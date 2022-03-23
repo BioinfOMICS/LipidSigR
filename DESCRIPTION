@@ -1,6 +1,6 @@
 Package: LipidSigR
 Type: Package
-Title: What the Package Does (Title Case)
+Title: comprehensive analysis for streamlined data mining of lipidomic datasets
 Version: 0.1.0
 Author: Wei-Chung Cheng <wccheng@mail.cmu.edu.tw>
 Maintainer: Wei-Chung Cheng <wccheng@mail.cmu.edu.tw>
@@ -65,4 +65,5 @@ Enhances:
     tidyverse,
     ggforce,
     ggpubr,
-    ranger
+    ranger,
+    showimage
