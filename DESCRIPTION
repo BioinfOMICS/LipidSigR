@@ -1,0 +1,40 @@
+Package: LipidSigR
+Type: Package
+Title: A comprehensive analysis for streamlined data mining of
+        lipidomic data
+Version: 0.99.0
+Authors@R: c(
+    person("Wei-Chung", "Cheng", email="cwc0702@gmail.com", role = c("aut","cre","cph"), comment = c(ORCID = "0000-0002-1229-4857")),
+    person("Wen-Jen", "Lin", role = c("aut","ctb")),
+    person("Pei-Chun", "Shen", role = c("ctb")),
+    person("Hsiu-Cheng", "Liu", role = c("ctb")),
+    person("Meng-Hsin", "Tsai", role = c("ctb")))
+Description: 
+    "LipidSigR" is an R package developed based on LipidSig web-based tool (http://www.chenglab.cmu.edu.tw/lipidsig/). This package integrates a comprehensive analysis for streamlined data mining of lipidomic datasets. We provide 4 main analysis workflows, which is "Profiling", "Differential expression", "Machine learning", and "Correlation". Each section provides unique aspects to analyze the lipidome profiling data based on different characteristics including lipid class, chain length, unsaturation, hydroxyl group, and fatty acid composition.
+    "Profiling" provides an overview of comprehensive analyses to efficiently examine data quality, the clustering of samples, the correlation between lipid species, and the composition of lipid characteristics. "Differential expression" integrates many useful lipid-focused analyses for identifying significant lipid species or lipid characteristics. "Machine learning" provides a broad variety of feature selection methods and classifiers to build binary classification models. Furthermore, the subsequent analyses can help users to evaluate the learning algorithm's performance and to explore important lipid-related variables. "Correlation" illustrates and compares the relationships between different clinical phenotypes and lipid features.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: FALSE
+RoxygenNote: 7.1.2
+biocViews: Lipidomics, GeneExpression, Classification, Clustering
+Depends: R (>= 4.0.0)
+Imports: plotly (>= 4.9.4.1), dplyr, scales, tidyselect, stringr,
+        magrittr, methods, Hmisc, tidyr, iheatmapr, visNetwork,
+        ggthemes, caret, e1071, pROC, glmnet, xgboost, yardstick,
+        rsample, cluster, dbscan, forcats, factoextra, mixOmics, purrr,
+        hwordcloud, Rtsne, uwot, tibble, stats, grDevices,
+        RColorBrewer, ggplot2, heatmaply, pathview
+Suggests: knitr, devtools, roxygen2, rmarkdown, BiocStyle
+Enhances: SHAPforxgboost, rstatix, data.table, fastshap, tidyverse,
+        ggforce, parsnip, ggpubr, ranger, utils, ggrepel, ggbeeswarm,
+        showimage, rlang (>= 0.4.11),
+VignetteBuilder: utils
+NeedsCompilation: no
+Packaged: 2022-04-10 14:00:39 UTC; tiffany
+Author: Wei-Chung Cheng [aut, cre, cph]
+    (<https://orcid.org/0000-0002-1229-4857>),
+  Wen-Jen Lin [aut, ctb],
+  Pei-Chun Shen [ctb],
+  Hsiu-Cheng Liu [ctb],
+  Meng-Hsin Tsai [ctb]
+Maintainer: Wei-Chung Cheng <cwc0702@gmail.com>
