@@ -1,0 +1,445 @@
+---
+title: "LipidSigR tutorial - Machine Learning"
+author:
+- name: Wei-Chung Cheng
+  affiliation: China Medical University
+output:
+  #BiocStyle::pdf_document: default
+  BiocStyle::html_document:
+    #toc_float: true
+bibliography: ref.bib
+csl: nature.csl
+vignette: |
+  %\VignetteIndexEntry{LipidSigR tutorial - Machine Learning}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+<script src="https://raw.githubusercontent.com/datastorm-open/visNetwork/master/inst/htmlwidgets/visNetwork.js"></script>
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE)
+knitr::opts_chunk$set(fig.width = 5, fig.height = 4)
+knitr::opts_chunk$set(fig.align ="center")
+```
+
+
+```{r , message = FALSE, echo=FALSE}
+library(LipidSigR)
+library(plotly)
+library(SHAPforxgboost)
+library(visNetwork)
+```
+
+After identifying significant lipid species and lipids characteristics, now we are going to conduct machine learning for feature selection and then view the importance of each feature. Lipid species and lipid characteristics data will be combined to predict the binary outcome using various machine learning methods and select the best feature combination to explore further relationships. For cross-validation, Monte-Carlo cross-validation (MCCV) is executed to evaluate the model performance and to reach statistical significance.
+
+Monte-Carlo cross-validation is a model validation technique that we used to create multiple random splits of the dataset into training and validation data, which prevent an unnecessary large model and thus prevent over-fitting for the calibration model [@xu2001monte]. With MCCV, we can conduct a split-sample CV multiple times and aggregate the results from each to quantify predictive performance for a candidate mode. For each CV, data is randomly split into training and testing data. The training data is used to select the top 2, 3, 5, 10, 20, 50, and 100 important features for model training. Then, the model will be validated by testing data. If the data are less than 100 features, the total feature number is set as the maximum. The proportion of data used for testing and the times of cross-validation (CV) and can be defined by the parameters `split_prop` and `nfold`. *(Note: The more cross-validation times are, the longer it takes to calculate the results.)*
+
+Feature selection methods are aimed to rank the most significant variables to a model to predict the target variable. Our platform provides two categories of feature selection methods: the univariate and the multivariate analysis. Univariate analysis, including p-value, p-value\*Fold Change or ROC, compares each feature between two groups and picks top N features based on -log10(p-value), –log10(p-value)\*Fold change or Area Under Curve (AUC), respectively according to the user-selected ranking methods. On the other hand, for multivariate analysis, we offer Random Forest, Linear SVM (e1071), Lasso (glmnet), Ridge (glmnet), and ElasticNet (glmnet). Random Forest (ranger) uses built-in feature importance results, while others rank the features according to the absolute value of their coefficients in the algorithm. *(Note: The names in the bracket are the packages we adopt.)*
+
+Here, we provide eight feature ranking methods and six classification methods for training and selecting the best model.
+
+* **Feature ranking methods**: p-value, p-value*FC, ROC, Random Forest, Linear SVM, Lasso, Ridge, ElasticNet.
+* **Classification methods**: Random Forest, Linear SVM, Lasso, Ridge, ElasticNet, XGBoost.
+
+Furthermore, we will conduct a series of consequent analyses to evaluate the methods and visualize the results of machine learning, including ROC/PR curve, model predictivity, sample probability, feature importance, and network.
+
+# Input data
+First, we have to read the input data needed for the machine learning section. We have to prepare lipid expression data (`exp_data`), lipid characteristics table (`lipid_char_table`), and a condition table of sample names and clinical conditions (`condition_table`) as input data.
+```{r load_ML_data}
+# clears all objects from workspace
+rm(list = ls())
+
+# lipid expression data
+data("ML_exp_data")
+exp_data <- ML_exp_data
+head(exp_data[, 1:5], 5)
+
+# lipid characteristics table
+data("ML_lipid_char_table")
+lipid_char_table <- ML_lipid_char_table
+head(lipid_char_table[, 1:4], 5)
+
+# condition table
+data("ML_condition_table")
+condition_table <- ML_condition_table
+head(condition_table, 5)
+```
+After importing the input data, sometimes, we may need to conduct data processing before analysis. Here, we provide the `ML_data_process` function for data processing, including removing features with missing values, missing values imputation, percentage transformation, log10 transformation, etc. 
+```{r ML_data_process}
+# lipid expression data
+head(exp_data[, 1:5], 5)
+# data processing of exp_data
+exp_transform_table <- data_process(exp_data, exclude_var_missing=TRUE,
+                                    missing_pct_limit=50, replace_zero=TRUE,
+                                    zero2what='min', xmin=0.5, replace_NA=TRUE,
+                                    NA2what='min', ymin=0.5, pct_transform=TRUE,
+                                    data_transform=TRUE, trans_type='log',
+                                    centering=FALSE, scaling=FALSE)
+# exp_data after data processing
+head(exp_transform_table[, 1:5], 5)
+```
+
+# ROC/PR curve
+The ROC and Precision-Recall (PR) curves are very common methods to evaluate the diagnostic ability of a binary classifier. The mean AUC and 95% confidence interval of the ROC and PR curve are calculated from all CV runs in each feature number. Theoretically, the higher the AUC is, the better the model performs. PR curve is more sensitive to data with highly skewed datasets (i.e., rare positive samples), and offers a more informative view of an algorithm's performance [@davis2006relationship]. A random classifier yields a ROC-AUC about 0.5 and a PR-AUC close to a positive sample proportion. On the contrary, both AUC equal to 1 represents perfect performance in two methods.
+
+Speaking of interpreting plots, the ROC curve is created with 'sensitivity' (proportion of positive samples that are correctly classified) as y-axis and '1-specificity' (proportion of negative samples that are correctly classified) as x-axis based on different thresholds whereas the PR curve is a similar graph with 'precision' (proportion of positive samples out of those that are predicted positive) on the y-axis and 'recall' (=sensitivity) on the x-axis. Generally, a better model shows a ROC curve approaching the left upper corner and a PR curve around the right upper corner.
+
+To combine the testing results from all CV runs, 300 thresholds are evenly distributed from 0 to 1. The thresholds are then calculated the corresponding sensitivity, specificity, precision, and recall with predicted probabilities and true labels of testing samples in each CV. These values are then averaged to plot a final ROC and PR curve.
+
+Now, we are going to conduct calculation for plotting ROC curves first,  and then the PR curves.
+```{r ML: ROC curve}
+# get lipid characteristics
+char_var <- colnames(lipid_char_table)[-1]
+# data processing of machine learning
+ML_data <- ML_data_process(exp_data, group_info = condition_table,
+                           lipid_char_table, char_var[1],
+                           exclude_var_missing=TRUE, missing_pct_limit=50,
+                           replace_zero=TRUE, zero2what='min', xmin=0.5,
+                           replace_NA=TRUE, NA2what='min', ymin=0.5,
+                           pct_transform=TRUE, data_transform=TRUE,
+                           trans_type='log', centering=FALSE, scaling=FALSE)
+# conduct machine learning
+ML_output <- ML_final(ML_data[[2]],ranking_method='Random_forest',
+                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+# ROC curves
+ROC_result <- ROC_plot_all(ML_output[[3]], ML_output[[5]], feature_n=10)
+
+# view result: ROC data frame of 10 features
+head(ROC_result[[3]][, 1:5], 5)
+
+# view result: data frame of ROC values
+head(ROC_result[[1]][, 1:5], 5)
+```
+
+```{r , fig.cap= 'ROC curve plot. The plot shows the average ROC curve for different feature numbers with their mean AUC and 95% confidence interval.', fig.width=6}
+# view result: ROC curve plot
+ROC_result[[2]]
+```
+
+```{r , fig.cap= 'average ROC curve plot of 10 features. The plot displays average ROC curves of user-defined features. Each CV is in grey, and the red line is the average of those cross-validations (CVs) for the ROC curves.'}
+# view result: average ROC curve plot of 10 features
+ROC_result[[4]]   
+```
+
+```{r ML: PR curve}
+# get lipid characteristics
+char_var <- colnames(lipid_char_table)[-1]
+## data processing of machine learning
+ML_data <- ML_data_process(exp_data, group_info = condition_table,
+                           lipid_char_table, char_var[1],
+                           exclude_var_missing=TRUE, missing_pct_limit=50,
+                           replace_zero=TRUE, zero2what='min', xmin=0.5,
+                           replace_NA=TRUE, NA2what='min', ymin=0.5,
+                           pct_transform=TRUE, data_transform=TRUE,
+                           trans_type='log', centering=FALSE, scaling=FALSE)
+# conduct machine learning
+ML_output <- ML_final(ML_data[[2]],ranking_method='Random_forest',
+                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+# PR curves
+PR_result <- PR_plot_all(ML_output[[4]], ML_output[[5]], feature_n=10)
+
+# view result: data frame of precision and recall values
+head(PR_result[[1]][, 1:5], 5)
+
+# view result: data frame of PR values
+head(PR_result[[3]][, 1:5], 5)
+```
+
+```{r , fig.cap= 'PR curve plot. The plot shows the average PR curve for different feature numbers with their mean AUC and 95% confidence interval.', fig.width=6}
+# view result: PR curve plot
+PR_result[[2]]
+```
+
+```{r , fig.cap= 'average PR curve plot of 10 features. The plot displays the average PR curves of user-defined features. Each CV is in grey, and the red line is the average of those cross-validations (CVs) for the PR curves.'}
+# view result: average PR curve plot of 10 features
+PR_result[[4]]    
+```
+
+
+# Model performance
+After constructing the model, it is necessary to evaluate the performance of our model. Here, we provide many useful indicators to evaluate model performance. For each feature number, we calculate and plot the average value and 95% confidence interval of accuracy, sensitivity (recall), specificity, positive predictive value (precision), negative predictive value, F1 score, prevalence, detection rate, detection prevalence, and balanced accuracy in all CV runs with confusion matrix function in carat package. All these indicators can be described in terms of true positive (TP), false positive (FP), false negative (FN), and true negative (TN).
+
+Here, all the provided evaluation indicators are listed below. We can define the evaluation method by the parameter `method`.
+
+* Sensitivity = Recall $= \frac{TP}{(TP + FN)}$
+
+* Specificity $= \frac{TN}{(FP + TN)}$
+
+* Prevalence $= \frac{(TP + FN)}{(TP + FP + FN + TN)}$
+
+* Positive predictive value (PPV) = Precision $= \frac{TP}{(TP + FP)}$
+
+* Negative predictive value (NPV) $= \frac{TN}{(FN + TN)}$
+
+* Detection rate $= \frac{TP}{(TP + FP + FN + TN)}$
+
+* Detection prevalence $= \frac{(TP + FP)}{(TP + FP + FN + TN)}$
+
+* F1 score $= \frac{2 \times Precision \times Recall}{(Precision + Recall)}$
+
+```{r ML: model performance}
+# get lipid characteristics
+char_var <- colnames(lipid_char_table)[-1]
+# data processing of machine learning
+ML_data <- ML_data_process(exp_data, group_info = condition_table,
+                           lipid_char_table, char_var[1],
+                           exclude_var_missing=TRUE, missing_pct_limit=50,
+                           replace_zero=TRUE, zero2what='min', xmin=0.5,
+                           replace_NA=TRUE, NA2what='min', ymin=0.5,
+                           pct_transform=TRUE, data_transform=TRUE,
+                           trans_type='log', centering=FALSE, scaling=FALSE)
+# conduct machine learning
+ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
+                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+# conduct model evaluation
+evaluate_result <- evalution_plot(ML_output[[2]], method='Accuracy')
+
+# view result: data frame of model evaluation information
+head(evaluate_result[[1]][, 1:5], 5)
+```
+```{r , fig.cap = "Model performance (Accuracy). The evaluation plot shows the model performance of accuracy. The highest value is marked in red."}
+# view result: model performance plot
+evaluate_result[[2]]         
+```
+
+# Predicted probability
+The average predicted probabilities of each sample in testing data from all CV runs assist us to explore those incorrect or uncertain labels.
+```{r ML: predicted probability}
+# get lipid characteristics
+char_var <- colnames(lipid_char_table)[-1]
+# data processing of machine learning
+ML_data <- ML_data_process(exp_data, group_info = condition_table,
+                           lipid_char_table, char_var[1],
+                           exclude_var_missing=TRUE, missing_pct_limit=50,
+                           replace_zero=TRUE, zero2what='min', xmin=0.5,
+                           replace_NA=TRUE, NA2what='min', ymin=0.5,
+                           pct_transform=TRUE, data_transform=TRUE,
+                           trans_type='log', centering=FALSE, scaling=FALSE)
+# conduct machine learning
+ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
+                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+# compute and visualize the average predicted probabilities
+prob_result <- probability_plot(ML_output[[1]], feature_n=10)
+
+# view result: data frame of confusion matrix
+head(prob_result[[1]][, 1:5], 5)
+
+# view result: data frame of predicted probability and labels
+head(prob_result[[4]][, 1:5], 5)
+```
+```{r , fig.cap = "Probability plot. In the plot of average sample probability in all CVs’ distribution, each point represents a sample, which is the mean of the prediction from all models of all Cross Validations. The y-axis is the predicted probabilities of the samples, which means the probability that the prediction value of each machine learning model is one. To depict in detail, the blue group of samples shows the probabilities that the true value is one and the prediction value of the sample is also one. The black group illustrates the probabilities that the true value is zero and the prediction value of the sample is also one. Hence, the Black group should be as close to zero, whereas the blue group should be as close to one as possible."}
+# view result: the distribution of predicted probabilities
+prob_result[[2]]
+```
+
+```{r , fig.cap = "Confusion matrix. In the confusion matrix, the y-axis indicates the predicted class, the x-axis is the actual class. Therefore, the upper left is a true positive; the upper right is a false positive; the lower left is a false negative; the lower right is a true negative. The numbers are the count and the number in the bracket is the percentage."}
+# view result: confusion matrix of sample number and proportion
+prob_result[[3]]        
+```
+
+
+# Feature importance {#subsec:feature_im}
+After building a high-accuracy model, now we are going to explore the contribution of each feature. Two methods, **'Algorithm-based'** and **'SHAP analysis'** are provided to rank and visualize the feature importance.
+
+## Algorithm-based
+In the **'Algorithm-based'** part, when we set a certain feature number by parameter `feature_n`, the selected frequency and the average feature importance of the top 10 features from all CV runs will be displayed. For a Linear SVM, Lasso, Ridge, or ElasticNet model, the importance of each feature depends on the absolute value of their coefficients in the algorithm, while Random Forest and XGBoost use built-in feature importance results.
+```{r ML: feature importance_algorithm-based}
+# get lipid characteristics
+char_var <- colnames(lipid_char_table)[-1]
+# data processing of machine learning
+ML_data <- ML_data_process(exp_data, group_info = condition_table,
+                           lipid_char_table, char_var[1],
+                           exclude_var_missing=TRUE, missing_pct_limit=50,
+                           replace_zero=TRUE, zero2what='min', xmin=0.5,
+                           replace_NA=TRUE, NA2what='min', ymin=0.5,
+                           pct_transform=TRUE, data_transform=TRUE,
+                           trans_type='log', centering=FALSE, scaling=FALSE)
+# conduct machine learning
+ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
+                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+# compute and rank the contribution of each feature
+feature_result <- feature_plot(ML_output[[6]], ML_output[[7]],
+                               feature_n=10, nfold=10)
+
+# view result: data frame of the selected frequency
+head(feature_result[[1]][, 1:5], 5)
+
+# view result: data frame of feature importance
+head(feature_result[[3]][, 1:5], 5)
+```
+```{r , fig.cap = "Feature importance (Algorithm-based)-selected frequency"}
+# view result: selected frequency plot
+feature_result[[2]]
+```
+```{r , fig.cap = "Feature importance (Algorithm-based)-feature importance"}
+# view result: feature importance plot
+feature_result[[4]] 
+```
+
+## SHAP analysis
+Shapley Additive exPlanations (SHAP) approach on the basis of Shapley values in game theory has recently been introduced to explain individual predictions of any machine learning model. More detailed information can be found in the paper 'A Unified Approach to Interpreting Model Predictions' (2017) [@lundberg2017unified]. 
+    
+The analysis is based on the result of ROC-AUC and PR-AUC. We can decide the feature number by parameter `feature_n`. According to the defined feature number, the corresponding best model in all CVs will be used to compute approximate Shapley values of each feature for all samples with 'fastshap' package in R.
+
+```{r ML: SHAP analysis}
+# get lipid characteristics
+char_var <- colnames(lipid_char_table)[-1]
+# data processing of machine learning
+ML_data <- ML_data_process(exp_data, group_info = condition_table,
+                           lipid_char_table, char_var[1],
+                           exclude_var_missing=TRUE, missing_pct_limit=50,
+                           replace_zero=TRUE, zero2what='min', xmin=0.5,
+                           replace_NA=TRUE, NA2what='min', ymin=0.5,
+                           pct_transform=TRUE, data_transform=TRUE,
+                           trans_type='log', centering=FALSE, scaling=FALSE)
+# conduct machine learning
+ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
+                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+# conduct SHAP
+SHAP_output <- SHAP(ML_data[[2]], best_model=ML_output[[8]],
+                    best_model_feature=ML_output[[9]],
+                    ML_method='Random_forest', feature_n=10, nsim=5)
+```
+```{r , fig.cap = "SHAP feature importance plot. The top 10 features are ranked and demonstrated according to the average absolute value of shapely values from all samples."}
+# view result: SHAP feature importance plot
+SHAP_output[[3]]
+```
+
+```{r , fig.cap = "SHAP feature importance plot. The SHAP summary plot illustrates the distribution of all shapely values for each feature. It uses sina plot to present important features by binary patterns. The color exemplifying the value of the feature from low (yellow) to high (purple) indicates the variable is high/low for that observation. The x-axis presents whether the impact is positive or negative on quality rating (target variable). In the summary plot, the relationship between the value of a feature and the influence on the prediction is shown."}
+# view result: SHAP summary plot
+SHAP_output[[4]] 
+```
+
+Next, we are going to visualize the SHAP feature importance of N samples.
+```{r ML: SHAP analysis_sample}
+# get lipid characteristics
+char_var <- colnames(lipid_char_table)[-1]
+# data processing of machine learning
+ML_data <- ML_data_process(exp_data, group_info = condition_table,
+                           lipid_char_table, char_var[1],
+                           exclude_var_missing=TRUE, pct_transform=TRUE,
+                           missing_pct_limit=50, replace_zero=TRUE,
+                           zero2what='min', NA2what='min',
+                           xmin=0.5, replace_NA=TRUE, ymin=0.5,
+                           data_transform=TRUE, centering=FALSE,
+                           trans_type='log', scaling=FALSE)
+# conduct machine learning
+ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
+                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+# conduct SHAP
+SHAP_output <- SHAP(ML_data[[2]], best_model=ML_output[[8]],
+                    best_model_feature=ML_output[[9]], nsim=5,
+                    ML_method='Random_forest', feature_n=10)
+# visualize SHAP feature importance of 10 samples
+SHAP_sample_result <- SHAP_sample(SHAP_output[[2]], n_sample=10)
+```
+```{r , fig.cap = "SHAP feature importance of 10 samples"}
+# view result: SHAP feature importance plot of 10 samples
+SHAP_sample_result      
+```
+Lastly, we build the SHAP force plot and dependence plot with different parameter sets.
+
+The SHAP force plot stacks these Shapley values and shows how the selected features affect the final output for each sample. We can decide the number of top features to be shown by parameter `topN_feature`, and the number of groups the samples to be clustered into by parameter `group_num`. 
+```{r ML: SHAP analysis_forceplot}
+# get lipid characteristics
+char_var <- colnames(lipid_char_table)[-1]
+# data processing of machine learning
+ML_data <- ML_data_process(exp_data, group_info = condition_table,
+                           lipid_char_table, char_var[1],
+                           exclude_var_missing=TRUE, missing_pct_limit=50,
+                           replace_zero=TRUE, zero2what='min', xmin=0.5,
+                           replace_NA=TRUE, NA2what='min', ymin=0.5,
+                           pct_transform=TRUE, data_transform=TRUE,
+                           trans_type='log', centering=FALSE, scaling=FALSE)
+# conduct machine learning
+ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
+                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+# conduct SHAP
+SHAP_output <- SHAP(ML_data[[2]], best_model=ML_output[[8]],
+                    best_model_feature=ML_output[[9]],
+                    ML_method='Random_forest', feature_n=10, nsim=5)
+# visualize each predictor’s attributions
+SHAP_force_result <- SHAP_forceplot(SHAP_output[[1]], topN_feature=10,
+                                    cluster_method="ward.D", group_num=10)
+
+# view result: data frame of force plot information
+head(SHAP_force_result[[1]][, 1:5], 5)
+```
+```{r , fig.cap = "SHAP force plot. The colors of the bars are filled according to the features."}
+# view result: SHAP force plot
+SHAP_force_result[[2]] 
+```
+
+As to the SHAP dependence plot, it allows us to explore how the model output varies by a feature value. It reveals whether the link between the target and the variable is linear, monotonic, or more complex.
+
+We can define the x-axis, y-axis, and color of the plot. Generally, the x-axis represents the value of a certain feature while the y-axis is the corresponding Shapley value. The color parameter can be assigned to check if a second feature has an interaction effect with the feature we are plotting.
+```{r ML: SHAP analysis_dependence_plot}
+# get lipid characteristics
+char_var <- colnames(lipid_char_table)[-1]
+# data processing of machine learning
+ML_data <- ML_data_process(exp_data, group_info = condition_table,
+                           lipid_char_table, char_var[1],
+                           exclude_var_missing=TRUE, missing_pct_limit=50,
+                           replace_zero=TRUE, zero2what='min', xmin=0.5,
+                           replace_NA=TRUE, NA2what='min', ymin=0.5,
+                           pct_transform=TRUE, data_transform=TRUE,
+                           trans_type='log', centering=FALSE, scaling=FALSE)
+# conduct machine learning
+ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
+                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+# conduct SHAP
+SHAP_output <- SHAP(ML_data[[2]], best_model=ML_output[[8]],
+                    best_model_feature=ML_output[[9]], nsim=5,
+                    ML_method='Random_forest', feature_n=10)
+# visualize SHAP values against feature values for each variable
+SHAP_depend_result <- SHAP_dependence_plot(SHAP_output[[2]], x="C38.6.PC",
+                                           y="C38.6.PC", color_var="C38.6.PC")
+
+```
+```{r , fig.cap = "SHAP dependence plot"}
+# view result: SHAP dependence plot
+SHAP_depend_result 
+```
+
+# Network
+A correlation network helps us interrogate the interaction of features in a machine learning model. We can decide on an appropriate feature number according to previous cross-validation results. Then, the features in the best model (based on ROC-AUC + PR-AUC) are used to compute the correlation coefficients between each other.
+    
+To build a network, nodes (features) are filled based on feature importance whereas line width represents the value of the correlation coefficient. Two methods, ‘Algorithm-based’ and ‘SHAP analysis’, can be selected to evaluate feature importance. The detailed information about them can be found in the Feature importance section (Section \@ref(subsec:feature_im) ). A plus or minus are assigned to feature importance in SHAP analysis based on the direction of feature values and Shapley values of samples.
+```{r ML: network}
+# get lipid characteristics
+char_var <- colnames(lipid_char_table)[-1]
+# data processing of machine learning
+ML_data <- ML_data_process(exp_data, group_info = condition_table,
+                           lipid_char_table, char_var[1],
+                           exclude_var_missing=TRUE, missing_pct_limit=50,
+                           replace_zero=TRUE, zero2what='min', xmin=0.5,
+                           replace_NA=TRUE, NA2what='min', ymin=0.5,
+                           pct_transform=TRUE, data_transform=TRUE,
+                           trans_type='log', centering=FALSE, scaling=FALSE)
+# conduct machine learning
+ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
+                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+# select feature importance from model of ML_output
+model_net <- model_for_net(ML_data[[2]], ML_method='Random_forest',
+                           varimp_method='Algorithm-based', ML_output[[8]],
+                           ML_output[[9]], feature_num=10, nsim=5)
+# compute correlation coefficients and visualize correlation network
+cor_net_result <- cor_network(ML_data[[1]], lipid_char_table,
+                              model_net[[2]], model_net[[3]],
+                              cor_method='pearson', edge_cutoff=0)
+```
+```{r , fig.cap = "The network of feature importance", result='asis', eval=FALSE}
+# view result: the network of feature importance
+cor_net_result  
+```
+
+
+# Session info
+```{r sessionInfo, echo=FALSE}
+sessionInfo()
+```
+
+# References
+

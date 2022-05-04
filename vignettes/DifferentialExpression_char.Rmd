@@ -1,0 +1,486 @@
+---
+title: "DE"
+author:
+- name: Wei-Chung Cheng
+  affiliation: China Medical University
+output:
+  #BiocStyle::pdf_document: default
+  BiocStyle::html_document:
+    toc_float: true
+bibliography: ref.bib
+csl: nature.csl
+
+vignette: |
+  %\VignetteIndexEntry{LipidSigR tutorial}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE)
+knitr::opts_chunk$set(fig.width = 6, fig.height = 5)
+knitr::opts_chunk$set(fig.align ="center")
+```
+
+```{r style, echo = FALSE, results = 'asis'} 
+        BiocStyle::markdown()
+```
+
+```{r , message = FALSE, echo=FALSE}
+library(LipidSigR)
+library(plotly)
+library(pathview)
+```
+
+# Differential expression {#DE}
+After overviewing the lipid data, then we move on to differential expression to identify the significant lipid species and lipid characteristics. Differential Expression is divided into two main analyses, **'Lipid species analysis'** and **'Lipid characteristics analysis'**. Further analysis and visualization methods can also be conducted based on the results of differential expressed analysis.
+
+* **Lipid species analysis**: The lipid species analysis explores the significant lipid species based on differentially expressed analysis. Data are analyzed based on each lipid species. Further analysis and visualization methods, include 
+
+  1. dimensionality reduction,
+  2. hierarchical clustering,
+  3. characteristics association,
+  4. enrichment.
+
+* **Lipid characteristics analysis**: The lipid characteristics analysis explores the significant lipid characteristics. Lipid species are categorized and summarized into a new lipid expression table according to a selected lipid characteristic.  The expression of all lipid species of the same categories are summed up, then conduct differential expressed analysis. Further analysis and visualization methods include
+
+  1. dimensionality reduction, 
+  2. hierarchical clustering.
+  
+## Lipid characteristics analysis
+After lipid species analysis, now let's move on to another main analysis of the Differential expression section -- **'Lipid Characteristics Analysis'**. The massive degree of structural diversity of lipids contributes to the functional variety of lipids. The characteristics can range from subtle variance (i.e. the number of a double bond in the fatty acid) to major change (i.e. diverse backbones). In this section, lipid species are categorized and summarized into a new lipid expression table according to two selected lipid characteristics, then conducted differential expressed analysis. Samples are divided into two groups based on the input 'Group Information' table.
+
+## Input data
+First, we have to read the input data needed for the differential expression section. We have to prepare lipid expression data (`exp_data`), lipid characteristics table (`lipid_char_table`), and a table of one clinical term (or one set of clinical terms) from demographic data (`group_info`) as input data.
+```{r load_DE_data}
+# clears all objects from workspace
+rm(list = ls())
+
+# lipid expression data
+data("DE_exp_data")
+exp_data <- DE_exp_data
+head(exp_data[, 1:5], 5)
+
+# lipid characteristics table
+data("DE_lipid_char_table")
+lipid_char_table <- DE_lipid_char_table
+head(lipid_char_table[, 1:4], 5)
+
+# group information table
+data("DE_group_info")
+group_info <- DE_group_info
+head(group_info, 5)
+```
+After importing the input data, sometimes, we may need to conduct data processing before analysis. Here, we provide the `data_process` function for data processing, including removing features with missing values, missing values imputation, percentage transformation, log10 transformation, etc.
+```{r DE_data_process}
+# lipid expression data
+head(exp_data[, 1:5], 5)
+# data processing of exp_data
+exp_transform_table <- data_process(exp_data, exclude_var_missing=TRUE,
+                                    missing_pct_limit=50, replace_zero=TRUE,
+                                    zero2what='min', xmin=0.5, replace_NA=TRUE,
+                                    NA2what='min', ymin=0.5, pct_transform=TRUE,
+                                    data_transform=TRUE, trans_type='log',
+                                    centering=FALSE, scaling=FALSE)
+head(exp_transform_table[, 1:5], 5)
+```
+
+### Differentially expressed analysis {#sec:DE-char}
+In differentially expressed analysis, we are going to conduct two procedures of analysis - first is **'Characteristics'** and then **'Subgroup of characteristics'**. **'Characteristics'** is based on the first selected 'characteristics' while **'Subgroup of characteristics'** is the subgroup analysis of the previous section.
+
+```{r DE_lipid characteristics: differentially expressed analysis}
+# get lipid characteristics
+char_var <- colnames(lipid_char_table)[-1]
+# aggregated(sum) expression data by selected characteristics
+exp_data_Spe2Char <- Species2Char(exp_data, lipid_char_table,
+                                  char_var = char_var[4])
+# data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(exp_data_Spe2Char,
+                                      exclude_var_missing=TRUE,
+                                      missing_pct_limit=50,
+                                      replace_zero=TRUE,
+                                      zero2what='min', xmin=0.5,
+                                      replace_NA=TRUE, NA2what='min',
+                                      ymin=0.5, pct_transform=TRUE,
+                                      data_transform=FALSE,
+                                      trans_type='log',
+                                      centering=FALSE, scaling=FALSE)
+# conduct deferentially expressed of lipid characters
+DE_char_result <- DE_char_2(exp_transform_non_log, data_transform=TRUE,
+                            group_info = group_info, paired=FALSE,
+                            sig_pvalue=0.05, sig_FC=2,
+                            insert_ref_group=NULL, ref_group=NULL)
+
+# view result: data frame of expression
+head(DE_char_result$DE_char_exp_data[, 1:5], 5)
+
+# view result: data frame of statistical analysis
+head(DE_char_result$DE_char_table_all[, 1:5], 5)
+
+# view result: data frame with value of the continuous lipid characteristics
+head(DE_char_result$DE_char_combined_table[, 1:5])
+
+# view result: data frame with statistics of t.test
+head(DE_char_result$DE_char_combine_result_table[, 1:5])
+```
+
+```{r , fig.cap = "The results of 'Characteristics' analysis in the first section - bar plot", fig.width=7}
+# view result: bar plot of split_class
+DE_char_result$DE_char_barplot 
+```
+```{r , fig.cap = "The results of 'Characteristics' analysis in the first section - sqrt-scaled bar plot", fig.width=7}
+# view result: sqrt-scaled bar plot of split_class
+DE_char_result$DE_char_barplot_sqrt
+```
+```{r , fig.cap = "The results of 'Characteristics' analysis in the first section - line plot", fig.width=7}
+# view result: line plot of split_class
+DE_char_result$DE_char_trendplot  
+```
+```{r , fig.cap = "The results of 'Characteristics' analysis in the first section - sqrt-scaled line plot", fig.width=7}
+# view result: sqrt-scaled line plot of split_class
+DE_char_result$DE_char_trendplot_sqrt  
+```
+```{r , fig.cap = "The results of 'Characteristics' analysis in the first section - box plot", fig.width=7}
+# view result: box plot of split_class
+DE_char_result$DE_char_boxplot  
+```
+In the **'Subgroup of characteristics'**, besides the selected characteristic in first section defined by parameter `char_var`, we can further choose another characteristic by parameter `split_var` (e.g. class). And then, analyzed results from the previous section are categorized by one of the subgroups (e.g. PC) of the selected characteristic.
+
+```{r DE_lipid characteristics: differentially expressed analysis_Subgroup}
+# get lipid characteristics
+char_var <- colnames(lipid_char_table)[-1]
+# subgroup deferentially expressed of lipid characters
+DE.sub.char.2 <- DE_sub_char_2(exp_data, data_transform=TRUE,
+                               lipid_char_table=lipid_char_table,
+                               split_var = char_var[1],
+                               char_var = char_var[4],
+                               group_info = group_info,
+                               paired=FALSE, sig_pvalue=0.05,
+                               sig_FC=2, exclude_var_missing=TRUE,
+                               missing_pct_limit=50,
+                               replace_zero=TRUE, zero2what='min',
+                               xmin=0.5, replace_NA=TRUE,
+                               NA2what='min', ymin=0.5,
+                               pct_transform=TRUE, trans_type='log',
+                               centering=FALSE, scaling=FALSE)
+# get class of characteristics
+char.class <- unique(DE.sub.char.2[[2]][1])
+# visualize subgroup deferentially expressed of lipid characters
+sub_char_result <- DE_sub_char_plot_2(DE.sub.char.2[[2]],
+                                      DE.sub.char.2[[3]],
+                                      group_info=group_info,
+                                      char_var=char_var[4],
+                                      split_var=char_var[1],
+                                      split_class=char.class[5,],
+                                      insert_ref_group=NULL, ref_group=NULL)
+```
+* *Note: The star above the bar shows the significant difference of the specific subgroup of the selected characteristic between control and experimental groups.*
+```{r , fig.cap = "The results of 'Subgroup of characteristics' analysis in the second section - bar plot"}
+# view result: bar plot of split_class
+sub_char_result[[1]]  
+```
+```{r , fig.cap = "The results of 'Subgroup of characteristics' analysis in the second section - sqrt-scaled bar plot"}
+# view result: sqrt-scaled bar plot of split_class
+sub_char_result[[4]]
+```
+```{r , fig.cap = "The results of 'Subgroup of characteristics' analysis in the second section - line plot"}
+# view result: line plot of split_class
+sub_char_result[[2]]
+```
+```{r , fig.cap = "The results of 'Subgroup of characteristics' analysis in the second section - sqrt-scaled line plot"}
+# view result: sqrt-scaled line plot of split_class
+sub_char_result[[5]] 
+```
+```{r , fig.cap = "The results of 'Subgroup of characteristics' analysis in the second section - box plot"}
+# view result: box plot of split_class
+sub_char_result[[3]] 
+```
+
+### Dimensionality reduction
+Dimensionality reduction is common when dealing with large numbers of observations and/or large numbers of variables in lipids analysis. It transforms data from a high-dimensional space into a low-dimensional space to retain vital properties of the original data and close to its intrinsic dimension. Here, we provide 4 dimensionality reduction methods, namely, PCA, t-SNE, UMAP, and PLS-DA. For the detailed information of the former three methods, please refer to Section \@ref(DimensionReduce). 
+
+#### PCA (Principal component analysis)
+PCA is an unsupervised linear dimensionality reduction and data visualization technique for high dimensional data, which tries to preserve the global structure of the data. For detailed information of PCA, please refer to Section \@ref(PCA).
+```{r DE_lipid characteristics: dimensionality reduction - PCA}
+# get lipid characteristics
+char_var <- colnames(lipid_char_table)[-1]
+# sum expression data by selected characteristics
+exp_data_Spe2Char <- Species2Char(exp_data, lipid_char_table,
+                                  char_var = char_var[4])
+# data processing of exp_data_Spe2Char
+exp_transform_class <- data_process(exp_data_Spe2Char, exclude_var_missing=TRUE,
+                                    missing_pct_limit=50, replace_zero=TRUE,
+                                    zero2what='NA', xmin=0.5, replace_NA=TRUE,
+                                    NA2what='min', ymin=0.5, pct_transform=TRUE,
+                                    data_transform=TRUE, trans_type='log',
+                                    centering=FALSE, scaling=FALSE)
+# data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(exp_data_Spe2Char,
+                                      exclude_var_missing=TRUE,
+                                      missing_pct_limit=50,
+                                      replace_zero=TRUE,
+                                      zero2what='min', xmin=0.5,
+                                      replace_NA=TRUE, NA2what='min',
+                                      ymin=0.5, pct_transform=TRUE,
+                                      data_transform=FALSE,
+                                      trans_type='log',
+                                      centering=FALSE, scaling=FALSE)
+# filter significant lipid characteristics
+DE_char_table_sig <- DE_char_2(exp_transform_non_log,
+                               data_transform=TRUE,
+                               group_info = group_info,
+                               paired=FALSE, sig_pvalue=0.05,
+                               sig_FC=2)$DE_char_table_all %>% 
+                               filter(sig=="yes")
+# conduct PCA
+DEchar_PCA <- PCA(exp_transform_class, group_info = group_info,
+                  sig_feature = DE_char_table_sig[,1],
+                  scaling=TRUE, centering=TRUE,
+                  cluster_method='kmeans',
+                  group_num=2, var1 = NULL, var2 = NULL,
+                  insert_ref_group=NULL, ref_group=NULL,
+                  n_PC=c(1,2), top_n_feature=10)
+
+# view result: PCA prcomp
+head(DEchar_PCA[[1]], 2)
+
+# view result: data frame of PCA rotated data
+head(DEchar_PCA[[2]][,1:5], 5)
+
+# view result: data frame of PCA contribution table
+head(DEchar_PCA[[3]])
+```
+
+```{r , fig.cap = "Results of PCA - PCA plot"}
+# view result: PCA plot 
+DEchar_PCA[[4]]  
+```
+```{r , fig.cap = "Results of PCA - scree plot"}
+# view result: scree plot
+DEchar_PCA[[5]]   
+```
+```{r , fig.cap = "Results of PCA - bar plot"}
+# view result: bar plot of features contribution
+DEchar_PCA[[6]]
+```
+```{r , fig.cap = "Results of PCA - correlation circle plot"}
+# view result: correlation circle plot of variables
+DEchar_PCA[[7]]
+```
+
+#### t-SNE (t-distributed stochastic neighbour embedding)
+t-Distributed Stochastic Neighbour Embedding (t-SNE) is an unsupervised non-linear dimensionality reduction technique that tries to retain the local structure(cluster) of data when visualising the high-dimensional datasets. For detailed information of t-SNE, please refer to Section \@ref(t-SNE).
+
+
+```{r DE_lipid characteristics: dimensionality reduction - t-SNE}
+# get lipid characteristics
+char_var <- colnames(lipid_char_table)[-1]
+# sum expression data by selected characteristics
+exp_data_Spe2Char <- Species2Char(exp_data, lipid_char_table,
+                                  char_var = char_var[4])
+# data processing of exp_data_Spe2Char
+exp_transform_class <- data_process(exp_data_Spe2Char, exclude_var_missing=TRUE,
+                                    missing_pct_limit=50, replace_zero=TRUE,
+                                    zero2what='NA', xmin=0.5, replace_NA=TRUE,
+                                    NA2what='min', ymin=0.5, pct_transform=TRUE,
+                                    data_transform=TRUE, trans_type='log',
+                                    centering=FALSE, scaling=FALSE)
+# data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(exp_data_Spe2Char,
+                                      exclude_var_missing=TRUE,
+                                      missing_pct_limit=50,
+                                      replace_zero=TRUE,
+                                      zero2what='min', xmin=0.5,
+                                      replace_NA=TRUE, NA2what='min',
+                                      ymin=0.5, pct_transform=TRUE,
+                                      data_transform=FALSE,
+                                      trans_type='log',
+                                      centering=FALSE, scaling=FALSE)
+# filter significant lipid characteristics
+DE_char_table_sig <- DE_char_2(exp_transform_non_log,
+                               data_transform=TRUE,
+                               group_info = group_info,
+                               paired=FALSE, sig_pvalue=0.05,
+                               sig_FC=2)$DE_char_table_all %>% 
+                               filter(sig=="yes")
+# conduct t-SNE
+DEchar_tsne <- tsne(exp_transform_class, group_info = group_info,
+                    sig_feature=DE_char_table_sig[,1],
+                    pca=TRUE, perplexity=5, max_iter=500,
+                    cluster_method='kmeans', group_num=2,
+                    var1 = 'euclidean', var2=NULL,
+                    insert_ref_group=NULL, ref_group=NULL)
+
+# view result: data frame of t-SNE data
+head(DEchar_tsne[[1]], 5)
+```
+
+```{r , fig.cap = "t-SNE plot"}
+# view result: t-SNE plot
+DEchar_tsne[[2]]  
+```
+
+#### UMAP (Uniform Manifold Approximation and Projection)
+UMAP using a nonlinear dimensionality reduction method, Manifold learning, which effectively visualizing clusters or groups of data points and their relative proximities. For detailed information of UMAP, please refer to Section \@ref(UMAP).
+
+```{r DE_lipid characteristics: dimensionality reduction - UMAP}
+# get lipid characteristics
+char_var <- colnames(lipid_char_table)[-1]
+# sum expression data by selected characteristics
+exp_data_Spe2Char <- Species2Char(exp_data, lipid_char_table,
+                                  char_var = char_var[4])
+# data processing of exp_data_Spe2Char
+exp_transform_class <- data_process(exp_data_Spe2Char, exclude_var_missing=TRUE,
+                                    missing_pct_limit=50, replace_zero=TRUE,
+                                    zero2what='NA', xmin=0.5, replace_NA=TRUE,
+                                    NA2what='min', ymin=0.5, pct_transform=TRUE,
+                                    data_transform=TRUE, trans_type='log',
+                                    centering=FALSE, scaling=FALSE)
+# data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(exp_data_Spe2Char,
+                                      exclude_var_missing=TRUE,
+                                      missing_pct_limit=50,
+                                      replace_zero=TRUE,
+                                      zero2what='min', xmin=0.5,
+                                      replace_NA=TRUE, NA2what='min',
+                                      ymin=0.5, pct_transform=TRUE,
+                                      data_transform=FALSE,
+                                      trans_type='log',
+                                      centering=FALSE, scaling=FALSE)
+# filter significant lipid characteristics
+DE_char_table_sig <- DE_char_2(exp_transform_non_log,
+                               data_transform=TRUE,
+                               group_info = group_info,
+                               paired=FALSE, sig_pvalue=0.05,
+                               sig_FC=2)$DE_char_table_all %>% 
+                               filter(sig=="yes")
+# conduct UMAP
+DEchar_UMAP <- UMAP(exp_transform_class, group_info = group_info,
+                    sig_feature = DE_char_table_sig[,1],
+                    n_neighbors=15, scale=TRUE, group_num=2,
+                    metric = 'euclidean',
+                    cluster_method = 'kmeans',
+                    var1=NULL, var2=NULL,
+                    insert_ref_group=NULL, ref_group=NULL)
+
+# view result: data frame of UMAP data
+head(DEchar_UMAP[[1]], 5)
+```
+
+```{r , fig.cap = "UMAP plot"}
+# view result: UMAP plot
+DEchar_UMAP[[2]] 
+```
+
+#### PLS-DA
+```{r DE_lipid characteristics: dimensionality reduction - PLS-DA}
+# get lipid characteristics
+char_var <- colnames(lipid_char_table)[-1]
+# sum expression data by selected characteristics
+exp_data_Spe2Char <- Species2Char(exp_data, lipid_char_table,
+                                  char_var = char_var[4])
+# data processing of exp_data_Spe2Char
+exp_transform_class <- data_process(exp_data_Spe2Char, exclude_var_missing=TRUE,
+                                    missing_pct_limit=50, replace_zero=TRUE,
+                                    zero2what='NA', xmin=0.5, replace_NA=TRUE,
+                                    NA2what='min', ymin=0.5, pct_transform=TRUE,
+                                    data_transform=TRUE, trans_type='log',
+                                    centering=FALSE, scaling=FALSE)
+# data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(exp_data_Spe2Char,
+                                      exclude_var_missing=TRUE,
+                                      missing_pct_limit=50,
+                                      replace_zero=TRUE,
+                                      zero2what='min', xmin=0.5,
+                                      replace_NA=TRUE, NA2what='min',
+                                      ymin=0.5, pct_transform=TRUE,
+                                      data_transform=FALSE,
+                                      trans_type='log',
+                                      centering=FALSE, scaling=FALSE)
+# filter significant lipid characteristics
+DE_char_table_sig <- DE_char_2(exp_transform_non_log,
+                               data_transform=TRUE,
+                               group_info = group_info,
+                               paired=FALSE, sig_pvalue=0.05,
+                               sig_FC=2)$DE_char_table_all %>% 
+                               filter(sig=="yes")
+# conduct PLSDA
+DEchar_PLSDA <- PLSDA(exp_transform_class, group_info = group_info,
+                      sig_feature=DE_char_table_sig[,1],
+                      ncomp=2, scaling=TRUE, cluster_method='group_info',
+                      group_num = NULL, var1=NULL, var2=NULL,
+                      insert_ref_group=NULL, ref_group=NULL)
+
+# view result: data frame of sample variate
+head(DEchar_PLSDA[[1]], 5)
+
+# view result: data frame of sample loading
+head(DEchar_PLSDA[[2]])
+```
+```{r , fig.cap = "PLS-DA sample plot"}
+# view result: PLS-DA sample plot
+DEchar_PLSDA[[3]]  
+```
+
+```{r , fig.cap = "PLS-DA loading plot. In the PLS-DA loading plot, the distance to the center of the variables indicates the contribution of the variable. The value of the x-axis reveals the contribution of the variable to PLS-DA-1, whereas the value of the y-axis discloses the contribution of the variable to PLS-DA-2."}
+# view result: PLS-DA loading plot
+DEchar_PLSDA[[4]]
+```
+
+### Hierarchical clustering
+A new lipid expression table summed up from species is clustered and shown on the heatmap using hierarchical clustering.
+```{r DE_lipid characteristics: hierarchical clustering}
+# get lipid characteristics
+char_var <- colnames(lipid_char_table)[-1]
+# sum expression data by selected characteristics
+exp_data_Spe2Char <- Species2Char(exp_data, lipid_char_table,
+                                  char_var = char_var[4])
+# data processing of exp_data_Spe2Char
+exp_transform_class <- data_process(exp_data_Spe2Char, exclude_var_missing=TRUE,
+                                    missing_pct_limit=50, replace_zero=TRUE,
+                                    replace_NA=TRUE,zero2what='NA',
+                                    NA2what='min', pct_transform=TRUE, xmin=0.5,
+                                    data_transform=TRUE, ymin=0.5,
+                                    trans_type='log', centering=FALSE, scaling=FALSE)
+# data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(exp_data_Spe2Char,
+                                      exclude_var_missing=TRUE,
+                                      missing_pct_limit=50,
+                                      replace_zero=TRUE, zero2what='min',
+                                      xmin=0.5, replace_NA=TRUE, NA2what='min',
+                                      ymin=0.5, pct_transform=TRUE,
+                                      data_transform=FALSE, trans_type='log',
+                                      centering=FALSE, scaling=FALSE)
+# filter significant lipid characteristics
+DE_char_table_sig <- DE_char_2(exp_transform_non_log,
+                               data_transform=TRUE, group_info = group_info,
+                               paired=FALSE, sig_pvalue=0.05, sig_FC=2
+                              )$DE_char_table_all %>% filter(sig=="yes")
+# conduct hierarchical clustering
+DEchar_Hcluster <- Hclustering(exp_transform_class, DE_char_table_sig,
+                               group_info, lipid_char_table=NULL, char_var=NULL,
+                               distfun='pearson', hclustfun='complete')
+
+# view result: matrix of all lipid species heatmap
+head(DEchar_Hcluster$all.lipid.data[, 1:5], 5)
+
+# view result: matrix of significant lipid species heatmap
+head(DEchar_Hcluster$sig.lipid.data[, 1:5])
+```
+
+```{r , fig.cap = "Heatmap of hierarchical clustering"}
+# view result: heatmap of all lipid species
+DEchar_Hcluster$all.lipid  
+
+# view result: heatmap of significant lipid species
+DEchar_Hcluster$sig.lipid 
+```
+Through heatmap of lipid characteristic expression differences between the control group and the experimental group, we may discover the difference between the two groups by observing the distribution of lipid characteristic expression. Columns are all samples and rows are the significant characteristic group (value) selected from the first 'Characteristics' section (Section \@ref(sec:DE-char) ).
+
+# Session info
+```{r sessionInfo, echo=FALSE}
+sessionInfo()
+```
+
+# References
+

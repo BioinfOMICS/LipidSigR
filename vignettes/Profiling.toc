@@ -1,0 +1,9 @@
+\contentsline {section}{\numberline {1}Input data}{3}{section.1}%
+\contentsline {section}{\numberline {2}Cross-sample variability}{4}{section.2}%
+\contentsline {section}{\numberline {3}Dimensionality reduction}{6}{section.3}%
+\contentsline {subsection}{\numberline {3.1}PCA}{6}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}t-SNE}{8}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}UMAP}{9}{subsection.3.3}%
+\contentsline {section}{\numberline {4}Correlation heatmap}{10}{section.4}%
+\contentsline {section}{References}{14}{figure.caption.5}%
+\contentsfinish 
