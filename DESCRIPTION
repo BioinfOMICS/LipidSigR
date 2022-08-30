@@ -31,10 +31,3 @@ Enhances: SHAPforxgboost, rstatix, data.table, fastshap, tidyverse,
 VignetteBuilder: utils
 NeedsCompilation: no
 Packaged: 2022-04-10 14:00:39 UTC; tiffany
-Author: Wei-Chung Cheng [aut, cre, cph]
-    (<https://orcid.org/0000-0002-1229-4857>),
-  Wen-Jen Lin [aut, ctb],
-  Pei-Chun Shen [ctb],
-  Hsiu-Cheng Liu [ctb],
-  Meng-Hsin Tsai [ctb]
-Maintainer: Wei-Chung Cheng <cwc0702@gmail.com>
