@@ -4,7 +4,7 @@
 
 \documentclass{article}
 
-<<style-Sweave, eval=TRUE, echo=FALSE, results='asis'>>=
+<<style-Sweave, eval=TRUE, echo=FALSE, results=tex>>=
 BiocStyle::latex()
 @
 
@@ -40,14 +40,7 @@ knitr::opts_chunk$set(fig.align ="center")
 \affil[2]{China Medical University}
 
 \begin{document}
-
-<<include=FALSE>>=
-library(knitr)
-opts_chunk$set(
-concordance=TRUE
-)
-@
-
+\SweaveOpts{concordance=TRUE}
 \setlength{\headheight}{46.27916pt}
 
 \maketitle
@@ -1134,7 +1127,7 @@ path_result <- pathview_function(sig_enrich_class, path=outPath,
                                  DE.lipid.gene.path, DE.pathway.gene.list)
 @
 
-<<echo=FALSE, results='markup', include=FALSE>>=
+<<echo=FALSE, results=verbatim, include=FALSE>>=
 # data processing of exp_data
 exp_transform <- data_process(exp_data, exclude_var_missing=TRUE,
                               missing_pct_limit=50, replace_zero=TRUE,
@@ -2542,7 +2535,7 @@ COchar_clin_LR$LR_table_plot
 \section*{Session info}
 %---------------------------------------------------------
 
-<<sessionInfo, results='asis', echo=FALSE>>=
+<<sessionInfo, results=tex, echo=FALSE>>=
 toLatex(sessionInfo())
 @
 
