@@ -65,8 +65,14 @@ PLSDA <- function(exp_transform_table, group_info = NULL, sig_feature = NULL, nc
   if(sum(sapply(exp_transform_table[,-1], class)%in%c("numeric","integer"))!=ncol(exp_transform_table[,-1])){
     stop("First column type must be 'character',others must be 'numeric'")
   }
-  if(nrow(exp_transform_table)!=length(unique(exp_transform_table[,1]))){
-    stop("The lipids name (features) must be unique")
+  if(tibble::is.tibble(exp_transform_table)){
+    if(nrow(exp_transform_table)!=nrow(unique(exp_transform_table[,1]))){
+      stop("The lipids name (features) must be unique")
+    }
+  }else{
+    if(nrow(exp_transform_table)!=length(unique(exp_transform_table[,1]))){
+      stop("The lipids name (features) must be unique")
+    }
   }
   if(!is.null(sig_feature)){
     if(length(sig_feature)<2){
