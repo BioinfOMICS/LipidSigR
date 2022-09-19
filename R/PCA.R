@@ -65,8 +65,14 @@ PCA <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
       stop("First column type must be 'character',others must be 'numeric'")
     }
   }
-  if(nrow(exp_transform_table)!=length(unique(exp_transform_table[,1]))){
-    stop("The lipids name (features) must be unique")
+  if(tibble::is.tibble(exp_transform_table)){
+    if(nrow(exp_transform_table)!=nrow(unique(exp_transform_table[,1]))){
+      stop("The lipids name (features) must be unique")
+    }
+  }else{
+    if(nrow(exp_transform_table)!=length(unique(exp_transform_table[,1]))){
+      stop("The lipids name (features) must be unique")
+    }
   }
   if(ncol(exp_transform_table)<7){
     stop("At least 6 samples.")

@@ -49,8 +49,14 @@ Clin_LR_heatmap <- function(exp_data,
   if(sum(sapply(exp_data[,-1], class)%in%c("numeric","integer"))!=ncol(exp_data[,-1])){
     stop("First column type must be 'character',others must be 'numeric'")
   }
-  if(nrow(exp_data)!=length(unique(exp_data[,1]))){
-    stop("The lipids name (features) must be unique")
+  if(tibble::is.tibble(exp_data)){
+    if(nrow(exp_data)!=nrow(unique(exp_data[,1]))){
+      stop("The lipids name (features) must be unique")
+    }
+  }else{
+    if(nrow(exp_data)!=length(unique(exp_data[,1]))){
+      stop("The lipids name (features) must be unique")
+    }
   }
   if(sum(is.na(exp_data[,-1]))>0){
     stop("Variables can not be NA")

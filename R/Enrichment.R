@@ -57,8 +57,14 @@ Enrichment <- function(DE_species_table_sig, lipid_char_table, char_var, sig_pva
   if(!is(lipid_char_table[,1], 'character')){
     stop("lipid_char_table first column must contain a list of lipids names (features).")
   }
-  if(nrow(lipid_char_table)!=length(unique(lipid_char_table[,1]))){
-    stop("lipid_char_table lipids names (features) must be unique.")
+  if(tibble::is.tibble(lipid_char_table)){
+    if(nrow(lipid_char_table)!=nrow(unique(lipid_char_table[,1]))){
+      stop("The lipids name (features) must be unique")
+    }
+  }else{
+    if(nrow(lipid_char_table)!=length(unique(lipid_char_table[,1]))){
+      stop("The lipids name (features) must be unique")
+    }
   }
   if("class" %in%colnames(lipid_char_table)){
     if(!is(lipid_char_table[,'class'], 'character')){

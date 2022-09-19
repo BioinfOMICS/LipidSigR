@@ -68,8 +68,14 @@ Hclustering <- function(exp_data, DE_result_table, group_info,
       stop("exp_data first column type must be 'character',others must be 'numeric'")
     }
   }
-  if(nrow(exp_data)!=length(unique(exp_data[,1]))){
-    stop("exp_data lipids name (features) must be unique")
+  if(tibble::is.tibble(exp_data)){
+    if(nrow(exp_data)!=nrow(unique(exp_data[,1]))){
+      stop("The lipids name (features) must be unique")
+    }
+  }else{
+    if(nrow(exp_data)!=length(unique(exp_data[,1]))){
+      stop("The lipids name (features) must be unique")
+    }
   }
   if(ncol(exp_data)<3){
     stop("exp_data at least 2 samples.")

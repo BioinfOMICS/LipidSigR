@@ -35,9 +35,16 @@ exp_compo_by_lipidinfo <- function(exp_data, lipid_char_table, char_var){
       stop("First column type must be 'character',others must be 'numeric'")
     }
   }
-  if(nrow(exp_data)!=length(unique(exp_data[,1]))){
-    stop("The lipids name (features) must be unique")
+  if(tibble::is.tibble(exp_data)){
+    if(nrow(exp_data)!=nrow(unique(exp_data[,1]))){
+      stop("The lipids name (features) must be unique")
+    }
+  }else{
+    if(nrow(exp_data)!=length(unique(exp_data[,1]))){
+      stop("The lipids name (features) must be unique")
+    }
   }
+  
   if(ncol(exp_data)<3){
     stop("At least 2 samples.")
   }
