@@ -40,7 +40,6 @@
 ML_final <- function(ML_data,ranking_method, ML_method,
                      split_prop, nfold, alpha=NULL){
   
-  ML_data <- as.data.frame(ML_data)
   if(!ranking_method %in% c('p_value','pvalue_FC','ROC','Random_forest','SVM','Lasso','Ridge','ElasticNet')){
     stop('ranking_method must be one of the strings "p_value", "pvalue_FC", "ROC", "Random_forest", "SVM", "Lasso", "Ridge", or "ElasticNet".')
   }
