@@ -34,6 +34,7 @@
 #'              hclustfun="average")
 corr_heatmap <- function(exp_data,corr_method="pearson",
                          distfun = "maximum", hclustfun='average'){
+  exp_data <- as.data.frame(exp_data)
   #####################################
   #####################################
   ### Correlation heatmap by Sample ###

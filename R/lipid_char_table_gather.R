@@ -10,7 +10,8 @@
 #' char_var <- colnames(lipid_char_table)[-1]
 #' lipid_char_table_gather(lipid_char_table, char_var = char_var[8])
 lipid_char_table_gather <- function(lipid_char_table, char_var){
-
+  
+  lipid_char_table <- as.data.frame(lipid_char_table)
   if(!char_var %in% grep(pattern = 'FA_', x = colnames(lipid_char_table), value = TRUE)){
     stop("Function lipid_char_table_gather is use for transform 'FA_' column")
   }

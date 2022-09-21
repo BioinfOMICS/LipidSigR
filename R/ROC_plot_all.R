@@ -35,7 +35,9 @@
 #'                       ML_method='Random_forest', split_prop=0.3, nfold=10)
 #' ROC_plot_all(ML_output[[3]], ML_output[[5]], feature_n=10)
 ROC_plot_all <- function(data1,data2,feature_n){
-
+  
+  data1 <- as.data.frame(data1)
+  data2 <- as.data.frame(data2)
   total_feature <- sort(unique(data1$feature_num)) %>% as.character()
   AUC_label <- c(length(total_feature))
   for(a in seq_len(length(total_feature))){

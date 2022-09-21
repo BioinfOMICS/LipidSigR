@@ -37,7 +37,9 @@
 cor_network <- function(exp_transform_table, lipid_char_table,
                         sig_feature, node_col,
                         cor_method, edge_cutoff){
-
+  
+  exp_transform_table <- as.data.frame(exp_transform_table)
+  lipid_char_table <- as.data.frame(lipid_char_table)
   if(!is(exp_transform_table[,1], 'character')){
     stop("exp_transform_table first column must contain a list of lipids names (features)")
   }

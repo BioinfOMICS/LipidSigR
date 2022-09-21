@@ -54,8 +54,11 @@ PCA <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
                 group_num = NULL, var1 = NULL, var2 = NULL,
                 insert_ref_group=NULL,ref_group=NULL,
                 n_PC,top_n_feature){
-
-
+  
+  exp_transform_table <- as.data.frame(exp_transform_table)
+  if(!is.null(group_info)){
+    group_info <- as.data.frame(group_info)
+  }
   if(ncol(exp_transform_table)==2){
     if(sum(class(exp_transform_table[,-1])%in%c("numeric","integer"))!=1){
       stop("First column type must be 'character',others must be 'numeric'")

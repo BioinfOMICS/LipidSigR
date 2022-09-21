@@ -40,7 +40,8 @@
 #'              sig_pvalue = 0.05, sig_FC = 2)
 DE_species_2 <- function(exp_data, data_transform = TRUE, group_info, paired = FALSE, test = 't.test',
                          adjust_p_method = 'BH', sig_stat = 'p.adj', sig_pvalue = 0.05, sig_FC = 2){
-
+  
+  exp_data <- as.data.frame(exp_data)
   if(!is(exp_data[,1], 'character')){
     stop("exp_data first column must contain a list of lipids names (features)")
   }

@@ -46,7 +46,10 @@ ML_data_process <- function(exp_data, group_info, lipid_char_table, char_var=NUL
                               data_transform=TRUE, trans_type='log',
                               centering=FALSE,
                               scaling=FALSE){
-
+  
+  exp_data <- as.data.frame(exp_data)
+  group_info <- as.data.frame(group_info)
+  lipid_char_table <- as.data.frame(lipid_char_table)
   if(!is(exp_data[,1], 'character')){
     stop("exp_data first column must contain a list of lipids names (features)")
   }

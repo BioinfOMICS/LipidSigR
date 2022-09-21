@@ -41,6 +41,8 @@ Clin_Cor_heatmap <- function(exp_data,
                         test = 'pearson', adjust_p_method = 'BH',
                         sig_stat = 'p.adj', sig_pvalue = 0.05, sig_cor_coef = 0.3,
                         heatmap_col='statistic', distfun='spearman', hclustfun='average'){
+  exp_data <- as.data.frame(exp_data)
+  condition_table <- as.data.frame(condition_table)
   if(ncol(exp_data)<=10){
     stop("At least 10 samples.")
   }

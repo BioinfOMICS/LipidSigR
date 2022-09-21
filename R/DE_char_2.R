@@ -53,7 +53,8 @@
 DE_char_2 <- function(exp_data,  data_transform=TRUE,
                       group_info, paired=FALSE, sig_pvalue = 0.05, sig_FC = 2,
                       insert_ref_group=NULL, ref_group=NULL, char_var='Category'){
-
+  
+  exp_data <- as.data.frame(exp_data)
   if(ncol(exp_data)==2){
     if(sum(class(exp_data[,-1])%in%c("numeric","integer"))!=1){
       stop("exp_data variables must be 'numeric'")

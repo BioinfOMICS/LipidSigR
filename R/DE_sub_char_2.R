@@ -59,7 +59,8 @@ DE_sub_char_2 <- function(exp_data, data_transform=TRUE, lipid_char_table, split
                           pct_transform=TRUE,
                           trans_type='log',
                           centering=FALSE, scaling=FALSE){
-
+  
+  exp_data <- as.data.frame(exp_data)
   if(!is(exp_data[,1], 'character')){
     stop("exp_data first column must contain a list of lipids names (features)")
   }
