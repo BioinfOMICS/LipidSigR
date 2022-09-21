@@ -35,7 +35,8 @@
 #'                       ML_method='Random_forest', split_prop=0.3, nfold=10)
 #' probability_plot(ML_output[[1]], feature_n=10)
 probability_plot <- function(data, feature_n){
-
+  
+  data <- as.data.frame(data)
   if(!class(feature_n)%in%c("numeric","integer")){
     stop('feature_n must be integer')
   }else{

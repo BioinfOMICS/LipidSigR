@@ -31,7 +31,9 @@
 #'                       ML_method='Random_forest', split_prop=0.3, nfold=10)
 #' feature_plot(ML_output[[6]], ML_output[[7]], feature_n=10, nfold=10)
 feature_plot <- function(data1, data2, feature_n, nfold=10){
-
+  
+  data1 <- as.data.frame(data1)
+  data2 <- as.data.frame(data2)
   if(!class(feature_n)%in%c("numeric","integer")){
     stop('feature_n must be integer')
   }else{

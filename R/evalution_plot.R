@@ -28,7 +28,8 @@
 #'                       ML_method='Random_forest', split_prop=0.3, nfold=10)
 #' evalution_plot(ML_output[[2]], method='Accuracy')
 evalution_plot <- function(data, method){
-
+  
+  data <- as.data.frame(data)
   if(!method %in% c('Accuracy','Sensitivity','Specificity','Pos Pred Value','Neg Pred Value','Precision','Recall','F1','Prevalence','Detection Rate','Detection Prevalence', 'Balanced Accuracy')){
     stop('ranking_method must be one of the strings "Accuracy", "Sensitivity", "Specificity", "Pos Pred Value", "Neg Pred Value", "Precision", "Recall", "F1", "Prevalence", "Detection Rate", "Detection Prevalence", or "Balanced Accuracy".')
   }

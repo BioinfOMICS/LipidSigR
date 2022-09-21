@@ -18,6 +18,8 @@
 #' exp_data <- profiling_exp_data
 #' exp_profiling(exp_data)
 exp_profiling <- function(exp_data){
+  
+  exp_data <- as.data.frame(exp_data)
   ################################################
   ####                                        ####
   #### PLOT: total expressed lipid by samples ####

@@ -14,6 +14,8 @@
 #' Species2Char(exp_data, lipid_char_table, char_var=char_var[1])
 Species2Char <- function(exp_data, lipid_char_table, char_var){
 
+  exp_data <- as.data.frame(exp_data)
+  lipid_char_table <- as.data.frame(lipid_char_table)
   if(nrow(lipid_char_table)==nrow(exp_data)){
     if(sum(lipid_char_table[,1]%in%exp_data[,1])!=nrow(lipid_char_table)){
       stop("The lipids names (features) of lipid_char_table table must same as exp_data.")

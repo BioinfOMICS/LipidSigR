@@ -36,7 +36,8 @@
 #'      best_model_feature=ML_output[[9]],
 #'      ML_method='Random_forest', feature_n=10, nsim=5)
 SHAP <- function(data, best_model, best_model_feature,  ML_method ,feature_n, nsim){
-
+  
+  data <- as.data.frame(data)
   if(!ML_method %in% c('Random_forest','SVM','Lasso','Ridge','ElasticNet','xgboost')){
     stop('ML_method must be one of the strings "Random_forest", "SVM", "Lasso", "Ridge", "ElasticNet", or "xgboost".')
   }

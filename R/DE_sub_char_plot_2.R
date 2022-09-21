@@ -51,7 +51,8 @@
 DE_sub_char_plot_2 <- function(DE_split_char_table_all, DE_split_char_index, group_info,
                                char_var='Category', split_var, split_class,
                                insert_ref_group=NULL, ref_group=NULL){
-
+  
+  DE_split_char_table_all <- as.data.frame(DE_split_char_table_all)
   #### Plot ####
 
   CTRL.RES <- DE_split_char_table_all %>%

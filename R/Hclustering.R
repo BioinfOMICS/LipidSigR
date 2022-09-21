@@ -59,6 +59,13 @@ Hclustering <- function(exp_data, DE_result_table, group_info,
                         lipid_char_table = NULL, char_var = NULL,
                         distfun = 'pearson', hclustfun = 'complete',
                         insert_ref_group=NULL,ref_group=NULL){
+  
+  exp_data <- as.data.frame(exp_data)
+  DE_result_table <- as.data.frame(DE_result_table)
+  group_info <- as.data.frame(group_info)
+  if(!is.null(lipid_char_table)){
+    lipid_char_table <- as.data.frame(lipid_char_table)
+  }
   if(ncol(exp_data)==2){
     if(sum(class(exp_data[,-1])%in%c("numeric","integer"))!=1){
       stop("exp_data first column type must be 'character',others must be 'numeric'")

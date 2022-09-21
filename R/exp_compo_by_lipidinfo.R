@@ -22,7 +22,9 @@
 #' char_var <- colnames(lipid_char_table)[-1]
 #' exp_compo_by_lipidinfo(exp_data, lipid_char_table, char_var[1])
 exp_compo_by_lipidinfo <- function(exp_data, lipid_char_table, char_var){
-
+  
+  exp_data <- as.data.frame(exp_data)
+  lipid_char_table <- as.data.frame(lipid_char_table)
   if(!is(exp_data[,1], 'character')){
     stop("The first column must contain a list of lipids names (features)")
   }

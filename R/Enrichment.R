@@ -51,6 +51,9 @@
 #' Enrichment (DE_species_table_sig, lipid_char_table= lipid_char_filter,
 #'             char_var = char_var[1], sig_pvalue = 0.05)
 Enrichment <- function(DE_species_table_sig, lipid_char_table, char_var, sig_pvalue = 0.05){
+  
+  DE_species_table_sig <- as.data.frame(DE_species_table_sig)
+  lipid_char_table <- as.data.frame(lipid_char_table)
   if(nrow(DE_species_table_sig)<5){
     stop("Less than 5 significant lipid features")
   }

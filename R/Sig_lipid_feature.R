@@ -46,6 +46,9 @@
 #' Sig_lipid_feature(DE_species_table_sig, lipid_char_filter,
 #'                   char_var[1], sig_FC = 2)
 Sig_lipid_feature <- function(DE_species_table_sig, lipid_char_table, char_var, sig_FC = 2){
+  
+  DE_species_table_sig <- as.data.frame(DE_species_table_sig)
+  lipid_char_table <- as.data.frame(lipid_char_table)
   if(nrow(DE_species_table_sig)<1){
     stop("Less than 1 significant lipid features")
   }

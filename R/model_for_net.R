@@ -34,6 +34,8 @@
 #'               ML_output[[9]], feature_num=10, nsim=5)
 model_for_net <- function(data, ML_method, varimp_method, best_model,
                           best_model_feature,feature_num, nsim){
+  
+  data <- as.data.frame(data)
   if(!varimp_method %in% c('Algorithm-based','SHAP analysis')){
     stop('varimp_method must be one of the strings "Algorithm-based", or "SHAP analysis".')
   }

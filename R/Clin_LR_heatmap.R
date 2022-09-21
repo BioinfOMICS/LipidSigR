@@ -42,7 +42,10 @@ Clin_LR_heatmap <- function(exp_data,
                        sig_stat = 'p.adj', sig_pvalue = 0.05,
                        distfun='spearman', hclustfun='centroid',
                        heatmap_col='beta_coef'){
-
+  
+  exp_data <- as.data.frame(exp_data)
+  condition_table <- as.data.frame(condition_table)
+  adjusted_table <- as.data.frame(adjusted_table)
   if(ncol(exp_data)<=10){
     stop("At least 10 samples.")
   }

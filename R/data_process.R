@@ -32,7 +32,8 @@ data_process <- function(exp_data, exclude_var_missing=TRUE,
                          data_transform=TRUE,trans_type='log',
                          centering=FALSE,
                          scaling=FALSE){
-
+  
+  exp_data <- as.data.frame(exp_data)
   if(ncol(exp_data)==2){
     if(sum(class(exp_data[,-1])%in%c("numeric","integer"))!=1){
       stop("First column type must be 'character',others must be 'numeric'")

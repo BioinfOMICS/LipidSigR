@@ -46,7 +46,11 @@ tsne <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
                  pca=TRUE, perplexity=5,max_iter=500, cluster_method,
                  group_num = NULL, var1 = NULL, var2 = NULL,
                  insert_ref_group = NULL, ref_group = NULL){
-
+  
+  exp_transform_table <- as.data.frame(exp_transform_table)
+  if(!is.null(group_info)){
+    group_info <- as.data.frame(group_info)
+  }
   if(ncol(exp_transform_table)<3){
     stop("At least 2 samples.")
   }
