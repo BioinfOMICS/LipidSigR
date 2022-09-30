@@ -287,7 +287,7 @@ DE_char_2 <- function(exp_data,  data_transform=TRUE,
   ## Fig.1 bar chart
   barTab <- data.table::rbindlist(l = list(CTRL.RES, EXP.RES), use.names = TRUE, fill = TRUE)
   barTab <- barTab %>%  dplyr::group_by(Category) %>% dplyr::mutate(max_error_bar = max(Mean+SD)) %>% dplyr::ungroup()
-  barTab$post_hoc_pvalue = NA
+  barTab$post_hoc_pvalue <- NA
   for(i in seq_len(nrow(barTab))){
     barTab$post_hoc_pvalue[i] <- Result_table$post_hoc_pvalue[which(barTab$Category[i]==Result_table[,1])]
   }
