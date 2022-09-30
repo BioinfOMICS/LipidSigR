@@ -217,7 +217,7 @@ DE_sub_char_2 <- function(exp_data, data_transform=TRUE, lipid_char_table, split
     spec2char <- Species2Char(split_exp_data, split_lipid_char_table, char_var)
 
     if(nrow(spec2char)==0){
-      show('no')
+      methods::show('no')
       next()
     }
 
@@ -229,7 +229,7 @@ DE_sub_char_2 <- function(exp_data, data_transform=TRUE, lipid_char_table, split
                                    centering, scaling)
 
     if(is.null(exp_data_trans)){
-      show('no')
+      methods::show('no')
       next()
     }
 
