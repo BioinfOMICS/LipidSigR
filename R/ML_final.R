@@ -369,7 +369,7 @@ ML_final <- function(ML_data,ranking_method, ML_method,
 
     cv_feature_save <- list(nfold)
     for(a in seq_len(nfold)){
-      show(stringr::str_c('CV fold ', as.character(a), ' done'))
+      methods::show(stringr::str_c('CV fold ', as.character(a), ' done'))
       train_data <- rsample::assessment(cv$splits[[a]])
       test_data <- rsample::analysis(cv$splits[[a]])
 
