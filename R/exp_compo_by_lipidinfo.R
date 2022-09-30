@@ -33,7 +33,7 @@ exp_compo_by_lipidinfo <- function(exp_data, lipid_char_table, char_var){
       stop("First column type must be 'character',others must be 'numeric'")
     }
   }else{
-    if(!is(exp_data[,1], 'character') | sum(sapply(exp_data[,-1], class)%in%c("numeric","integer"))!=ncol(exp_data[,-1])){
+    if(!is(exp_data[,1], 'character') | sum(vapply(exp_data[,-1], class,character(1))%in%c("numeric","integer"))!=ncol(exp_data[,-1])){
       stop("First column type must be 'character',others must be 'numeric'")
     }
   }

@@ -49,7 +49,7 @@ Clin_LR_heatmap <- function(exp_data,
   if(ncol(exp_data)<=10){
     stop("At least 10 samples.")
   }
-  if(sum(sapply(exp_data[,-1], class)%in%c("numeric","integer"))!=ncol(exp_data[,-1])){
+  if(sum(vapply(exp_data[,-1], class,character(1))%in%c("numeric","integer"))!=ncol(exp_data[,-1])){
     stop("First column type must be 'character',others must be 'numeric'")
   }
   if(tibble::is.tibble(exp_data)){
@@ -73,7 +73,7 @@ Clin_LR_heatmap <- function(exp_data,
   if(nrow(condition_table)<3){
     stop("At least 10 samples.")
   }
-  if(!is(condition_table[,1], 'character') | sum(sapply(condition_table[,-1], class)%in%c("numeric","integer"))!=ncol(condition_table[,-1])){
+  if(!is(condition_table[,1], 'character') | sum(vapply(condition_table[,-1], class,character(1))%in%c("numeric","integer"))!=ncol(condition_table[,-1])){
     stop("The columns 'sample_name' must be characters; the other columns must be numeric.")
   }
 
@@ -283,12 +283,12 @@ Clin_LR_heatmap <- function(exp_data,
         }
         reorder_Cor.mat <- Cor.mat[rev(row_dend$order),col_dend$order]
       }else{
-        hm = NULL
-        reorder_Cor.mat = NULL
+        hm <- NULL
+        reorder_Cor.mat <- NULL
       }
     }else{
-      hm = NULL
-      reorder_Cor.mat = NULL
+      hm <- NULL
+      reorder_Cor.mat <- NULL
     }
 
     colnames(Clin_LR_table_all)[2] <- CHAR

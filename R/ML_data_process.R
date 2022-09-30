@@ -58,7 +58,7 @@ ML_data_process <- function(exp_data, group_info, lipid_char_table, char_var=NUL
       stop("exp_data first column type must be 'character',others must be 'numeric'")
     }
   }else{
-    if(!is(exp_data[,1], 'character') | sum(sapply(exp_data[,-1], class)%in%c("numeric","integer"))!=ncol(exp_data[,-1])){
+    if(!is(exp_data[,1], 'character') | sum(vapply(exp_data[,-1], class,character(1))%in%c("numeric","integer"))!=ncol(exp_data[,-1])){
       stop("exp_data first column type must be 'character',others must be 'numeric'")
     }
   }

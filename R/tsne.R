@@ -57,7 +57,7 @@ tsne <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
   if(nrow(exp_transform_table)<5){
     stop("At least 4 features.")
   }
-  if(sum(sapply(exp_transform_table[,-1], class)%in%c("numeric","integer"))!=ncol(exp_transform_table[,-1])){
+  if(sum(vapply(exp_transform_table[,-1], class,character(1))%in%c("numeric","integer"))!=ncol(exp_transform_table[,-1])){
     stop("First column type must be 'character',others must be 'numeric'")
   }
   if(tibble::is.tibble(exp_transform_table)){
@@ -79,7 +79,7 @@ tsne <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
   }
   if(!is.null(group_info)){
     if(ncol(group_info)==4){
-      if(sum(sapply(group_info[,seq_len(3)],class)!="character")==0){
+      if(sum(vapply(group_info[,seq_len(3)],class,character(1))!="character")==0){
         if("pair" %in% colnames(group_info)){
           if(which(colnames(group_info)=="pair")!=4){
             stop("group_info column must arrange in order of sample_name, label_name, group, pair(optional).")
@@ -112,7 +112,7 @@ tsne <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
       if("pair" %in% colnames(group_info)){
         stop("group_info column must arrange in order of sample_name, label_name, group, pair(optional).")
       }
-      if(sum(sapply(group_info,class)!="character")!=0){
+      if(sum(vapply(group_info,class,character(1))!="character")!=0){
         stop("group_info first 3 columns must be characters.")
       }
       if(sum(group_info[,1]%in%colnames(exp_data))!=nrow(group_info) | sum(group_info[,1]%in%colnames(exp_data))!=ncol(exp_data[,-1])){

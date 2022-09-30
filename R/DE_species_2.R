@@ -50,7 +50,7 @@ DE_species_2 <- function(exp_data, data_transform = TRUE, group_info, paired = F
       stop("exp_data first column type must be 'character',others must be 'numeric'")
     }
   }else{
-    if(!is(exp_data[,1], 'character') | sum(sapply(exp_data[,-1], class)%in%c("numeric","integer"))!=ncol(exp_data[,-1])){
+    if(!is(exp_data[,1], 'character') | sum(vapply(exp_data[,-1], class,character(1))%in%c("numeric","integer"))!=ncol(exp_data[,-1])){
       stop("exp_data first column type must be 'character',others must be 'numeric'")
     }
   }
@@ -75,7 +75,7 @@ DE_species_2 <- function(exp_data, data_transform = TRUE, group_info, paired = F
     stop("exp_data variables can not be all NULL/NA")
   }
   if(ncol(group_info)==4){
-    if(sum(sapply(group_info[,seq_len(3)],class)!="character")==0){
+    if(sum(vapply(group_info[,seq_len(3)],class,character(1))!="character")==0){
       if("pair" %in% colnames(group_info)){
         if(which(colnames(group_info)=="pair")!=4){
           stop("group_info column must arrange in order of sample_name, label_name, group, pair(optional).")
@@ -103,7 +103,7 @@ DE_species_2 <- function(exp_data, data_transform = TRUE, group_info, paired = F
     if("pair" %in% colnames(group_info)){
       stop("group_info column must arrange in order of sample_name, label_name, group, pair(optional).")
     }
-    if(sum(sapply(group_info,class)!="character")!=0){
+    if(sum(vapply(group_info,class,character(1))!="character")!=0){
       stop("group_info first 3 columns must be characters.")
     }
     if(sum(group_info[,1]%in%colnames(exp_data))!=nrow(group_info) | sum(group_info[,1]%in%colnames(exp_data))!=ncol(exp_data[,-1])){

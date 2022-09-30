@@ -39,7 +39,7 @@ data_process <- function(exp_data, exclude_var_missing=TRUE,
       stop("First column type must be 'character',others must be 'numeric'")
     }
   }else{
-    if(sum(sapply(exp_data[,-1], class)%in%c("numeric","integer"))!=ncol(exp_data[,-1])){
+    if(sum(vapply(exp_data[,-1], class,character(1))%in%c("numeric","integer"))!=ncol(exp_data[,-1])){
       stop("First column type must be 'character',others must be 'numeric'")
     }
   }

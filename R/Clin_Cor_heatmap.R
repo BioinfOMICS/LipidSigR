@@ -37,16 +37,16 @@
 #'                  sig_pvalue = 1, sig_cor_coef = 0, heatmap_col='statistic',
 #'                  distfun='spearman', hclustfun='average')
 Clin_Cor_heatmap <- function(exp_data,
-                        condition_table,
-                        test = 'pearson', adjust_p_method = 'BH',
-                        sig_stat = 'p.adj', sig_pvalue = 0.05, sig_cor_coef = 0.3,
-                        heatmap_col='statistic', distfun='spearman', hclustfun='average'){
+                             condition_table,
+                             test = 'pearson', adjust_p_method = 'BH',
+                             sig_stat = 'p.adj', sig_pvalue = 0.05, sig_cor_coef = 0.3,
+                             heatmap_col='statistic', distfun='spearman', hclustfun='average'){
   exp_data <- as.data.frame(exp_data)
   condition_table <- as.data.frame(condition_table)
   if(ncol(exp_data)<=10){
     stop("At least 10 samples.")
   }
-  if(sum(sapply(exp_data[,-1], class)%in%c("numeric","integer"))!=ncol(exp_data[,-1])){
+  if(sum(vapply(exp_data[,-1], class,character(1))%in%c("numeric","integer"))!=ncol(exp_data[,-1])){
     stop("First column type must be 'character',others must be 'numeric'")
   }
   if(tibble::is.tibble(exp_data)){
@@ -70,7 +70,7 @@ Clin_Cor_heatmap <- function(exp_data,
   if(nrow(condition_table)<3){
     stop("At least 10 samples.")
   }
-  if(!is(condition_table[,1], 'character') | sum(sapply(condition_table[,-1], class)%in%c("numeric","integer"))!=ncol(condition_table[,-1])){
+  if(!is(condition_table[,1], 'character') | sum(vapply(condition_table[,-1], class,character(1))%in%c("numeric","integer"))!=ncol(condition_table[,-1])){
     stop("The columns 'sample_name' must be characters; the other columns must be numeric.")
   }
 
@@ -190,36 +190,6 @@ Clin_Cor_heatmap <- function(exp_data,
         return(color)
       }
 
-      #if(min(Cor.mat)>=0){
-      #  hm <- iheatmapr::iheatmap(Cor.mat,colors = heatmap_color_scale(Cor.mat),colorbar_grid = cb_grid) %>%
-      #    iheatmapr::add_col_dendro(col_dend,side="top",reorder =T,size=0.1) %>%
-      #    iheatmapr::add_row_dendro(row_dend,side="right",reorder =T,size=0.1)
-      #}else if(max(Cor.mat)<=0){
-      #  hm <- iheatmapr::iheatmap(Cor.mat,colors = heatmap_color_scale(Cor.mat),colorbar_grid = cb_grid) %>%
-      #    iheatmapr::add_col_dendro(col_dend,side="top",reorder =T,size=0.1) %>%
-      #    iheatmapr::add_row_dendro(row_dend,side="right",reorder =T,size=0.1)
-      #}else{
-      #  hm <- iheatmapr::iheatmap(Cor.mat,colorbar_grid = cb_grid) %>%
-      #    iheatmapr::add_col_dendro(col_dend,side="top",reorder =T,size=0.1) %>%
-      #    iheatmapr::add_row_dendro(row_dend,side="right",reorder =T,size=0.1)
-      #}
-      #if(max(nchar(colnames(Cor.mat)))<10){
-      #  text_size <- 0.1
-      #}else if(max(nchar(colnames(Cor.mat)))<20 & max(nchar(colnames(Cor.mat)))>=10){
-      #  text_size <- 0.2
-      #}else if(max(nchar(colnames(Cor.mat)))<30 & max(nchar(colnames(Cor.mat)))>=20){
-      #  text_size <- 0.3
-      #}else if(max(nchar(colnames(Cor.mat)))<40 & max(nchar(colnames(Cor.mat)))>=30){
-      #  text_size <- 0.4
-      #}else{
-      #  text_size <- 0.5
-      #}
-      #if(nrow(Cor.mat)<50){
-      #  hm <- hm %>% iheatmapr::add_row_labels(font=list(size=8))
-      #}
-      #if(ncol(Cor.mat)<50){
-      #  hm <- hm %>% iheatmapr::add_col_labels(side="bottom",font=list(size=8),size= text_size)
-      #}
       ax <- list(
         title = "",
         zeroline = FALSE,
@@ -269,13 +239,13 @@ Clin_Cor_heatmap <- function(exp_data,
       }
       reorder_Cor.mat <- Cor.mat[rev(row_dend$order),col_dend$order]
       }else{
-        hm = NULL
-        reorder_Cor.mat = NULL
+        hm <- NULL
+        reorder_Cor.mat <- NULL
       }
 
     }else{
-      hm = NULL
-      reorder_Cor.mat = NULL
+      hm <- NULL
+      reorder_Cor.mat <- NULL
     }
 
     colnames(Clin_Cor_table_all)[2] <- CHAR

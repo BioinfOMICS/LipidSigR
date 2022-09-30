@@ -48,7 +48,7 @@ cor_network <- function(exp_transform_table, lipid_char_table,
       stop("exp_transform_table first column type must be 'character',others must be 'numeric'")
     }
   }else{
-    if(!is(exp_transform_table[,1], 'character') | sum(sapply(exp_transform_table[,-1], class)%in%c("numeric","integer"))!=ncol(exp_transform_table[,-1])){
+    if(!is(exp_transform_table[,1], 'character') | sum(vapply(exp_transform_table[,-1], class,character(1))%in%c("numeric","integer"))!=ncol(exp_transform_table[,-1])){
       stop("exp_transform_table first column type must be 'character',others must be 'numeric'")
     }
   }
