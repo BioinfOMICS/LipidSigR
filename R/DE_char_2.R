@@ -60,7 +60,7 @@ DE_char_2 <- function(exp_data,  data_transform=TRUE,
       stop("exp_data variables must be 'numeric'")
     }
   }else{
-    if(sum(vapply(exp_data[,-1], class)%in%c("numeric","integer"),character(1))!=ncol(exp_data[,-1])){
+    if(sum(vapply(exp_data[,-1], class,character(1))%in%c("numeric","integer"))!=ncol(exp_data[,-1])){
       stop("exp_data variables must be 'numeric'")
     }
   }
