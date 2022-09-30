@@ -205,13 +205,8 @@ PLSDA <- function(exp_transform_table, group_info = NULL, sig_feature = NULL, nc
     t()
 
   plsda.res <- mixOmics::plsda(X, Y, ncomp, scaling)
-
-
   X.variate <- plsda.res$variates$X
   X.loading <- plsda.res$loadings$X
-
-
-
 
   #grouping
   if(cluster_method=='kmeans'){
@@ -220,15 +215,15 @@ PLSDA <- function(exp_transform_table, group_info = NULL, sig_feature = NULL, nc
     cluster_group <- cluster::pam(X.variate, k = group_num, metric = var1)$cluster #euclidean manhattan
   }else if(cluster_method=='hclustering'){
     if(var1 %in% c('pearson','spearman','kendall')){
-      dist.fun=function(x){
-        x=t(x)
-        cor.mat=stats::cor(x,method=var1,use = 'complete.obs')
-        cor.mat=(1-cor.mat)
-        cor.dist=stats::as.dist(cor.mat)
+      dist.fun <- function(x){
+        x <- t(x)
+        cor.mat <- stats::cor(x,method=var1,use = 'complete.obs')
+        cor.mat <- (1-cor.mat)
+        cor.dist <- stats::as.dist(cor.mat)
         return(cor.dist)
       }
     }else{
-      dist.fun=function(x) stats::dist(x, method=var1)
+      dist.fun <- function(x) stats::dist(x, method=var1)
     }
     cluster_group <- stats::hclust(dist.fun(X.variate), method = var2)
     cluster_group <- stats::cutree(cluster_group, k=group_num)
@@ -248,7 +243,6 @@ PLSDA <- function(exp_transform_table, group_info = NULL, sig_feature = NULL, nc
 
   color <- c("#00AFBB", "#E7B800", "#FC4E07","#42B540FF","#BB3099","#EE0099","#0000AC","#868686FF",'#00468BFF','black')
   if(cluster_method %in% c('dbscan')){
-
     sample.plot <-  factoextra::fviz_cluster(list(data = as.data.frame(X.variate),
                                       cluster = cluster_group),
                                  palette = color[seq_len(length(unique(cluster_group)))],
@@ -264,10 +258,10 @@ PLSDA <- function(exp_transform_table, group_info = NULL, sig_feature = NULL, nc
     sample_plot <- plotly::ggplotly(sample.plot)
     for (i in seq_len(length(sample_plot$x$data))){
       if (!is.null(sample_plot$x$data[[i]]$name)){
-        sample_plot$x$data[[i]]$name =  gsub("\\(","",stringr::str_split(sample_plot$x$data[[i]]$name,",")[[1]][1])
+        sample_plot$x$data[[i]]$name <- gsub("\\(","",stringr::str_split(sample_plot$x$data[[i]]$name,",")[[1]][1])
       }
       if(i<=length(unique(cluster_group))){
-        sample_plot$x$data[[i]]$text<-paste("x :",round(sample_plot$x$data[[i]]$x,3),
+        sample_plot$x$data[[i]]$text <- paste("x :",round(sample_plot$x$data[[i]]$x,3),
                                             "\ny :",round(sample_plot$x$data[[i]]$y,3),
                                             "\nGroups :",sample_plot$x$data[[i]]$name,
                                             "\nSample name :",sample.plot$data[which(sample.plot$data$cluster==sample_plot$x$data[[i]]$name),]$name)
@@ -291,15 +285,15 @@ PLSDA <- function(exp_transform_table, group_info = NULL, sig_feature = NULL, nc
     sample_plot <- plotly::ggplotly(sample.plot)
     for (i in seq_len(length(sample_plot$x$data))){
       if (!is.null(sample_plot$x$data[[i]]$name)){
-        sample_plot$x$data[[i]]$name =  gsub("\\(","",stringr::str_split(sample_plot$x$data[[i]]$name,",")[[1]][1])
+        sample_plot$x$data[[i]]$name <- gsub("\\(","",stringr::str_split(sample_plot$x$data[[i]]$name,",")[[1]][1])
       }
       if (i<=group_num){
-        sample_plot$x$data[[i]]$text<-paste("x :",round(sample_plot$x$data[[i]]$x,3),
+        sample_plot$x$data[[i]]$text <- paste("x :",round(sample_plot$x$data[[i]]$x,3),
                                             "\ny :",round(sample_plot$x$data[[i]]$y,3),
                                             "\nGroups :",sample_plot$x$data[[i]]$name,
                                             "\nSample name :",sample.plot$data[which(sample.plot$data$cluster==sample_plot$x$data[[i]]$name),]$name)
       }else if(i>=group_num+1 & i <= 2*group_num){
-        sample_plot$x$data[[i]]$text<-paste("Groups :",sample_plot$x$data[[i]]$name)
+        sample_plot$x$data[[i]]$text <- paste("Groups :",sample_plot$x$data[[i]]$name)
       }
     }
     for (i in seq_len((2*group_num))) {
@@ -325,10 +319,10 @@ PLSDA <- function(exp_transform_table, group_info = NULL, sig_feature = NULL, nc
 
   variable.tab <- mixOmics::plotVar(plsda.res, comp = seq_len(2), var.names = TRUE, plot = FALSE)
 
-  creat_circle_data<-function(r,x=0,y=0){
-    circle.x<-seq(x-r,x+r,length.out =150)
-    circle.y <-c(sqrt(r^2-circle.x^2),-sqrt(r^2-circle.x^2))
-    circle.x=c(circle.x,seq(x+r,x-r,length.out =150))
+  creat_circle_data <- function(r,x=0,y=0){
+    circle.x <- seq(x-r,x+r,length.out =150)
+    circle.y <- c(sqrt(r^2-circle.x^2),-sqrt(r^2-circle.x^2))
+    circle.x <- c(circle.x,seq(x+r,x-r,length.out =150))
     circle <-data.frame(circle.x,circle.y)
   }
   circle_data_1 <-creat_circle_data(1)

@@ -326,8 +326,8 @@ DE_char_2 <- function(exp_data,  data_transform=TRUE,
                                              "\nGroup :",data$Group)
   }
   for (i in seq_len(length(barggplotly$x$data))) {
-    text = stringr::str_split(barggplotly$x$data[[i]]$hovertext,"<br />max_error_bar")
-    hovertext =list()
+    text <- stringr::str_split(barggplotly$x$data[[i]]$hovertext,"<br />max_error_bar")
+    hovertext <- list()
     if(length(text)>0){
       for (j in seq_len(length(text))) {
         hovertext[[j]] <- paste(text[[j]][1],"Significant : YES")
@@ -359,13 +359,13 @@ DE_char_2 <- function(exp_data,  data_transform=TRUE,
                                                    "\nGroup :",data$Group)
   }
   for (i in seq_len(length(bar_ggplotly_sqrt$x$data))) {
-    text = stringr::str_split(bar_ggplotly_sqrt$x$data[[i]]$hovertext,"<br />max_error_bar")
-    hovertext =list()
+    text <- stringr::str_split(bar_ggplotly_sqrt$x$data[[i]]$hovertext,"<br />max_error_bar")
+    hovertext <- list()
     if(length(text)>0){
       for (j in seq_len(length(text))) {
         hovertext[[j]] <- paste(text[[j]][1],"Significant : YES")
       }
-      bar_ggplotly_sqrt$x$data[[i]]$hovertext <-hovertext
+      bar_ggplotly_sqrt$x$data[[i]]$hovertext <- hovertext
     }
   }
   barPlot_sqrt <- bar_ggplotly_sqrt
@@ -399,8 +399,8 @@ DE_char_2 <- function(exp_data,  data_transform=TRUE,
       }
     }
     for (i in seq_len(length(lineggplotly$x$data))) {
-      text = stringr::str_split(lineggplotly$x$data[[i]]$hovertext,"<br />max_error_bar")
-      hovertext =list()
+      text <- stringr::str_split(lineggplotly$x$data[[i]]$hovertext,"<br />max_error_bar")
+      hovertext <- list()
       if(length(text)>0){
         for (j in seq_len(length(text))) {
           hovertext[[j]] <- paste(text[[j]][1],"Significant : YES")
@@ -437,8 +437,8 @@ DE_char_2 <- function(exp_data,  data_transform=TRUE,
       }
     }
     for (i in seq_len(length(line_sqrt_ggplot$x$data))) {
-      text = stringr::str_split(line_sqrt_ggplot$x$data[[i]]$hovertext,"<br />max_error_bar")
-      hovertext =list()
+      text <- stringr::str_split(line_sqrt_ggplot$x$data[[i]]$hovertext,"<br />max_error_bar")
+      hovertext <- list()
       if(length(text)>0){
         for (j in seq_len(length(text))) {
           hovertext[[j]] <- paste(text[[j]][1],"Significant : YES")
@@ -510,13 +510,10 @@ DE_char_2 <- function(exp_data,  data_transform=TRUE,
                             ticktext = c(unique(boxTab$group)[1], '', unique(boxTab$group)[2]),
                             titlefont = list(size = 16),
                             tickfont = list(size = 14)),
-               yaxis = list(#title = paste0(char_var, ' index'),
+               yaxis = list(
                  titlefont = list(size = 16),
                  tickfont = list(size = 14),
-                 range = c( group_min, group_max+0.5)
-                 #type = "log",
-                 #exponentformat = 'e'
-               ),
+                 range = c( group_min, group_max+0.5)),
                legend = list(font = list(size = 14),
                              y = 0.5),
                margin = list(l=70, r=70, b=80, t = 60))
@@ -531,17 +528,12 @@ DE_char_2 <- function(exp_data,  data_transform=TRUE,
                          jitter = 0.85,
                          pointpos = 0,
                          marker = list(size = 5, opacity = 0.8)) %>%
-        plotly::layout(#title = gene,
-          #titlefont = list(size = 20),
-          xaxis = list(title = 'Group',
+        plotly::layout(xaxis = list(title = 'Group',
                        titlefont = list(size = 16),
                        tickfont = list(size = 14)),
           yaxis = list(title = paste0(CHAR, ' index'),
                        titlefont = list(size = 16),
-                       tickfont = list(size = 14)#,
-                       #type = "log",
-                       #exponentformat = 'e'
-          ),
+                       tickfont = list(size = 14)),
           legend = list(font = list(size = 14),
                         y = 0.5),
           margin = list(l=70, r=70, b=80, t = 60))

@@ -249,19 +249,19 @@ Clin_LR_heatmap <- function(exp_data,
           ticks = ''
         )
         if(distfun %in% c('pearson','spearman','kendall')){
-          dist_fun=function(x){
-            x=t(x)
-            cor.mat=stats::cor(x,method=distfun)
-            cor.mat=(1-cor.mat)
-            cor.dist=stats::as.dist(cor.mat)
+          dist_fun <- function(x){
+            x <- t(x)
+            cor.mat <- stats::cor(x,method=distfun)
+            cor.mat <- (1-cor.mat)
+            cor.dist <- stats::as.dist(cor.mat)
             return(cor.dist)
           }
         }else{
-          dist_fun=function(x) stats::dist(x, method=distfun)
+          dist_fun <- function(x) stats::dist(x, method=distfun)
         }
 
-        hclust_fun = function(x) stats::hclust(x, method = hclustfun)
-        hm = Cor.mat %>%
+        hclust_fun <- function(x) stats::hclust(x, method = hclustfun)
+        hm <- Cor.mat %>%
           heatmaply::heatmaply(scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(low="#0571b0",mid="white", high="#ca0020",midpoint = 0),
                                distfun = dist_fun,
                                hclustfun = hclust_fun,

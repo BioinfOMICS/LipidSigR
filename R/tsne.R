@@ -166,7 +166,6 @@ tsne <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
     group_info$group[which(group_info$group=='exp')] <-  exp_raw_name
   }
 
-
   if(!is.null(sig_feature)){
     exp_transform_table <- exp_transform_table %>%
       dplyr::filter(eval(parse(text = colnames(exp_transform_table)[1]))%in%sig_feature)
@@ -190,9 +189,7 @@ tsne <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
   tsne <- Rtsne::Rtsne(tsne_table,check_duplicates=FALSE , pca=pca,
                 perplexity=perplexity, verbose=TRUE,
                 max_iter = max_iter,theta=0)
-
   tsne_data <- as.data.frame(tsne$Y) %>% dplyr::mutate(sample_name=colnames(exp_transform_table)[-1])
-
   colnames(tsne_data)[seq_len(2)] <- c('tsne1', 'tsne2')
 
   #grouping
@@ -202,15 +199,15 @@ tsne <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
     cluster_group <- cluster::pam(tsne$Y, k = group_num, metric = var1)$cluster #euclidean manhattan
   }else if(cluster_method=='hclustering'){
     if(var1 %in% c('pearson','spearman','kendall')){
-      dist.fun=function(x){
-        x=t(x)
-        cor.mat=stats::cor(x,method=var1,use = 'complete.obs')
-        cor.mat=(1-cor.mat)
-        cor.dist=stats::as.dist(cor.mat)
+      dist.fun <- function(x){
+        x <- t(x)
+        cor.mat <- stats::cor(x,method=var1,use = 'complete.obs')
+        cor.mat <- (1-cor.mat)
+        cor.dist <- stats::as.dist(cor.mat)
         return(cor.dist)
       }
     }else{
-      dist.fun=function(x) stats::dist(x, method=var1)
+      dist.fun <- function(x) stats::dist(x, method=var1)
     }
     cluster_group <- stats::hclust(dist.fun(tsne$Y), method = var2)
     cluster_group <- stats::cutree(cluster_group, k=group_num)
@@ -219,12 +216,9 @@ tsne <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
     cluster_group <- ifelse(cluster_group>9,9,cluster_group) %>% as.character()
     cluster_group <- ifelse(cluster_group=='0','noise',cluster_group)
   }else if(cluster_method=='group_info'){
-
     group_order <- purrr::map_dbl(rownames(tsne_table), function(x){which(x==group_info$sample_name)})
-
     cluster_group <- group_info[group_order,] %>% .$group
     group_num <- length(unique(cluster_group))
-
   }
 
   cluster_group <- as.character(cluster_group)
@@ -234,7 +228,6 @@ tsne <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
   #tsne plot*5
   color <- c("#00AFBB", "#E7B800", "#FC4E07","#42B540FF","#BB3099","#EE0099","#0000AC","#868686FF",'#00468BFF','black')
   if(cluster_method %in% c('dbscan')){
-
     tsne_plot <- factoextra::fviz_cluster(list(data = as.data.frame(tsne$Y),
                                    cluster = cluster_group),
                               palette = color[seq_len(length(unique(cluster_group)))],
@@ -250,10 +243,10 @@ tsne <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
     tsne_plot <- plotly::ggplotly(tsne_plot)
     for (i in seq_len(length(tsne_plot$x$data))){
       if (!is.null(tsne_plot$x$data[[i]]$name)){
-        tsne_plot$x$data[[i]]$name =  gsub("\\(","",stringr::str_split(tsne_plot$x$data[[i]]$name,",")[[1]][1])
+        tsne_plot$x$data[[i]]$name <-  gsub("\\(","",stringr::str_split(tsne_plot$x$data[[i]]$name,",")[[1]][1])
       }
       if(i<=length(unique(cluster_group))){
-        tsne_plot$x$data[[i]]$text<-paste("x :",round(tsne_plot$x$data[[i]]$x,3),
+        tsne_plot$x$data[[i]]$text <- paste("x :",round(tsne_plot$x$data[[i]]$x,3),
                                           "\ny :",round(tsne_plot$x$data[[i]]$y,3),
                                           "\nGroups :",tsne_plot$x$data[[i]]$name,
                                           "\nSample name :",tsne_data[which(tsne_data$group==tsne_plot$x$data[[i]]$name),]$sample_name)
@@ -278,15 +271,15 @@ tsne <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
     tsne_plot <- plotly::ggplotly(tsne_plot)
     for (i in seq_len(length(tsne_plot$x$data))){
       if (!is.null(tsne_plot$x$data[[i]]$name)){
-        tsne_plot$x$data[[i]]$name =  gsub("\\(","",stringr::str_split(tsne_plot$x$data[[i]]$name,",")[[1]][1])
+        tsne_plot$x$data[[i]]$name <- gsub("\\(","",stringr::str_split(tsne_plot$x$data[[i]]$name,",")[[1]][1])
       }
       if(i<=group_num){
-        tsne_plot$x$data[[i]]$text<-paste("x :",round(tsne_plot$x$data[[i]]$x,3),
+        tsne_plot$x$data[[i]]$text <- paste("x :",round(tsne_plot$x$data[[i]]$x,3),
                                           "\ny :",round(tsne_plot$x$data[[i]]$y,3),
                                           "\nGroups :",tsne_plot$x$data[[i]]$name,
                                           "\nSample name :",tsne_data[which(tsne_data$group==tsne_plot$x$data[[i]]$name),]$sample_name)
       }else if(i>=group_num+1 & i <= 2*group_num){
-        tsne_plot$x$data[[i]]$text<-paste("\nGroups :",tsne_plot$x$data[[i]]$name)
+        tsne_plot$x$data[[i]]$text <- paste("\nGroups :",tsne_plot$x$data[[i]]$name)
       }
     }
     for (i in seq_len((2*group_num))) {

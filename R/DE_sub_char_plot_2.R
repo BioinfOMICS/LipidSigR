@@ -74,7 +74,7 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all, DE_split_char_index, gro
 
   splitTab <- barTab %>% dplyr::filter(Split_category == split_class)
   splitTab <- splitTab %>% dplyr::group_by(Category) %>% dplyr::mutate(max_error_bar = max(Mean+SD)) %>% dplyr::ungroup()
-  splitTab$post_hoc_pvalue = NA
+  splitTab$post_hoc_pvalue <- NA
   for(i in seq_len(nrow(splitTab))){
     post_hoc_pvalue_data <- DE_split_char_table_all[which(DE_split_char_table_all[,1]==split_class),]
     splitTab$post_hoc_pvalue[i] <- post_hoc_pvalue_data$post_hoc_pvalue[which(splitTab$Category[i]==post_hoc_pvalue_data[,2])]
@@ -111,13 +111,13 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all, DE_split_char_index, gro
                                              "\nGroup :",data$Group)
   }
   for (i in seq_len(length(barggplotly$x$data))) {
-    text = stringr::str_split(barggplotly$x$data[[i]]$hovertext,"<br />max_error_bar")
-    hovertext =list()
+    text <- stringr::str_split(barggplotly$x$data[[i]]$hovertext,"<br />max_error_bar")
+    hovertext <- list()
     if(length(text)>0){
       for (j in seq_len(length(text))) {
         hovertext[[j]] <- paste(text[[j]][1],"Significant : YES")
       }
-      barggplotly$x$data[[i]]$hovertext <-hovertext
+      barggplotly$x$data[[i]]$hovertext <- hovertext
     }
   }
   barPlot <- barggplotly
@@ -146,13 +146,13 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all, DE_split_char_index, gro
                                                    "\nGroup :",data$Group)
   }
   for (i in seq_len(length(bar_ggplotly_sqrt$x$data))){
-    text = stringr::str_split(bar_ggplotly_sqrt$x$data[[i]]$hovertext,"<br />max_error_bar")
-    hovertext =list()
+    text <- stringr::str_split(bar_ggplotly_sqrt$x$data[[i]]$hovertext,"<br />max_error_bar")
+    hovertext <- list()
     if(length(text)>0){
       for (j in seq_len(length(text))) {
         hovertext[[j]] <- paste(text[[j]][1],"Significant : YES")
       }
-      bar_ggplotly_sqrt$x$data[[i]]$hovertext <-hovertext
+      bar_ggplotly_sqrt$x$data[[i]]$hovertext <- hovertext
     }
   }
   barPlot_sqrt <- bar_ggplotly_sqrt
@@ -169,7 +169,7 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all, DE_split_char_index, gro
   lineggplotly <- plotly::ggplotly(linePlot)
   for(i in seq_len(length(lineggplotly$x$data))){
     if(!is.null(lineggplotly$x$data[i]$name)){
-      lineggplotly$x$data[i]$name = gsub("\\(","",stringr::str_split(lineggplotly$x$data[i]$name,",")[[1]][1])
+      lineggplotly$x$data[i]$name <- gsub("\\(","",stringr::str_split(lineggplotly$x$data[i]$name,",")[[1]][1])
     }
   }
   for (i in seq_len(length(unique(linePlot$data$Group)))) {
@@ -187,13 +187,13 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all, DE_split_char_index, gro
     }
   }
   for (i in seq_len(length(lineggplotly$x$data))) {
-    text = stringr::str_split(lineggplotly$x$data[[i]]$hovertext,"<br />max_error_bar")
-    hovertext =list()
+    text <- stringr::str_split(lineggplotly$x$data[[i]]$hovertext,"<br />max_error_bar")
+    hovertext <- list()
     if(length(text)>0){
       for (j in seq_len(length(text))) {
         hovertext[[j]] <- paste(text[[j]][1],"Significant : YES")
       }
-      lineggplotly$x$data[[i]]$hovertext <-hovertext
+      lineggplotly$x$data[[i]]$hovertext <- hovertext
     }
   }
   linePlot <- lineggplotly
@@ -211,7 +211,7 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all, DE_split_char_index, gro
   line_ggplotly_sqrt <- plotly::ggplotly(linePlot_sqrt)
   for(i in seq_len(length(line_ggplotly_sqrt$x$data))){
     if(!is.null(line_ggplotly_sqrt$x$data[i]$name)){
-      line_ggplotly_sqrt$x$data[i]$name = gsub("\\(","",stringr::str_split(line_ggplotly_sqrt$x$data[i]$name,",")[[1]][1])
+      line_ggplotly_sqrt$x$data[i]$name <- gsub("\\(","",stringr::str_split(line_ggplotly_sqrt$x$data[i]$name,",")[[1]][1])
     }
   }
   for (i in seq_len(length(unique(linePlot_sqrt$data$Group)))) {
@@ -229,8 +229,8 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all, DE_split_char_index, gro
     }
   }
   for (i in seq_len(length(line_ggplotly_sqrt$x$data))) {
-    text = stringr::str_split(line_ggplotly_sqrt$x$data[[i]]$hovertext,"<br />max_error_bar")
-    hovertext =list()
+    text <- stringr::str_split(line_ggplotly_sqrt$x$data[[i]]$hovertext,"<br />max_error_bar")
+    hovertext <- list()
     if(length(text)>0){
       for (j in seq_len(length(text))) {
         hovertext[[j]] <- paste(text[[j]][1],"Significant : YES")

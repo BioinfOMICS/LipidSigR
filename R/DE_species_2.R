@@ -156,8 +156,8 @@ DE_species_2 <- function(exp_data, data_transform = TRUE, group_info, paired = F
       dplyr::mutate(p_value = tryCatch(stats::t.test(unlist(ctrl), unlist(exp), paired = paired, var.equal = TRUE)$p.value,
                                 error=function(e){NA}),
              m_log10_p_value = -log10(p_value))
-    exp_data_p$p_adj = stats::p.adjust(exp_data_p$p_value, method = adjust_p_method)
-    exp_data_p$m_log10_p_adj = -log10(exp_data_p$p_adj)
+    exp_data_p$p_adj <- stats::p.adjust(exp_data_p$p_value, method = adjust_p_method)
+    exp_data_p$m_log10_p_adj <- -log10(exp_data_p$p_adj)
 
     exp_data_stat <- exp_data_tab[-2:-3] %>%
       dplyr::right_join(exp_data_p[-2:-3], by = 'feature') %>%
@@ -180,8 +180,8 @@ DE_species_2 <- function(exp_data, data_transform = TRUE, group_info, paired = F
              p_value = tryCatch(stats::t.test(unlist(ctrl), unlist(exp), paired = paired, var.equal = TRUE)$p.value,
                                 error=function(e){NA}),
              m_log10_p_value = -log10(p_value))
-    exp_data_p$p_adj = stats::p.adjust(exp_data_p$p_value, method = adjust_p_method)
-    exp_data_p$m_log10_p_adj = -log10(exp_data_p$p_adj)
+    exp_data_p$p_adj <- stats::p.adjust(exp_data_p$p_value, method = adjust_p_method)
+    exp_data_p$m_log10_p_adj <- -log10(exp_data_p$p_adj)
 
     exp_data_stat <- exp_data_p[-2:-3] %>%
       dplyr::mutate(sig_p = ifelse(p_value < sig_pvalue & abs(log2FC) > log2(sig_FC), 'yes', 'no'),
@@ -211,9 +211,8 @@ DE_species_2 <- function(exp_data, data_transform = TRUE, group_info, paired = F
       dplyr::mutate(p_value = tryCatch(stats::wilcox.test(unlist(ctrl), unlist(exp), paired = paired)$p.value,
                                 error=function(e){NA}),
              m_log10_p_value = -log10(p_value))
-    #statistic = wilcox.test(unlist(ctrl), unlist(exp))$statistic,
-    exp_data_p$p_adj = stats::p.adjust(exp_data_p$p_value, method = adjust_p_method)
-    exp_data_p$m_log10_p_adj = -log10(exp_data_p$p_adj)
+    exp_data_p$p_adj <- stats::p.adjust(exp_data_p$p_value, method = adjust_p_method)
+    exp_data_p$m_log10_p_adj <- -log10(exp_data_p$p_adj)
 
     exp_data_stat <- exp_data_tab[-2:-3] %>%
       dplyr::right_join(exp_data_p[-2:-3], by = 'feature') %>%
@@ -236,8 +235,8 @@ DE_species_2 <- function(exp_data, data_transform = TRUE, group_info, paired = F
              p_value = tryCatch(stats::wilcox.test(unlist(ctrl), unlist(exp), paired = paired)$p.value,
                                 error=function(e){NA}),
              m_log10_p_value = -log10(p_value))
-    exp_data_p$p_adj = stats::p.adjust(exp_data_p$p_value, method = adjust_p_method)
-    exp_data_p$m_log10_p_adj = -log10(exp_data_p$p_adj)
+    exp_data_p$p_adj <- stats::p.adjust(exp_data_p$p_value, method = adjust_p_method)
+    exp_data_p$m_log10_p_adj <- -log10(exp_data_p$p_adj)
 
     exp_data_stat <- exp_data_p[-2:-3] %>%
       dplyr::mutate(sig_p = ifelse(p_value < sig_pvalue & abs(log2(FC)) > log2(sig_FC), 'yes', 'no'),
@@ -318,7 +317,7 @@ DE_species_2 <- function(exp_data, data_transform = TRUE, group_info, paired = F
                                 tooltip = "text")
       }
 
-      i=NULL
+      i <- NULL
       for(i in seq_len(length(in.dotchart$x$data))){
         in.dotchart$x$data[[i]]$text <- in.dotchart$x$data[[i]]$text %>%
           stringr::str_replace_all(pattern = 'log2(FC): 5', replacement = 'log2(FC): Inf') %>%
@@ -430,7 +429,7 @@ DE_species_2 <- function(exp_data, data_transform = TRUE, group_info, paired = F
       }
 
 
-      i=NULL
+      i <- NULL
       for(i in seq_len(length(in.dotchart$x$data))){
         in.dotchart$x$data[[i]]$text <- in.dotchart$x$data[[i]]$text %>%
           stringr::str_replace_all(pattern = paste0('log2(FC): ', INF), replacement = 'log2(FC): Inf') %>%
@@ -443,7 +442,7 @@ DE_species_2 <- function(exp_data, data_transform = TRUE, group_info, paired = F
 
   }else{
 
-    in.dotchart = NULL
+    in.dotchart <- NULL
 
   } #if(nrow(sig.diff.exp) > 0)
 
@@ -525,7 +524,6 @@ DE_species_2 <- function(exp_data, data_transform = TRUE, group_info, paired = F
         plotly::layout(xaxis = list(title = "M = log<sub>2</sub>(exp)-log<sub>2</sub>(ctrl)"),
                yaxis = list(title = "-log<sub>10</sub>(p-value)"),
                title = "Volcano Plot",
-               #annotations = annotation,
                legend = list(title = list(text = "Significant lipid"),
                              orientation = 'h',
                              xanchor = "center",

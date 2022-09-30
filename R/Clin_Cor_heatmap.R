@@ -40,7 +40,7 @@ Clin_Cor_heatmap <- function(exp_data,
                              condition_table,
                              test = 'pearson', adjust_p_method = 'BH',
                              sig_stat = 'p.adj', sig_pvalue = 0.05, sig_cor_coef = 0.3,
-                             heatmap_col='statistic', distfun='spearman', hclustfun='average'){
+                             heatmap_col = 'statistic', distfun = 'spearman', hclustfun = 'average'){
   exp_data <- as.data.frame(exp_data)
   condition_table <- as.data.frame(condition_table)
   if(ncol(exp_data)<=10){
@@ -109,24 +109,24 @@ Clin_Cor_heatmap <- function(exp_data,
         }
       }
 
-      Clin_Cor_table_all[[a-1]] <- data.frame(clin_factor=colnames(condition_table)[a],
-                                              feature=feature, method=test,
-                                              cor_coef=cor_coef, statistic=statistic, p_value=p_value,
-                                              p_adj=stats::p.adjust(p_value, method = adjust_p_method, n = length(p_value)))
+      Clin_Cor_table_all[[a-1]] <- data.frame(clin_factor = colnames(condition_table)[a],
+                                              feature = feature, method=test,
+                                              cor_coef = cor_coef, statistic = statistic, p_value = p_value,
+                                              p_adj = stats::p.adjust(p_value, method = adjust_p_method, n = length(p_value)))
 
     }
     Clin_Cor_table_all <- Reduce(rbind, Clin_Cor_table_all)
 
     Clin_Cor_table_all <- Clin_Cor_table_all %>%
-      dplyr::mutate(sig_p=ifelse(abs(cor_coef)>sig_cor_coef & p_value<sig_pvalue, 'yes','no'),
-             sig_p_adj=ifelse(abs(cor_coef)>sig_cor_coef & p_adj<sig_pvalue, 'yes','no'))
+      dplyr::mutate(sig_p = ifelse(abs(cor_coef)>sig_cor_coef & p_value<sig_pvalue, 'yes','no'),
+             sig_p_adj = ifelse(abs(cor_coef)>sig_cor_coef & p_adj<sig_pvalue, 'yes','no'))
 
-    if(sig_stat=='p'){
+    if(sig_stat == 'p'){
       Clin_Cor_table_sig <- Clin_Cor_table_all %>%
-        dplyr::filter(sig_p=='yes')
+        dplyr::filter(sig_p == 'yes')
     }else if(sig_stat=='p.adj'){
       Clin_Cor_table_sig <- Clin_Cor_table_all %>%
-        dplyr::filter(sig_p_adj=='yes')
+        dplyr::filter(sig_p_adj == 'yes')
     }
 
     #---------heatmap-----------------------------
@@ -140,13 +140,13 @@ Clin_Cor_heatmap <- function(exp_data,
       if(max_rowcex<4){
         max_rowcex <- 4
       }
-      if(heatmap_col=='cor_coef'){
+      if(heatmap_col == 'cor_coef'){
         Cor.mat <- Clin_Cor_table_sig %>%
           dplyr::select(clin_factor, feature, cor_coef) %>%
           tidyr::spread(feature, cor_coef) %>%
           tibble::column_to_rownames(var = 'clin_factor') %>%
           as.matrix()
-      }else if(heatmap_col=='statistic'){
+      }else if(heatmap_col == 'statistic'){
         Cor.mat <- Clin_Cor_table_sig %>%
           dplyr::select(clin_factor, feature, statistic) %>%
           tidyr::spread(feature, statistic) %>%
@@ -206,19 +206,19 @@ Clin_Cor_heatmap <- function(exp_data,
         ticks = ''
       )
       if(distfun %in% c('pearson','spearman','kendall')){
-        dist_fun=function(x){
-          x=t(x)
-          cor.mat=stats::cor(x,method=distfun,use = 'complete.obs')
-          cor.mat=(1-cor.mat)
-          cor.dist=stats::as.dist(cor.mat)
+        dist_fun <- function(x){
+          x <- t(x)
+          cor.mat <- stats::cor(x,method=distfun,use = 'complete.obs')
+          cor.mat <- (1-cor.mat)
+          cor.dist <- stats::as.dist(cor.mat)
           return(cor.dist)
         }
       }else{
-        dist_fun=function(x) stats::dist(x, method=distfun)
+        dist_fun <- function(x) stats::dist(x, method=distfun)
       }
 
-      hclust_fun = function(x) stats::hclust(x, method = hclustfun)
-      hm = Cor.mat %>%
+      hclust_fun <- function(x) stats::hclust(x, method = hclustfun)
+      hm <- Cor.mat %>%
         heatmaply::heatmaply(scale_fill_gradient_fun = ggplot2::scale_fill_gradient2(low="#0571b0",mid="white", high="#ca0020",midpoint = 0),
                   distfun = dist_fun,
                   hclustfun = hclust_fun,
