@@ -1,10 +1,23 @@
 #' @title DE_pathview_function
-#' @description The function is to produce the enrichment plot that assists users to determine whether significant lipid species are enriched in the categories of the selected characteristics. To obtain the enrichment plot, a vector of lipid classes and the pathway information from the database, such as KEGG, need to be provided. A differentially expressed analysis pathview plot and a data frame with key_name, DB, ID, path_id, path_name will be returned as a result.
+#' @description The function is to produce the enrichment plot that assists 
+#'     users to determine whether significant lipid species are enriched in the 
+#'     categories of the selected characteristics. To obtain the enrichment 
+#'     plot, a vector of lipid classes and the pathway information from the 
+#'     database, such as KEGG, need to be provided. A differentially expressed 
+#'     analysis pathview plot and a data frame with key_name, DB, ID, path_id, 
+#'     path_name will be returned as a result.
 #' @param lipid_class a vector comprising lipid class, such as PC, PE, TAG
-#' @param lipid_gene_path A data frame of pathway information, which can be retrieved and reorganized from KEGG or other databases. It includes the related pathways of lipids, ID, pathway ID, pathway name, gene ID, and gene name.
+#' @param lipid_gene_path A data frame of pathway information, which can be 
+#'     retrieved and reorganized from KEGG or other databases. It includes the 
+#'     related pathways of lipids, ID, pathway ID, pathway name, gene ID, 
+#'     and gene name.
 #' @param path a character string, output path.
-#' @param pathway_gene_list A list that comprises the genes included in each pathway for compiling the significant network of the selected lipid class. \emph{NOTE: the information can be retrieved from the KEGG database or others.}
-#' @return Return a network plot of pathway analysis and a data frame revealing the details of the plot
+#' @param pathway_gene_list A list that comprises the genes included in each 
+#'     pathway for compiling the significant network of the selected lipid 
+#'     class. \emph{NOTE: the information can be retrieved from the KEGG 
+#'     database or others.}
+#' @return Return a network plot of pathway analysis and a data frame revealing 
+#'     the details of the plot
 #' \enumerate{
 #' \item pathview plot save as .png
 #' \item A data frame with key_name, DB, ID, path_id, path_name
@@ -57,49 +70,43 @@
 #' outPath <- file.path(getwd(), "pathview_result")
 #' pathview_function(sig_enrich_class, path = getwd(), DE.lipid.gene.path,
 #'                   DE.pathway.gene.list)
-pathview_function <- function(lipid_class, path, lipid_gene_path, pathway_gene_list){
+pathview_function <- function(lipid_class, 
+                              path, 
+                              lipid_gene_path, 
+                              pathway_gene_list){
 
-  kegg_cpd <- lipid_gene_path[c(1,2,4,7,8)] %>% dplyr::filter(key_name%in%lipid_class) %>%
-    dplyr::filter(DB=='KEGG') %>% unique()
+  kegg_cpd <- lipid_gene_path[c(1, 2, 4, 7, 8)] %>% 
+    dplyr::filter(key_name %in% lipid_class) %>%
+    dplyr::filter(DB == 'KEGG') %>% unique()
   kegg_cpd <- kegg_cpd[stats::complete.cases(kegg_cpd),]
-  kegg_path <- sort(table(stats::na.omit(kegg_cpd$path_id)),decreasing = TRUE)
-  pathview_path <- kegg_path %>% names() %>% stringr::str_sub(start = 5)
-
-
-  cpd <- lipid_gene_path %>% dplyr::filter(key_name%in%lipid_class) %>%
-    dplyr::filter(DB=='KEGG') %>% .$ID
-
+  kegg_path <- sort(table(stats::na.omit(kegg_cpd$path_id)), decreasing=TRUE)
+  pathview_path <- kegg_path %>% names() %>% stringr::str_sub(start=5)
+  cpd <- lipid_gene_path %>% dplyr::filter(key_name %in% lipid_class) %>%
+    dplyr::filter(DB == 'KEGG') %>% .$ID
   lipid_class_list <- unique(cpd)
-
-  if (length(lipid_class_list)==0) {
+  if (length(lipid_class_list) == 0) {
     stop('Lipid class name not found')
   }
-  pathview_cpd <- rep(1,length(lipid_class_list))
-
+  pathview_cpd <- rep(1, length(lipid_class_list))
   names(pathview_cpd) <- lipid_class_list
-
   setwd(path)
 
   for(a in seq_len(length(kegg_path))){
-
-    pathway_gene <- which(stringr::str_sub(names(pathway_gene_list),start = 5)==pathview_path[a])
-
-    pathway_gene <- pathway_gene_list[[pathway_gene]] %>% stringr::str_sub(start = 10)
-
+    pathway_gene <- which(stringr::str_sub(names(pathway_gene_list), 
+                                           start = 5) == pathview_path[a])
+    pathway_gene <- pathway_gene_list[[pathway_gene]] %>% 
+      stringr::str_sub(start=10)
     pathview_gene <- rep(0, length(pathway_gene))
     names(pathview_gene) <- pathway_gene
 
     tryCatch({
-      pathview::pathview(gene.data = pathview_gene, cpd.data=pathview_cpd, pathway.id  = pathview_path[a], species = "hsa",
-               out.suffix = "pathview",discrete=list(cpd=TRUE),
-               limit = list(cpd = c(0,1)), bins = list(cpd = 1),
-               mid = list(cpd = "red"),low = list(cpd = "white", gene='#bfffbf'),
-               plot.col.key=FALSE, kegg.native = TRUE,same.layer=TRUE) #kegg.dir='C:/Users/user/Desktop/KEGG/pathview/
+      pathview::pathview(gene.data=pathview_gene, cpd.data=pathview_cpd,
+                         pathway.id=pathview_path[a], species="hsa",
+               out.suffix="pathview", discrete=list(cpd=TRUE),
+               limit=list(cpd=c(0, 1)), bins=list(cpd=1),
+               mid=list(cpd="red"), low=list(cpd="white", gene='#bfffbf'),
+               plot.col.key=FALSE, kegg.native=TRUE, same.layer=TRUE)
     }, error = function(e){message(e)})
-
   }
-
-
   return(kegg_cpd)
-
 }
