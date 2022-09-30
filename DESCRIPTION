@@ -53,7 +53,8 @@ Imports:
     RColorBrewer,
     ggplot2,
     heatmaply,
-    pathview
+    pathview,
+    methods
 Suggests:
     devtools,
     roxygen2,
