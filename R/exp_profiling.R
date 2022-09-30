@@ -147,7 +147,7 @@ exp_profiling <- function(exp_data){
                                           "\nDensity :",
                                           round(y1,3)))
     }else{
-      text = paste0("p.hist.value %>% plotly::add_trace(x = ~x",
+      text <- paste0("p.hist.value %>% plotly::add_trace(x = ~x",
                     i,
                     ",",
                     "y = ~y",i,

@@ -148,11 +148,11 @@ Sig_lipid_feature <- function(DE_species_table_sig, lipid_char_table, char_var, 
   in.log2fc.sig.ggplotly <- plotly::ggplotly(p.log2fc.sig)
 
   for(i in seq_len(length(in.log2fc.sig.ggplotly$x$data))){
-    in.log2fc.sig.ggplotly$x$data[[i]]$text =gsub('(characteristic, -log2FC.mean)','',in.log2fc.sig.ggplotly$x$data[[i]]$text)
-    in.log2fc.sig.ggplotly$x$data[[i]]$text =gsub('reorder',paste0(char_var,' :'),in.log2fc.sig.ggplotly$x$data[[i]]$text)
-    in.log2fc.sig.ggplotly$x$data[[i]]$text =gsub('\\(\\): ','',in.log2fc.sig.ggplotly$x$data[[i]]$text)
-    in.log2fc.sig.ggplotly$x$data[[i]]$text =gsub('log2FC.mean: ','mean(log2FC) :',in.log2fc.sig.ggplotly$x$data[[i]]$text)
-    in.log2fc.sig.ggplotly$x$data[[i]]$text =gsub('significant: ','significant :',in.log2fc.sig.ggplotly$x$data[[i]]$text)
+    in.log2fc.sig.ggplotly$x$data[[i]]$text <- gsub('(characteristic, -log2FC.mean)','',in.log2fc.sig.ggplotly$x$data[[i]]$text)
+    in.log2fc.sig.ggplotly$x$data[[i]]$text <- gsub('reorder',paste0(char_var,' :'),in.log2fc.sig.ggplotly$x$data[[i]]$text)
+    in.log2fc.sig.ggplotly$x$data[[i]]$text <- gsub('\\(\\): ','',in.log2fc.sig.ggplotly$x$data[[i]]$text)
+    in.log2fc.sig.ggplotly$x$data[[i]]$text <- gsub('log2FC.mean: ','mean(log2FC) :',in.log2fc.sig.ggplotly$x$data[[i]]$text)
+    in.log2fc.sig.ggplotly$x$data[[i]]$text <- gsub('significant: ','significant :',in.log2fc.sig.ggplotly$x$data[[i]]$text)
   }
 
   in.log2fc.sig <- in.log2fc.sig.ggplotly

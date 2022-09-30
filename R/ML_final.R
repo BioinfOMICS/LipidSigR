@@ -362,7 +362,7 @@ ML_final <- function(ML_data,ranking_method, ML_method,
                                   cv_fold=rep(NA, 30000),
                                   feature_num=rep(NA, 30000))
 
-    m=0
+    m <- 0
     best_model <- list(length(sele_feature_num))
     best_model_feature <- list(length(sele_feature_num))
     best_ROC_PR <- numeric(length(sele_feature_num))
@@ -419,7 +419,7 @@ ML_final <- function(ML_data,ranking_method, ML_method,
 
         cv_varimp_result[(1+100*m):(100*m+nrow(varimp_result)),] <- varimp_result
 
-        m=m+1
+        m <- m+1
       }
       names(feature_save) <- as.character(sele_feature_num)
       cv_feature_save[[a]] <- feature_save

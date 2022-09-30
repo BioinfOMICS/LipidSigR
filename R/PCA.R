@@ -208,15 +208,15 @@ PCA <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
     cluster_group <- cluster::pam(pca$x, k = group_num, metric = var1)$cluster #euclidean manhattan
   }else if(cluster_method=='hclustering'){
     if(var1 %in% c('pearson','spearman','kendall')){
-      dist.fun=function(x){
-        x=t(x)
-        cor.mat=stats::cor(x,method=var1,use = 'complete.obs')
-        cor.mat=(1-cor.mat)
-        cor.dist=stats::as.dist(cor.mat)
+      dist.fun <- function(x){
+        x <- t(x)
+        cor.mat <- stats::cor(x,method=var1,use = 'complete.obs')
+        cor.mat <- (1-cor.mat)
+        cor.dist <- stats::as.dist(cor.mat)
         return(cor.dist)
       }
     }else{
-      dist.fun=function(x) stats::dist(x, method=var1)
+      dist.fun <- function(x) stats::dist(x, method=var1)
     }
     cluster_group <- stats::hclust(dist.fun(pca$x), method = var2)
     cluster_group <- stats::cutree(cluster_group, k=group_num)
@@ -261,10 +261,10 @@ PCA <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
       biplot <- plotly::ggplotly(pca_biplot)
       for (i in seq_len(length(biplot$x$data))){
         if (!is.null(biplot$x$data[[i]]$name)){
-          biplot$x$data[[i]]$name =  gsub("\\(","",stringr::str_split(biplot$x$data[[i]]$name,",")[[1]][1])
+          biplot$x$data[[i]]$name <- gsub("\\(","",stringr::str_split(biplot$x$data[[i]]$name,",")[[1]][1])
         }
         if(i<=length(unique(cluster_group))){
-          biplot$x$data[[i]]$text<-paste("x :",round(biplot$x$data[[i]]$x,3),
+          biplot$x$data[[i]]$text <- paste("x :",round(biplot$x$data[[i]]$x,3),
                                          "\ny :",round(biplot$x$data[[i]]$y,3),
                                          "\nGroups :",biplot$x$data[[i]]$name,
                                          "\nSample name :",pca_biplot$data[which(pca_biplot$data$Groups==biplot$x$data[[i]]$name),]$name)
@@ -281,21 +281,21 @@ PCA <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
       biplot <- plotly::ggplotly(pca_biplot)
       for (i in seq_len(length(biplot$x$data))){
         if (!is.null(biplot$x$data[[i]]$name)){
-          biplot$x$data[[i]]$name =  gsub("\\(","",stringr::str_split(biplot$x$data[[i]]$name,",")[[1]][1])
+          biplot$x$data[[i]]$name <- gsub("\\(","",stringr::str_split(biplot$x$data[[i]]$name,",")[[1]][1])
         }
         if (i<=group_num){
-          biplot$x$data[[i]]$text<-paste("Dim1 :",round(biplot$x$data[[i]]$x,3),
+          biplot$x$data[[i]]$text <- paste("Dim1 :",round(biplot$x$data[[i]]$x,3),
                                          "\nDim2 :",round(biplot$x$data[[i]]$y,3),
                                          "\nGroups :",biplot$x$data[[i]]$name,
                                          "\nSample name :",pca_biplot$data[which(pca_biplot$data$Groups==biplot$x$data[[i]]$name),]$name)
         }else if(i>=group_num+1 & i <= 2*group_num){
-          biplot$x$data[[i]]$text<-paste("\nGroups :",biplot$x$data[[i]]$name)
+          biplot$x$data[[i]]$text <- paste("\nGroups :",biplot$x$data[[i]]$name)
         }
       }
       for (i in seq_len((2*group_num))) {
         rev_n <- rev(seq_len((2*group_num)))
         if(i==1){rev_list<-list(biplot$x$data[[rev_n[i]]])}
-        else{rev_list<-c(rev_list,list(biplot$x$data[[rev_n[i]]]))}
+        else{rev_list <- c(rev_list,list(biplot$x$data[[rev_n[i]]]))}
       }
       biplot$x$data <- rev_list
       pca_biplot <- biplot

@@ -181,19 +181,13 @@ UMAP <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
   num <- apply(exp_transform_table[-1], 1, FUN = function(x){length(unique(x))})
   exp_transform_table <- exp_transform_table[(num!=1),]
   exp_transform_table <- exp_transform_table[!is.infinite(rowSums(exp_transform_table[-1], na.rm = TRUE)),]
-
   umap_table <- exp_transform_table[-1] %>% t() %>% as.data.frame()
-
   colnames(umap_table) <- exp_transform_table[[1]]
 
-
   umap_table <- stats::na.omit(umap_table)
-
   umap_result <- uwot::umap(umap_table,n_neighbors=n_neighbors,
                       scale=scale, metric=metric)
-
   umap_data <- as.data.frame(umap_result) %>% dplyr::mutate(sample_name=colnames(exp_transform_table)[-1])
-
   colnames(umap_data)[seq_len(2)] <- c('UMAP-1', 'UMAP-2')
 
   #grouping
@@ -203,15 +197,15 @@ UMAP <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
     cluster_group <- cluster::pam(umap_result, k = group_num, metric = var1)$cluster #euclidean manhattan
   }else if(cluster_method=='hclustering'){
     if(var1 %in% c('pearson','spearman','kendall')){
-      dist.fun=function(x){
-        x=t(x)
-        cor.mat=stats::cor(x,method=var1,use = 'complete.obs')
-        cor.mat=(1-cor.mat)
-        cor.dist=stats::as.dist(cor.mat)
+      dist.fun <- function(x){
+        x <- t(x)
+        cor.mat <- stats::cor(x,method=var1,use = 'complete.obs')
+        cor.mat <- (1-cor.mat)
+        cor.dist <- stats::as.dist(cor.mat)
         return(cor.dist)
       }
     }else{
-      dist.fun=function(x) stats::dist(x, method=var1)
+      dist.fun <- function(x) stats::dist(x, method=var1)
     }
     cluster_group <- stats::hclust(dist.fun(umap_result), method = var2)
     cluster_group <- stats::cutree(cluster_group, k=group_num)
@@ -220,12 +214,9 @@ UMAP <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
     cluster_group <- ifelse(cluster_group>9,9,cluster_group) %>% as.character()
     cluster_group <- ifelse(cluster_group=='0','noise',cluster_group)
   }else if(cluster_method=='group_info'){
-
     group_order <- purrr::map_dbl(rownames(umap_table), function(x){which(x==group_info$sample_name)})
-
     cluster_group <- group_info[group_order,] %>% .$group
     group_num <- length(unique(cluster_group))
-
   }
 
   cluster_group <- as.character(cluster_group)
@@ -235,7 +226,6 @@ UMAP <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
   #tsne plot*5
   color <- c("#00AFBB", "#E7B800", "#FC4E07","#42B540FF","#BB3099","#EE0099","#0000AC","#868686FF",'#00468BFF','black')
   if(cluster_method %in% c('dbscan')){
-
     umap_plot <-  factoextra::fviz_cluster(list(data = as.data.frame(umap_result),
                                     cluster = cluster_group),
                                palette = color[seq_len(length(unique(cluster_group)))],
@@ -251,10 +241,10 @@ UMAP <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
     umap_plot <- plotly::ggplotly(umap_plot)
     for (i in seq_len(length(umap_plot$x$data))){
       if (!is.null(umap_plot$x$data[[i]]$name)){
-        umap_plot$x$data[[i]]$name =  gsub("\\(","",stringr::str_split(umap_plot$x$data[[i]]$name,",")[[1]][1])
+        umap_plot$x$data[[i]]$name <- gsub("\\(","",stringr::str_split(umap_plot$x$data[[i]]$name,",")[[1]][1])
       }
       if(i<=length(unique(cluster_group))){
-        umap_plot$x$data[[i]]$text<-paste("x :",round(umap_plot$x$data[[i]]$x,3),
+        umap_plot$x$data[[i]]$text <- paste("x :",round(umap_plot$x$data[[i]]$x,3),
                                           "\ny :",round(umap_plot$x$data[[i]]$y,3),
                                           "\nGroups :",umap_plot$x$data[[i]]$name,
                                           "\nSample name :",umap_data[which(umap_data$group==umap_plot$x$data[[i]]$name),]$sample_name)
@@ -278,15 +268,15 @@ UMAP <- function(exp_transform_table, group_info = NULL, sig_feature = NULL,
     umap_plot <- plotly::ggplotly(umap_plot)
     for (i in seq_len(length(umap_plot$x$data))){
       if (!is.null(umap_plot$x$data[[i]]$name)){
-        umap_plot$x$data[[i]]$name =  gsub("\\(","",stringr::str_split(umap_plot$x$data[[i]]$name,",")[[1]][1])
+        umap_plot$x$data[[i]]$name <- gsub("\\(","",stringr::str_split(umap_plot$x$data[[i]]$name,",")[[1]][1])
       }
       if(i<=group_num){
-        umap_plot$x$data[[i]]$text<-paste("x :",round(umap_plot$x$data[[i]]$x,3),
+        umap_plot$x$data[[i]]$text <- paste("x :",round(umap_plot$x$data[[i]]$x,3),
                                           "\ny :",round(umap_plot$x$data[[i]]$y,3),
                                           "\nGroups :",umap_plot$x$data[[i]]$name,
                                           "\nSample name :",umap_data[which(umap_data$group==umap_plot$x$data[[i]]$name),]$sample_name)
       }else if(i>=group_num+1 & i <= 2*group_num){
-        umap_plot$x$data[[i]]$text<-paste("Groups :",umap_plot$x$data[[i]]$name)
+        umap_plot$x$data[[i]]$text <- paste("Groups :",umap_plot$x$data[[i]]$name)
       }
     }
     for (i in seq_len(2*group_num)) {

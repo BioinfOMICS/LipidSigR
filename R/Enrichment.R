@@ -137,13 +137,13 @@ Enrichment <- function(DE_species_table_sig, lipid_char_table, char_var, sig_pva
 
     for (i in seq_len(nrow(sig.class))){
 
-      sig.class$p.value[i]=stats::fisher.test(matrix(c(sig.class$sig.count[i],
+      sig.class$p.value[i] <- stats::fisher.test(matrix(c(sig.class$sig.count[i],
                                                 sig.class$total.count[i],
                                                 n.sig-sig.class$sig.count[i],
                                                 n.lipid-sig.class$total.count[i]), nrow=2), alternative = 'greater')$p.value
     }
-    sig.class$m.log.p=-log10(sig.class$p.value)
-    sig.class$significant[sig.class$p.value < sig_pvalue]='YES'
+    sig.class$m.log.p <- -log10(sig.class$p.value)
+    sig.class$significant[sig.class$p.value < sig_pvalue] <- 'YES'
 
     return(sig.class)
   } #function
@@ -260,15 +260,15 @@ Enrichment <- function(DE_species_table_sig, lipid_char_table, char_var, sig_pva
     p.sig.class$data$mlogP <- round(p.sig.class$data$mlogP,3)
     in.sig.class <- plotly::ggplotly(p.sig.class)
     for (i in seq_len(length(in.sig.class$x$data))){
-      in.sig.class$x$data[[i]]$text = gsub("reorder\\(characteristic, rank, max\\)",char_var,in.sig.class$x$data[[i]]$text)
-      in.sig.class$x$data[[i]]$text = gsub("reorder\\(characteristic, mlogP\\)",char_var,in.sig.class$x$data[[i]]$text)
+      in.sig.class$x$data[[i]]$text <- gsub("reorder\\(characteristic, rank, max\\)",char_var,in.sig.class$x$data[[i]]$text)
+      in.sig.class$x$data[[i]]$text <- gsub("reorder\\(characteristic, mlogP\\)",char_var,in.sig.class$x$data[[i]]$text)
       in.sig.class$x$data[[i]]$text <- stringr::str_replace(string = in.sig.class$x$data[[i]]$text, pattern = '-', replacement = '')
       in.sig.class$x$data[[i]]$text <- stringr::str_replace(string = in.sig.class$x$data[[i]]$text, pattern = 'mlogP', replacement = '-log10(p-value)')
       if (!is.null(in.sig.class$x$data[[i]]$hovertext)){
-        in.sig.class$x$data[[i]]$hovertext =  gsub("\\(","",in.sig.class$x$data[[i]]$hovertext)
-        in.sig.class$x$data[[i]]$hovertext =  gsub("\\)","",in.sig.class$x$data[[i]]$hovertext)
-        in.sig.class$x$data[[i]]$hovertext = gsub("as.charactersig.count","sig.count ",in.sig.class$x$data[[i]]$hovertext)
-        in.sig.class$x$data[[i]]$hovertext = gsub("\\reorder(characteristic, mlogP)",char_var,in.sig.class$x$data[[i]]$hovertext)
+        in.sig.class$x$data[[i]]$hovertext <-  gsub("\\(","",in.sig.class$x$data[[i]]$hovertext)
+        in.sig.class$x$data[[i]]$hovertext <-  gsub("\\)","",in.sig.class$x$data[[i]]$hovertext)
+        in.sig.class$x$data[[i]]$hovertext <- gsub("as.charactersig.count","sig.count ",in.sig.class$x$data[[i]]$hovertext)
+        in.sig.class$x$data[[i]]$hovertext <- gsub("\\reorder(characteristic, mlogP)",char_var,in.sig.class$x$data[[i]]$hovertext)
         in.sig.class$x$data[[i]]$hovertext <- stringr::str_replace(in.sig.class$x$data[[i]]$hovertext, pattern = '-', replacement = '')
         in.sig.class$x$data[[i]]$hovertext <- stringr::str_replace(in.sig.class$x$data[[i]]$hovertext, pattern = 'mlogP', replacement = '-log10(p-value)')
       }
