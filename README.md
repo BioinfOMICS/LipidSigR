@@ -2,6 +2,15 @@
 
 ## Installation
 
+Before the installation you should first install the following packages from Bioconductor:
+
+``` r
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("LipidSigR")
+``` 
+
 Install the latest development version (on GitHub) via `{remotes}`:
 
 ``` r
