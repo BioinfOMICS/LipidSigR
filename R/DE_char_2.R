@@ -194,18 +194,18 @@ DE_char_2 <- function(exp_data,
     }
   }
   char_exp_data <- exp_data
-
+  
   var <- char_exp_data[[1]]
   char_name <- colnames(char_exp_data)[1]
-
+  
   if(data_transform == TRUE){
     Char_Transform_table <- cbind(char_exp_data[1], log10(char_exp_data[-1]))
   }else{
     Char_Transform_table <- char_exp_data
   }
-
+  
   colnames(Char_Transform_table)[1] <- 'feature'
-
+  
   #two-way ANOVA
   if(length(unique(Char_Transform_table[[1]])) > 1){
     two_way_anova <- Char_Transform_table %>% 
@@ -227,13 +227,13 @@ DE_char_2 <- function(exp_data,
   }else{
     anova_pvalue <- NA
   }
-
-
+  
+  
   group1 <- group_info %>% dplyr::filter(group == 'ctrl') %>%
     dplyr::arrange(pair) %>% .$sample_name
   group2 <- group_info %>% dplyr::filter(group == 'exp') %>%
     dplyr::arrange(pair) %>% .$sample_name
-
+  
   var_name <- character(length(var))
   mean_ctrl <- numeric(length(var))
   sd_ctrl <- numeric(length(var))
@@ -247,13 +247,13 @@ DE_char_2 <- function(exp_data,
     var_name[a] <- var[a]
     mean_ctrl[a] <- mean(unlist(char_exp_data[a,group1]), na.rm=TRUE)
     mean_exp[a] <- mean(unlist(char_exp_data[a,group2]), na.rm=TRUE)
-
+    
     sd_ctrl[a] <- stats::sd(unlist(char_exp_data[a,group1]), na.rm=TRUE)
     sd_exp[a] <- stats::sd(unlist(char_exp_data[a,group2]), na.rm=TRUE)
-
+    
     FC[a] <- mean(unlist(char_exp_data[a,group2]), na.rm=TRUE)/
       mean(unlist(char_exp_data[a,group1]), na.rm=TRUE)
-
+    
     if(paired == TRUE){
       pvalue[a] <- tryCatch(
         stats::t.test(unlist(Char_Transform_table[a,group1]),
@@ -262,7 +262,7 @@ DE_char_2 <- function(exp_data,
                       var.equal=TRUE)$p.value,
         error=function(e){NA}
       )
-
+      
     }else{
       pvalue[a] <- tryCatch(
         stats::t.test(unlist(Char_Transform_table[a,group1]),
@@ -272,7 +272,7 @@ DE_char_2 <- function(exp_data,
         error=function(e){NA}
       )
     }
-
+    
   }
   Result_table <- data.frame(var_name=var_name, method='two-way anova',
                              anova_pvalue=anova_pvalue,
@@ -287,10 +287,10 @@ DE_char_2 <- function(exp_data,
     dplyr::mutate(sig=ifelse(is.na(sig), 'no',sig ))
   Result_table[is.na(Result_table)] <- NA
   colnames(Result_table)[1] <- char_name
-
+  
   #Combined char into one
   if(sum(is.na(as.numeric(var)))==0){
-
+    
     char_exp_data[[1]] <- as.numeric(char_exp_data[[1]])
     Combined_char_data <- purrr::map2(char_exp_data[1],
                                       char_exp_data[-1],
@@ -307,7 +307,7 @@ DE_char_2 <- function(exp_data,
     sd_ctrl <- stats::sd(unlist(Combined_char_data[,group1]), na.rm=TRUE)
     sd_exp <- stats::sd(unlist(Combined_char_data[,group2]), na.rm=TRUE)
     FC <- mean_exp/mean_ctrl
-
+    
     if(data_transform == TRUE){
       Combined_char_transform_table <- cbind(Combined_char_data[1], 
                                              log10(Combined_char_data[-1]))
@@ -322,7 +322,7 @@ DE_char_2 <- function(exp_data,
                       var.equal=TRUE)$p.value,
         error=function(e){NA}
       )
-
+      
     }else{
       pvalue <- tryCatch(
         stats::t.test(unlist(Combined_char_transform_table[,group1]),
@@ -332,7 +332,7 @@ DE_char_2 <- function(exp_data,
         error=function(e){NA}
       )
     }
-
+    
     Combine_char_result_table <- data.frame(var_name=Combined_char_data[1,1],
                                             method='t.test',
                                             mean_ctrl=mean_ctrl,
@@ -348,27 +348,27 @@ DE_char_2 <- function(exp_data,
       dplyr::mutate(sig=ifelse(is.na(sig), 'no',sig ))
     Combine_char_result_table[is.na(Combine_char_result_table)] <- NA
     colnames(Combine_char_result_table)[1] <- colnames(Combined_char_data)[1]
-
+    
   }else{
     Combined_char_data <- data.frame()
     Combine_char_result_table <- data.frame()
-
+    
   }
-
+  
   #### Plot ####
   CHAR <- colnames(Result_table[1])
-
+  
   CTRL.RES <- Result_table %>%
     dplyr::select(1, sig, mean_ctrl, sd_ctrl) %>%
     dplyr::mutate(Group='Ctrl')
   colnames(CTRL.RES) <- c('Category', 'Significant', 'Mean', 'SD', 'Group')
-
+  
   EXP.RES <- Result_table %>%
     dplyr::select(1, sig, mean_exp, sd_exp) %>%
     dplyr::mutate(Group='Exp')
   colnames(EXP.RES) <- c('Category', 'Significant', 'Mean', 'SD', 'Group')
-
-
+  
+  
   ## Fig.1 bar chart
   barTab <- data.table::rbindlist(l = list(CTRL.RES, EXP.RES),
                                   use.names = TRUE, fill = TRUE)
@@ -395,7 +395,7 @@ DE_char_2 <- function(exp_data,
                                      ifelse(post_hoc_pvalue<=0.01, "**",
                                             ifelse(post_hoc_pvalue<=0.05, 
                                                    "*", ""))))
-
+  
   barPlot <- ggplot2::ggplot(data=barTab,
                              ggplot2::aes(x=Category, y=Mean, fill=Group)) +
     ggplot2::geom_bar(stat="identity", position=ggplot2::position_dodge()) +
@@ -410,7 +410,7 @@ DE_char_2 <- function(exp_data,
     ggplot2::theme_minimal() +
     ggplot2::labs(x = char_var)
   barggplotly <- plotly::ggplotly(barPlot)
-
+  
   for (i in seq_len(length(unique(barPlot$data$Group)))) {
     n <- length(unique(barPlot$data$Group))
     data <- barPlot$data[
@@ -436,7 +436,7 @@ DE_char_2 <- function(exp_data,
     }
   }
   barPlot <- barggplotly
-
+  
   barPlot_sqrt <- ggplot2::ggplot(data=barTab, ggplot2::aes(x=Category,
                                                             y=Mean,
                                                             fill=Group)) +
@@ -480,9 +480,9 @@ DE_char_2 <- function(exp_data,
     }
   }
   barPlot_sqrt <- bar_ggplotly_sqrt
-
+  
   if(nrow(Combined_char_data) > 0 & nrow(Combine_char_result_table) > 0){
-
+    
     ## Fig.3 trend plot
     linePlot <- ggplot2::ggplot(data=barTab, ggplot2::aes(x=Category,
                                                           y=Mean, 
@@ -502,7 +502,7 @@ DE_char_2 <- function(exp_data,
       ggplot2::theme_minimal() +
       ggplot2::labs(x = char_var)
     lineggplotly <- plotly::ggplotly(linePlot)
-
+    
     for (i in seq_len(length(unique(linePlot$data$Group)))) {
       n <- length(unique(linePlot$data$Group))
       data <- linePlot$data[
@@ -531,7 +531,7 @@ DE_char_2 <- function(exp_data,
       }
     }
     linePlot <- lineggplotly
-
+    
     ## Fig.3_1 trend plot sqrt scale
     linePlot_sqrt <- ggplot2::ggplot(data=barTab, 
                                      ggplot2::aes(x=Category,
@@ -543,7 +543,7 @@ DE_char_2 <- function(exp_data,
       ggplot2::scale_color_manual(values=c('lightslateblue', 'sienna2')) +
       ggplot2::geom_errorbar(ggplot2::aes(ymin=Mean, ymax=Mean+SD), 
                              color="gray39",
-                    position=ggplot2::position_dodge(0.05)) +
+                             position=ggplot2::position_dodge(0.05)) +
       ggplot2::geom_text(data=barTab_sig,ggplot2::aes(x=Category, 
                                                       y=max_error_bar+5, 
                                                       label=pvalue_text), 
@@ -552,7 +552,7 @@ DE_char_2 <- function(exp_data,
       ggplot2::theme_minimal() +
       ggplot2::labs(x = char_var)
     line_sqrt_ggplot <- plotly::ggplotly(linePlot_sqrt)
-
+    
     for (i in seq_len(length(unique(linePlot_sqrt$data$Group)))) {
       n <- length(unique(linePlot_sqrt$data$Group))
       data <- linePlot_sqrt$data[
@@ -584,20 +584,20 @@ DE_char_2 <- function(exp_data,
       }
     }
     linePlot_sqrt <- line_sqrt_ggplot
-
+    
     ## Fig.2 box plot
     boxTab <- Combined_char_data %>%
       tibble::column_to_rownames(var=CHAR) %>%
       t() %>% as.data.frame() %>%
       merge(group_info, by.x=0, by.y='sample_name')
     colnames(boxTab)[2] <- 'Category'
-
+    
     if(!is.null(insert_ref_group) & !is.null(ref_group)){
       exp_raw_name <- ref_group[-which(insert_ref_group == ref_group)]
       boxTab$group[which(boxTab$group == 'ctrl')] <-  insert_ref_group
       boxTab$group[which(boxTab$group == 'exp')] <-  exp_raw_name
     }
-
+    
     if(Combine_char_result_table$sig == 'yes'){
       group_name <- c(unique(boxTab$group)[1], 
                       paste0(unique(boxTab$group)[1], "0"), 
@@ -619,72 +619,72 @@ DE_char_2 <- function(exp_data,
         dplyr::filter(group == unique(boxTab$group)[2])
       boxPlot <- plotly::plot_ly() %>%
         plotly::add_bars(x=group_name,
-                 y=rep(group_max+0.15,3),
-                 opacity=1,
-                 showlegend=FALSE,
-                 marker=list(line=list(color='rgba(0,0,0,0)'),
-                             color='rgba(0,0,0,0)'),
-                 textfont=list(color='red'),
-                 text=t.text ,
-                 hoverinfo='none',
-                 textposition='outside',
-                 legendgroup="1") %>%
+                         y=rep(group_max+0.15,3),
+                         opacity=1,
+                         showlegend=FALSE,
+                         marker=list(line=list(color='rgba(0,0,0,0)'),
+                                     color='rgba(0,0,0,0)'),
+                         textfont=list(color='red'),
+                         text=t.text ,
+                         hoverinfo='none',
+                         textposition='outside',
+                         legendgroup="1") %>%
         plotly::add_lines(x=c(rep(paste(unique(boxTab$group)[1]), 2), 
                               rep(paste(unique(boxTab$group)[2]), 2)),
-                  y=c(group_max+0.1, group_max+0.15, 
-                      group_max+0.15, group_max+0.1),
-                  showlegend=FALSE,
-                  line=list(color = 'black'),
-                  legendgroup="1",
-                  hoverinfo='none') %>%
+                          y=c(group_max+0.1, group_max+0.15, 
+                              group_max+0.15, group_max+0.1),
+                          showlegend=FALSE,
+                          line=list(color = 'black'),
+                          legendgroup="1",
+                          hoverinfo='none') %>%
         plotly::add_boxplot(data=boxTab_1,x=~group, y=~Category,
-                    color=I('lightslateblue'),
-                    name=unique(boxTab$group)[1],
-                    boxpoints="all", jitter=0.85,  pointpos=0,
-                    marker=list(size=5, opacity=0.8)) %>%
+                            color=I('lightslateblue'),
+                            name=unique(boxTab$group)[1],
+                            boxpoints="all", jitter=0.85,  pointpos=0,
+                            marker=list(size=5, opacity=0.8)) %>%
         plotly::add_boxplot(data=boxTab_2,x=~group, y=~Category,
-                    color=I('sienna2'),
-                    name=unique(boxTab$group)[2],
-                    boxpoints="all", jitter=0.85,  pointpos=0,
-                    marker=list(size=5, opacity=0.8)) %>%
+                            color=I('sienna2'),
+                            name=unique(boxTab$group)[2],
+                            boxpoints="all", jitter=0.85,  pointpos=0,
+                            marker=list(size=5, opacity=0.8)) %>%
         plotly::layout(xaxis=list(title='Group',
-                       tickmode='array',
-                       tickvals= c(unique(boxTab$group)[1], '',
-                                   unique(boxTab$group)[2]),
-                       ticktext=c(unique(boxTab$group)[1], '',
-                                  unique(boxTab$group)[2]),
-                       titlefont=list(size=16),
-                       tickfont=list(size=14)),
-               yaxis=list(
-                 titlefont=list(size=16),
-                 tickfont=list(size=14),
-                 range=c(group_min, group_max+0.5)),
-               legend=list(font=list(size=14),
-                           y=0.5),
-               margin=list(l=70, r=70, b=80, t=60))
+                                  tickmode='array',
+                                  tickvals= c(unique(boxTab$group)[1], '',
+                                              unique(boxTab$group)[2]),
+                                  ticktext=c(unique(boxTab$group)[1], '',
+                                             unique(boxTab$group)[2]),
+                                  titlefont=list(size=16),
+                                  tickfont=list(size=14)),
+                       yaxis=list(
+                         titlefont=list(size=16),
+                         tickfont=list(size=14),
+                         range=c(group_min, group_max+0.5)),
+                       legend=list(font=list(size=14),
+                                   y=0.5),
+                       margin=list(l=70, r=70, b=80, t=60))
     }else{
       boxPlot <- plotly::plot_ly(data=boxTab,
-                         x=~group,
-                         y=~Category,
-                         type='box',
-                         color=~group,
-                         colors=c('lightslateblue','sienna2'),
-                         boxpoints='all',
-                         jitter=0.85,
-                         pointpos=0,
-                         marker=list(size=5, opacity=0.8)) %>%
+                                 x=~group,
+                                 y=~Category,
+                                 type='box',
+                                 color=~group,
+                                 colors=c('lightslateblue','sienna2'),
+                                 boxpoints='all',
+                                 jitter=0.85,
+                                 pointpos=0,
+                                 marker=list(size=5, opacity=0.8)) %>%
         plotly::layout(xaxis=list(title='Group',
-                       titlefont=list(size=16),
-                       tickfont=list(size=14)),
-          yaxis=list(title=paste0(CHAR, ' index'),
-                     titlefont=list(size=16),
-                     tickfont=list(size=14)),
-          legend=list(font=list(size=14),
-                      y=0.5),
-          margin=list(l=70, r=70, b=80, t=60))
+                                  titlefont=list(size=16),
+                                  tickfont=list(size=14)),
+                       yaxis=list(title=paste0(CHAR, ' index'),
+                                  titlefont=list(size=16),
+                                  tickfont=list(size=14)),
+                       legend=list(font=list(size=14),
+                                   y=0.5),
+                       margin=list(l=70, r=70, b=80, t=60))
     }
-
-
+    
+    
     return(list(DE_char_exp_data = char_exp_data,
                 DE_char_table_all = Result_table,
                 DE_char_combined_table = Combined_char_data,
@@ -694,16 +694,16 @@ DE_char_2 <- function(exp_data,
                 DE_char_boxplot = boxPlot,
                 DE_char_trendplot = linePlot,
                 DE_char_trendplot_sqrt = linePlot_sqrt))
-
+    
   }else{
-
+    
     return(list(DE_char_exp_data = char_exp_data,
                 DE_char_table_all = Result_table,
                 DE_char_combined_table = Combined_char_data,
                 DE_char_combine_result_table = Combine_char_result_table,
                 DE_char_barplot = barPlot,
                 DE_char_barplot_sqrt = barPlot_sqrt))
-
+    
   }
-
+  
 }

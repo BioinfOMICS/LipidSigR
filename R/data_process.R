@@ -72,7 +72,7 @@ data_process <- function(exp_data, exclude_var_missing=TRUE,
   if(ncol(exp_data) < 3){
     stop("At least 2 samples.")
   }
-  if(sum(exp_data[,-1] < 0,na.rm = TRUE) > 0){
+  if(sum(exp_data[,-1] < 0,na.rm=TRUE) > 0){
     stop("Variable must greater than zero")
   }
   if(sum(!is.na(exp_data[,-1])) == 0 | sum(!is.null(exp_data[,-1])) == 0){
@@ -91,7 +91,7 @@ data_process <- function(exp_data, exclude_var_missing=TRUE,
     }
     exp_data <- cbind(exp_data[1], exp_data2)
   }
-
+  
   exp_data2 <- exp_data[-1]
   #exclude_var_missing
   if(exclude_var_missing == TRUE){
@@ -103,7 +103,7 @@ data_process <- function(exp_data, exclude_var_missing=TRUE,
     return(NULL)
   }
   exp_data2 <- exp_data[-1]
-
+  
   #replace NA with: min, mean, median, specfic num
   if(replace_NA == TRUE){
     if(NA2what == 'min'){
@@ -125,7 +125,7 @@ data_process <- function(exp_data, exclude_var_missing=TRUE,
     }
     exp_data <- cbind(exp_data[1], exp_data2)
   }
-
+  
   if(pct_transform == TRUE){
     exp_data[-1] <- purrr::map2(exp_data[-1],
                                 colSums(exp_data[-1], na.rm=TRUE),
@@ -138,17 +138,17 @@ data_process <- function(exp_data, exclude_var_missing=TRUE,
       exp_data[-1] <- log10(exp_data[-1])
     }
   }
-
+  
   #centering
   if(centering == TRUE){
     exp_data[-1] <- exp_data[-1] %>% t() %>% scale(scale=FALSE) %>% t() %>% 
       as.data.frame()
   }
-
+  
   #scaling
   if(scaling == TRUE){
     exp_data[-1] <- exp_data[-1] %>% t() %>% scale() %>% t() %>% as.data.frame()
   }
-
+  
   return(exp_data)
 } #function: data_process()

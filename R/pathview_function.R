@@ -74,7 +74,7 @@ pathview_function <- function(lipid_class,
                               path, 
                               lipid_gene_path, 
                               pathway_gene_list){
-
+  
   kegg_cpd <- lipid_gene_path[c(1, 2, 4, 7, 8)] %>% 
     dplyr::filter(key_name %in% lipid_class) %>%
     dplyr::filter(DB == 'KEGG') %>% unique()
@@ -90,7 +90,7 @@ pathview_function <- function(lipid_class,
   pathview_cpd <- rep(1, length(lipid_class_list))
   names(pathview_cpd) <- lipid_class_list
   setwd(path)
-
+  
   for(a in seq_len(length(kegg_path))){
     pathway_gene <- which(stringr::str_sub(names(pathway_gene_list), 
                                            start = 5) == pathview_path[a])
@@ -98,14 +98,15 @@ pathview_function <- function(lipid_class,
       stringr::str_sub(start=10)
     pathview_gene <- rep(0, length(pathway_gene))
     names(pathview_gene) <- pathway_gene
-
+    
     tryCatch({
       pathview::pathview(gene.data=pathview_gene, cpd.data=pathview_cpd,
                          pathway.id=pathview_path[a], species="hsa",
-               out.suffix="pathview", discrete=list(cpd=TRUE),
-               limit=list(cpd=c(0, 1)), bins=list(cpd=1),
-               mid=list(cpd="red"), low=list(cpd="white", gene='#bfffbf'),
-               plot.col.key=FALSE, kegg.native=TRUE, same.layer=TRUE)
+                         out.suffix="pathview", discrete=list(cpd=TRUE),
+                         limit=list(cpd=c(0, 1)), bins=list(cpd=1),
+                         mid=list(cpd="red"), 
+                         low=list(cpd="white", gene='#bfffbf'),
+                         plot.col.key=FALSE, kegg.native=TRUE, same.layer=TRUE)
     }, error = function(e){message(e)})
   }
   return(kegg_cpd)

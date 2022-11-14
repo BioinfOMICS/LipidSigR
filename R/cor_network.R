@@ -11,8 +11,8 @@
 #'     \code{\link{ML_data_process}}.
 #' @param lipid_char_table A data frame of lipid characteristics such as 
 #'     name(feature) of lipid, class of lipid, the total length of lipid, and 
-#'     Fatty acid (FA_) related characteristics. NAs are allowed. The name of the 
-#'     first column must be "feature" (lipid species).
+#'     Fatty acid (FA_) related characteristics. NAs are allowed. The name of 
+#'     the first column must be "feature" (lipid species).
 #' @param sig_feature The output of \code{\link{model_for_net}} column 
 #'     \bold{'feature'}.
 #' @param node_col The output of \code{\link{model_for_net}} column 
@@ -86,7 +86,7 @@ cor_network <- function(exp_transform_table, lipid_char_table,
      sum(!is.null(exp_transform_table[,-1])) == 0){
     stop("exp_transform_table variables can not be all NULL/NA")
   }
-
+  
   if(!is(lipid_char_table[,1], 'character')){
     stop("lipid_char_table first column must contain
          a list of lipids names (features).")
@@ -120,7 +120,7 @@ cor_network <- function(exp_transform_table, lipid_char_table,
       stop("Thlipid_char_tablee content of column 'totaloh' must be numeric")
     }
   }
-
+  
   rownames(exp_transform_table) <- exp_transform_table$feature
   edge_table <- exp_transform_table %>% 
     dplyr::filter(feature %in% sig_feature) %>%
@@ -129,7 +129,7 @@ cor_network <- function(exp_transform_table, lipid_char_table,
     as.data.frame() %>% dplyr::mutate(from=rownames(.)) %>%
     tidyr::gather(-from, key='to', value='cor_coef') %>%
     dplyr::filter(abs(cor_coef) >= edge_cutoff)
-
+  
   node_table <- data.frame(feature=sig_feature, node_col=node_col) %>%
     dplyr::filter(feature%in%c(edge_table$from, edge_table$to))
   if(!is.null(lipid_char_table)){
@@ -140,7 +140,7 @@ cor_network <- function(exp_transform_table, lipid_char_table,
     dplyr::select(feature, node_col)
   colnames(node_table)[which(colnames(node_table) == "node_col")] <- "color"
   colnames(node_table)[which(colnames(node_table) == "feature")] <- "id"
-
+  
   node_table <- node_table %>%
     dplyr::mutate(lebel=id,
                   shpae="diamond",
@@ -177,20 +177,20 @@ cor_network <- function(exp_transform_table, lipid_char_table,
       }
     }
   }
-
+  
   edge_table <- edge_table %>%
     dplyr::mutate(width=abs(cor_coef)) %>%
     dplyr::select(from, to, width, cor_coef) %>%
     dplyr::mutate(width=scales::rescale(width, to=c(1, 5)),
-           dashes=FALSE,
-           smooth=FALSE,
-           shadow=FALSE,
-           color=ifelse(cor_coef > 0, '#FFDDAA', '#CCBBFF'),
-           title=paste0("<p><b>", edge_table$from, " vs ", edge_table$to,
-                        "</b><br>cor_coef = ", round(edge_table$cor_coef, 5), 
-                        "</p>"))
+                  dashes=FALSE,
+                  smooth=FALSE,
+                  shadow=FALSE,
+                  color=ifelse(cor_coef > 0, '#FFDDAA', '#CCBBFF'),
+                  title=paste0("<p><b>", edge_table$from, " vs ", edge_table$to,
+                               "</b><br>cor_coef = ", round(edge_table$cor_coef, 5), 
+                               "</p>"))
   edge_table <-  edge_table[-which(edge_table$from == edge_table$to),]
-
+  
   color_ledges_n <- c(1,
                       which(nodes$color == unique(nodes$color)
                             [round(length(unique(nodes$color))/4)])[1],
@@ -200,14 +200,15 @@ cor_network <- function(exp_transform_table, lipid_char_table,
                             [round(3*length(unique(nodes$color))/4)])[1],
                       which(nodes$color == unique(nodes$color)
                             [length(unique(nodes$color))])[1])
-
+  
   ledges <- data.frame(color=c("white",node_table$color[color_ledges_n]),
                        label=c("Feature\nimportance",
-                                 as.character(round(nodes$color[color_ledges_n], 3))),
+                               as.character(
+                                 round(nodes$color[color_ledges_n],3))),
                        shape=c("box", rep("dot", 5)),
                        size=c(30, rep(20, 5)),
                        font.size=c(35, rep(30, 5)))
-
+  
   visNet <- visNetwork::visNetwork(node_table, edge_table) %>%
     visNetwork::visLayout(randomSeed=12) %>%
     visNetwork::visOptions(highlightNearest=list(enabled=TRUE,
