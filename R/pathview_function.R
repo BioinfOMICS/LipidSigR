@@ -93,7 +93,7 @@ pathview_function <- function(lipid_class,
   
   for(a in seq_len(length(kegg_path))){
     pathway_gene <- which(stringr::str_sub(names(pathway_gene_list), 
-                                           start = 5) == pathview_path[a])
+                                           start=5) == pathview_path[a])
     pathway_gene <- pathway_gene_list[[pathway_gene]] %>% 
       stringr::str_sub(start=10)
     pathview_gene <- rep(0, length(pathway_gene))
