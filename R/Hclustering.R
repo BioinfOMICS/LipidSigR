@@ -82,7 +82,8 @@
 Hclustering <- function(exp_data, DE_result_table, group_info,
                         lipid_char_table=NULL, char_var=NULL,
                         distfun='pearson', hclustfun='complete',
-                        insert_ref_group=NULL,ref_group=NULL){
+                        insert_ref_group=NULL, ref_group=NULL, 
+                        plotly=TRUE){
   
   exp_data <- as.data.frame(exp_data)
   DE_result_table <- as.data.frame(DE_result_table)
