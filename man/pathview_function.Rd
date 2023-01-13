@@ -11,19 +11,32 @@ pathview_function(lipid_class, path, lipid_gene_path, pathway_gene_list)
 
 \item{path}{a character string, output path.}
 
-\item{lipid_gene_path}{A data frame of pathway information, which can be retrieved and reorganized from KEGG or other databases. It includes the related pathways of lipids, ID, pathway ID, pathway name, gene ID, and gene name.}
+\item{lipid_gene_path}{A data frame of pathway information, which can be 
+retrieved and reorganized from KEGG or other databases. It includes the 
+related pathways of lipids, ID, pathway ID, pathway name, gene ID, 
+and gene name.}
 
-\item{pathway_gene_list}{A list that comprises the genes included in each pathway for compiling the significant network of the selected lipid class. \emph{NOTE: the information can be retrieved from the KEGG database or others.}}
+\item{pathway_gene_list}{A list that comprises the genes included in each 
+pathway for compiling the significant network of the selected lipid 
+class. \emph{NOTE: the information can be retrieved from the KEGG 
+database or others.}}
 }
 \value{
-Return a network plot of pathway analysis and a data frame revealing the details of the plot
+Return a network plot of pathway analysis and a data frame revealing 
+    the details of the plot
 \enumerate{
 \item pathview plot save as .png
 \item A data frame with key_name, DB, ID, path_id, path_name
 }
 }
 \description{
-The function is to produce the enrichment plot that assists users to determine whether significant lipid species are enriched in the categories of the selected characteristics. To obtain the enrichment plot, a vector of lipid classes and the pathway information from the database, such as KEGG, need to be provided. A differentially expressed analysis pathview plot and a data frame with key_name, DB, ID, path_id, path_name will be returned as a result.
+The function is to produce the enrichment plot that assists 
+    users to determine whether significant lipid species are enriched in the 
+    categories of the selected characteristics. To obtain the enrichment 
+    plot, a vector of lipid classes and the pathway information from the 
+    database, such as KEGG, need to be provided. A differentially expressed 
+    analysis pathview plot and a data frame with key_name, DB, ID, path_id, 
+    path_name will be returned as a result.
 }
 \examples{
 library(magrittr)
@@ -33,8 +46,8 @@ data("DE_lipid_char_table")
 data("DE_group_info")
 data("DE_lipid_gene_path")
 data("DE_pathway_gene_list")
-exp_data <- DE_exp_data
-lipid_char_table <- DE_lipid_char_table
+exp_data <- DE_exp_data[1:120,]
+lipid_char_table <- DE_lipid_char_table[1:120,]
 group_info <- DE_group_info
 DE.lipid.gene.path <- DE_lipid_gene_path
 DE.pathway.gene.list <- DE_pathway_gene_list
@@ -60,12 +73,14 @@ DE_species_table_sig <- DE_species_2(exp_transform_non_log,
                                      group_info = group_info, paired = FALSE,
                                      test = 't.test', adjust_p_method = 'BH',
                                      sig_stat = 'p.adj', sig_pvalue = 0.05,
-                                     sig_FC = 2)$DE_species_table_sig
+                                     sig_FC = 2, 
+                                     plotly=TRUE)$DE_species_table_sig
 char_var <- colnames(lipid_char_filter)[-1]
 enrich_char_table <- Enrichment (DE_species_table_sig,
                                  lipid_char_table = lipid_char_filter,
                                  char_var = char_var[1],
-                                 sig_pvalue = 0.05)$enrich_char_table
+                                 sig_pvalue = 0.05, 
+                                 plotly=TRUE)$enrich_char_table
 sig_enrich_class <- enrich_char_table \%>\% filter(significant == 'YES') \%>\%
                     distinct(characteristic) \%>\% .$characteristic
 dir.create(file.path(getwd(),"pathview_result"), recursive=TRUE)

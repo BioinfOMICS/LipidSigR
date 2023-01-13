@@ -4,24 +4,32 @@
 \alias{probability_plot}
 \title{probability_plot}
 \usage{
-probability_plot(data, feature_n)
+probability_plot(data, feature_n, plotly = TRUE)
 }
 \arguments{
-\item{data}{an machine learning model after cross-validation. An output data frame of \code{\link{ML_final}} (list[[1]], cv_model_result).}
+\item{data}{an machine learning model after cross-validation. An output 
+data frame of \code{\link{ML_final}} (list[[1]], cv_model_result).}
 
-\item{feature_n}{A numeric value specifying the number of features to be computed.}
+\item{feature_n}{A numeric value specifying the number of features to 
+be computed.}
+
+\item{plotly}{Logical value. If TRUE, return the resulting plots dynamically.}
 }
 \value{
 Return a list of 2 tibbles and 2 plots.
 \enumerate{
 \item cm_data: a tibble of confusion matrix.
-\item probability_plot: plot, the distribution of predicted probabilities in two reference labels.
-\item cm_plot: plot. A confusion matrix composed of sample number and proportion.
+\item probability_plot: plot, the distribution of predicted probabilities 
+in two reference labels.
+\item cm_plot: plot. A confusion matrix composed of 
+sample number and proportion.
 \item data: a tibble of predicted probability and labels.
 }
 }
 \description{
-The function computes and visualizes the average predicted probabilities of each sample in testing data from all CV runs and allows users to explore those incorrect or uncertain labels. \\
+The function computes and visualizes the average predicted 
+probabilities of each sample in testing data from all CV runs and allows 
+users to explore those incorrect or uncertain labels. \\
 
 Return two plots.
 \enumerate{
@@ -33,9 +41,10 @@ Return two plots.
 data("ML_exp_data")
 data("ML_lipid_char_table")
 data("ML_condition_table")
-exp_data <- ML_exp_data
-lipid_char_table <- ML_lipid_char_table
-condition_table <- ML_condition_table
+condition_table <- ML_condition_table[85:144, ]
+exp_data <- ML_exp_data[1:40, ] \%>\%
+     select(feature, condition_table$sample_name)
+lipid_char_table <- ML_lipid_char_table[1:40, ]
 char_var <- colnames(lipid_char_table)[-1]
 ML_data <- ML_data_process(exp_data, group_info = condition_table,
                            lipid_char_table,
@@ -46,6 +55,6 @@ ML_data <- ML_data_process(exp_data, group_info = condition_table,
                            data_transform=TRUE, trans_type='log',
                            centering=FALSE, scaling=FALSE)
 ML_output <- ML_final(ML_data[[2]],ranking_method='Random_forest',
-                      ML_method='Random_forest', split_prop=0.3, nfold=10)
-probability_plot(ML_output[[1]], feature_n=10)
+                      ML_method='Random_forest', split_prop=0.3, nfold=3)
+probability_plot(ML_output[[1]], feature_n=10, plotly=TRUE)
 }

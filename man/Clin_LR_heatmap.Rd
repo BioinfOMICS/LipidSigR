@@ -13,39 +13,69 @@ Clin_LR_heatmap(
   sig_pvalue = 0.05,
   distfun = "spearman",
   hclustfun = "centroid",
-  heatmap_col = "beta_coef"
+  heatmap_col = "beta_coef",
+  plotly = TRUE
 )
 }
 \arguments{
-\item{exp_data}{A data frame of predictors, including features (molecule, lipid class etc.) and their expression of each sample. NAs are allowed. The first column must be 'feature' of gene/lipid names.}
+\item{exp_data}{A data frame of predictors, including features (molecule,
+lipid class etc.) and their expression of each sample. NAs are allowed.
+The first column must be 'feature' of gene/lipid names.}
 
-\item{condition_table}{A data frame. The condition table encompasses sample names and clinical conditions (disease status, gene dependence score, etc.)}
+\item{condition_table}{A data frame. The condition table encompasses sample
+names and clinical conditions
+(disease status, gene dependence score, etc.)}
 
-\item{adjusted_table}{A data frame with additional variables will be added into the algorithm and used to adjust the confounding effect.}
+\item{adjusted_table}{A data frame with additional variables will be added
+into the algorithm and used to adjust the confounding effect.}
 
-\item{adjust_p_method}{A character string of correction method. One of \bold{"holm"}, \bold{"hochberg"}, \bold{"hommel"}, \bold{"bonferroni"}, \bold{"BH"}, \bold{"BY"}, \bold{"fdr"}, \bold{"none"}, can be abbreviated. (default: "BH")}
+\item{adjust_p_method}{A character string of correction method. One of
+\bold{"holm"}, \bold{"hochberg"}, \bold{"hommel"}, \bold{"bonferroni"},
+\bold{"BH"}, \bold{"BY"}, \bold{"fdr"}, \bold{"none"},
+can be abbreviated. (default: "BH")}
 
-\item{sig_stat}{A character string indicating which pvalue is to be used for the statistically significant. One of \bold{"p.adj"} or \bold{"p"}. (default: "p.adj")}
+\item{sig_stat}{A character string indicating which pvalue is to be used for
+the statistically significant. One of \bold{"p.adj"} or \bold{"p"}.
+(default: "p.adj")}
 
 \item{sig_pvalue}{Numeric. Significant level.(default: 1)}
 
-\item{distfun}{A character string of the distance measure indicating which correlation coefficient (or covariance) is to be computed. Allowed methods include \bold{"pearson"}, \bold{"kendall"}, \bold{"spearman"}.(default: "spearman")}
+\item{distfun}{A character string of the distance measure indicating which
+correlation coefficient (or covariance) is to be computed.
+Allowed methods include \bold{"pearson"}, \bold{"kendall"},
+\bold{"spearman"}. (default: "spearman")}
 
-\item{hclustfun}{A character string of the agglomeration method to be used. This should be (an unambiguous abbreviation of) one of \bold{"ward.D"}, \bold{"ward.D2"}, \bold{"single"}, \bold{"complete"}, \bold{"average"}(= UPGMA), \bold{"mcquitty"} (= WPGMA), \bold{"median"} (= WPGMC) or \bold{"centroid"} (= UPGMC). (default: "centroid")}
+\item{hclustfun}{A character string of the agglomeration method to be used.
+This should be (an unambiguous abbreviation of) one of \bold{"ward.D"},
+\bold{"ward.D2"}, \bold{"single"}, \bold{"complete"},
+\bold{"average"}(= UPGMA), \bold{"mcquitty"} (= WPGMA),
+\bold{"median"} (= WPGMC) or \bold{"centroid"} (= UPGMC).
+(default: "centroid")}
 
-\item{heatmap_col}{A character string indicating the value for clustering. Allow method are \bold{'beta_coef'} and \bold{'t_statistic'}. (default: statistics)}
+\item{heatmap_col}{A character string indicating the value for clustering.
+Allow method are \bold{'beta_coef'} and \bold{'t_statistic'}.
+(default: statistics)}
+
+\item{plotly}{Logical value. If TRUE, return the resulting plots dynamically.}
 }
 \value{
 Return a list with 2 data frames, 1 plot, and 1 matrix.
 \enumerate{
-\item Clin_LR_table_all: data frame showing statistical results from the correlation analysis.
-\item Clin_LR_table_sig: data frame only showing significant statistical results from correlation analysis.
-\item Clin_LR_table_plot: heatmap plot display correlation result(\bold{beta_coef'} or \bold{'t_statistic'}).
+\item Clin_LR_table_all: data frame showing statistical results from the
+    correlation analysis.
+\item Clin_LR_table_sig: data frame only showing significant statistical
+    results from correlation analysis.
+\item Clin_LR_table_plot: heatmap plot display correlation result
+    (\bold{beta_coef'} or \bold{'t_statistic'}).
 \item Clin_LR_reorder_mat: matrix of heatmap
 }
 }
 \description{
-Linear regression is a statistical technique that uses several explanatory variables to predict the outcome of a continuous response variable, allowing researchers to estimate the associations between lipid levels and clinical features. This function prints the heatmap based on Linear Regression results.
+Linear regression is a statistical technique that uses several
+    explanatory variables to predict the outcome of a continuous response
+    variable, allowing researchers to estimate the associations between
+    lipid levels and clinical features. This function prints the heatmap
+    based on Linear Regression results.
 }
 \examples{
 data("corr_exp_data")
@@ -63,7 +93,7 @@ exp_transform <- data_process(exp_data, exclude_var_missing=TRUE,
                               trans_type='log', centering=FALSE,
                               scaling=FALSE)
 Clin_LR_heatmap(exp_transform, condition_table, adjusted_table,
-                adjust_p_method = 'BH', sig_stat = 'p.adj', sig_pvalue = 1,
+                adjust_p_method='BH', sig_stat='p.adj', sig_pvalue=1,
                 distfun='spearman', hclustfun='centroid',
-                heatmap_col='beta_coef')
+                heatmap_col='beta_coef', plotly=TRUE)
 }

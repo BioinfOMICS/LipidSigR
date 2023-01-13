@@ -4,16 +4,22 @@
 \alias{feature_plot}
 \title{feature_plot}
 \usage{
-feature_plot(data1, data2, feature_n, nfold = 10)
+feature_plot(data1, data2, feature_n, nfold = 10, plotly = TRUE)
 }
 \arguments{
-\item{data1}{feature after cross-validation. An output list of \code{\link{ML_final}} (list[[6]], cv_feature_save).}
+\item{data1}{feature after cross-validation. An output list of
+\code{\link{ML_final}} (list[[6]], cv_feature_save).}
 
-\item{data2}{variable importance after cross-validation. An output data frame of \code{\link{ML_final}} (list[[7]],cv_varimp_result).}
+\item{data2}{variable importance after cross-validation. An output
+data frame of \code{\link{ML_final}} (list[[7]],cv_varimp_result).}
 
-\item{feature_n}{A numeric value specifying the number of elements to be shown.}
+\item{feature_n}{A numeric value specifying the number of elements
+to be shown.}
 
-\item{nfold}{A numeric value. An optional parameter for setting the number of folds for cross-validation. (default=10)}
+\item{nfold}{A numeric value. An optional parameter for setting the number
+of folds for cross-validation. (default=10)}
+
+\item{plotly}{Logical value. If TRUE, return the resulting plots dynamically.}
 }
 \value{
 Return a list of 1 data frame, 1 tibble, and 2 plots.
@@ -25,15 +31,23 @@ Return a list of 1 data frame, 1 tibble, and 2 plots.
 }
 }
 \description{
-The function computes and ranks the contribution of each feature based on user-defined feature number, and visualizes the feature importance. In the ‘Algorithm-based’ part, when users choose a certain feature number, the selected frequency of top N features from all CV runs will be displayed. For a Linear SVM, Lasso, Ridge, or ElasticNet model, the importance of each feature depends on the absolute value of their coefficients in the algorithm, while Random Forest and XGBoost use built-in feature importance results.
+The function computes and ranks the contribution of each
+feature based on user-defined feature number, and visualizes the feature
+importance. In the ‘Algorithm-based’ part, when users choose a certain
+feature number, the selected frequency of top N features from all CV runs
+will be displayed. For a Linear SVM, Lasso, Ridge, or ElasticNet model, the
+importance of each feature depends on the absolute value of their
+coefficients in the algorithm, while Random Forest and XGBoost use built-in
+feature importance results.
 }
 \examples{
 data("ML_exp_data")
 data("ML_lipid_char_table")
 data("ML_condition_table")
-exp_data <- ML_exp_data
-lipid_char_table <- ML_lipid_char_table
-condition_table <- ML_condition_table
+condition_table <- ML_condition_table[85:144, ]
+exp_data <- ML_exp_data[1:40, ] \%>\%
+     select(feature, condition_table$sample_name)
+lipid_char_table <- ML_lipid_char_table[1:40, ]
 char_var <- colnames(lipid_char_table)[-1]
 ML_data <- ML_data_process(exp_data, group_info = condition_table,
                            lipid_char_table, char_var[1],
@@ -43,6 +57,7 @@ ML_data <- ML_data_process(exp_data, group_info = condition_table,
                            pct_transform=TRUE, data_transform=TRUE,
                            trans_type='log', centering=FALSE, scaling=FALSE)
 ML_output <- ML_final(ML_data[[2]],ranking_method='Random_forest',
-                      ML_method='Random_forest', split_prop=0.3, nfold=10)
-feature_plot(ML_output[[6]], ML_output[[7]], feature_n=10, nfold=10)
+                      ML_method='Random_forest', split_prop=0.3, nfold=3)
+feature_plot(ML_output[[6]], ML_output[[7]], feature_n=10, nfold=5,
+             plotly=TRUE)
 }

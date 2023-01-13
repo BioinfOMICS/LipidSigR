@@ -23,6 +23,16 @@ A data frame of lipid characteristics for profiling analysis workflow.
     \item{\code{FA_oh}}{a character vector}
   }
 }
+\details{
+The lipid characteristic data is obtained from the cohort interrogating the
+associations of plasma sphingolipids with subphenotypes of COPD, including
+airflow obstruction, emphysema, and frequent exacerbations.
+}
+\source{
+Salatzki J, Foryst-Ludwig A, Bentele K, Blumrich A, Smeir E, Ban Z, et al.
+Adipose tissue ATGL modifies the cardiac lipidome in pressure-overload-induced
+left ventricular failure. PLoS genetics. 2018;14(1):e1007171
+}
 \examples{
 data(profiling_lipid_char_table)
 }

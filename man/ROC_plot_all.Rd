@@ -4,14 +4,21 @@
 \alias{ROC_plot_all}
 \title{ROC_plot_all}
 \usage{
-ROC_plot_all(data1, data2, feature_n)
+ROC_plot_all(data1, data2, feature_n, plotly = TRUE)
 }
 \arguments{
-\item{data1}{receiver operating characteristic after cross-validation. An output data frame of \code{\link{ML_final}} (list\bold{[[3]]}, cv_ROC_result).}
+\item{data1}{receiver operating characteristic after cross-validation. An
+output data frame of \code{\link{ML_final}}
+(list\bold{[[3]]}, cv_ROC_result).}
 
-\item{data2}{mean receiver operating characteristic of cross-validation. An output data frame of \code{\link{ML_final}} (list\bold{[[5]]}, cv_meanROC_result).}
+\item{data2}{mean receiver operating characteristic of cross-validation.
+An output data frame of \code{\link{ML_final}}
+(list\bold{[[5]]}, cv_meanROC_result).}
 
-\item{feature_n}{A numeric value specifying the number of features to be shown.}
+\item{feature_n}{A numeric value specifying the number of features to be
+shown.}
+
+\item{plotly}{Logical value. If TRUE, return the resulting plots dynamically.}
 }
 \value{
 1 tibble, 1 data frame, and 2 plot.
@@ -23,7 +30,10 @@ ROC_plot_all(data1, data2, feature_n)
 }
 }
 \description{
-The receiver operating characteristic (ROC) curve is one of the common methods to evaluate the diagnostic ability of a binary classifier. Mean AUC and 95% confidence interval for the ROC curve are calculated from all CV runs in each feature number.
+The receiver operating characteristic (ROC) curve is one of
+the common methods to evaluate the diagnostic ability of a
+binary classifier. Mean AUC and 95% confidence interval for the ROC curve
+are calculated from all CV runs in each feature number.
 
 This function provides
 \enumerate{
@@ -35,9 +45,10 @@ This function provides
 data("ML_exp_data")
 data("ML_lipid_char_table")
 data("ML_condition_table")
-exp_data <- ML_exp_data
-lipid_char_table <- ML_lipid_char_table
-condition_table <- ML_condition_table
+condition_table <- ML_condition_table[85:144, ]
+exp_data <- ML_exp_data[1:40, ] \%>\%
+   select(feature, condition_table$sample_name)
+lipid_char_table <- ML_lipid_char_table[1:40, ]
 char_var <- colnames(lipid_char_table)[-1]
 ML_data <- ML_data_process(exp_data, group_info = condition_table,
                            lipid_char_table, char_var[1],
@@ -47,6 +58,6 @@ ML_data <- ML_data_process(exp_data, group_info = condition_table,
                            pct_transform=TRUE, data_transform=TRUE,
                            trans_type='log', centering=FALSE, scaling=FALSE)
 ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
-                      ML_method='Random_forest', split_prop=0.3, nfold=10)
-ROC_plot_all(ML_output[[3]], ML_output[[5]], feature_n=10)
+                      ML_method='Random_forest', split_prop=0.3, nfold=3)
+ROC_plot_all(ML_output[[3]], ML_output[[5]], feature_n=10, plotly=TRUE)
 }

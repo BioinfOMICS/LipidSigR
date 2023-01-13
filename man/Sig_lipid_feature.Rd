@@ -4,27 +4,49 @@
 \alias{Sig_lipid_feature}
 \title{Sig_lipid_feature}
 \usage{
-Sig_lipid_feature(DE_species_table_sig, lipid_char_table, char_var, sig_FC = 2)
+Sig_lipid_feature(
+  DE_species_table_sig,
+  lipid_char_table,
+  char_var,
+  sig_FC = 2,
+  plotly = TRUE
+)
 }
 \arguments{
-\item{DE_species_table_sig}{A data frame comprises the significant results of differential expression analysis, including fold change, p-value, adjusted p-value. The output of \code{\link{DE_species_2}}.}
+\item{DE_species_table_sig}{A data frame comprises the significant results
+of differential expression analysis, including fold change, p-value,
+adjusted p-value. The output of \code{\link{DE_species_2}}.}
 
-\item{lipid_char_table}{A data frame. NAs are allowed. The name of first column must be "feature".A data frame with lipid features, such as class, total length. NAs are allowed. The name of the first column must be "feature".}
+\item{lipid_char_table}{A data frame. NAs are allowed. The name of
+first column must be "feature".A data frame with lipid features,
+such as class, total length. NAs are allowed. The name of the
+first column must be "feature".}
 
-\item{char_var}{A character string of the first lipid characteristic selected by users from the column name of \bold{lipid_char_table}, such as total length.}
+\item{char_var}{A character string of the first lipid characteristic
+selected by users from the column name of \bold{lipid_char_table},
+such as total length.}
 
 \item{sig_FC}{Numeric. Significance of the fold-change. (default: 2)}
+
+\item{plotly}{Logical value. If TRUE, return the resulting plots dynamically.}
 }
 \value{
 Return a list with 3 figures.
 \enumerate{
-\item a bar chart shows the significant groups (values) with mean fold change over 2 in the selected characteristics by colors
-\item a lollipop plot to compare multiple values simultaneously and it aligns the log2(fold change) of all significant groups(values) within the selected characteristics
-\item a word cloud of the count of each group(value) of the selected characteristics
+\item a bar chart shows the significant groups (values) with
+mean fold change over 2 in the selected characteristics by colors
+\item a lollipop plot to compare multiple values simultaneously and
+it aligns the log2(fold change) of all significant groups(values) within
+the selected characteristics
+\item a word cloud of the count of each group(value) of the
+selected characteristics
 }
 }
 \description{
-\code{\link{Sig_lipid_feature}} shows the significant lipid species based on different lipid characteristics and visualizes the difference between control and experimental groups by applying log2 Fold Change.
+\code{\link{Sig_lipid_feature}} shows the significant
+lipid species based on different lipid characteristics and visualizes the
+difference between control and experimental groups by applying
+log2 Fold Change.
 }
 \examples{
 library(magrittr)
@@ -53,11 +75,12 @@ lipid_char_filter <- lipid_char_table \%>\%
     filter(feature \%in\% exp_transform_non_log$feature)
 char_var <- colnames(lipid_char_filter)[-1]
 DE_species_table_sig <- DE_species_2(exp_transform_non_log,
-                                     data_transform = TRUE,
-                                     group_info = group_info, paired = FALSE,
-                                     test = 't.test', adjust_p_method = 'BH',
-                                     sig_stat = 'p.adj', sig_pvalue = 0.05,
-                                     sig_FC = 2)$DE_species_table_sig
+                                     data_transform=TRUE,
+                                     group_info=group_info, paired=FALSE,
+                                     test='t.test', adjust_p_method='BH',
+                                     sig_stat='p.adj', sig_pvalue=0.05,
+                                     sig_FC=2,
+                                     plotly=TRUE)$DE_species_table_sig
 Sig_lipid_feature(DE_species_table_sig, lipid_char_filter,
-                  char_var[1], sig_FC = 2)
+                  char_var[1], sig_FC=2, plotly=TRUE)
 }

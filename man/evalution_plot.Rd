@@ -4,12 +4,19 @@
 \alias{evalution_plot}
 \title{evalution_plot}
 \usage{
-evalution_plot(data, method)
+evalution_plot(data, method, plotly = TRUE)
 }
 \arguments{
-\item{data}{confusion matrix after cross-validation. A output data frame of \code{\link{ML_final}} (list[[2]],cv_cm_result).}
+\item{data}{confusion matrix after cross-validation. A output data frame of
+\code{\link{ML_final}} (list[[2]],cv_cm_result).}
 
-\item{method}{A character string indicating which evaluation method to be used. Allowed methods include "Accuracy", "Sensitivity", "Specificity", "Positive Predictive Value", "Negative Predictive Value", "Precision", "Recall", "F1", "Prevalence", "Detection Rate", "Detection Prevalence", "Balance Accuracy".}
+\item{method}{A character string indicating which evaluation method to be
+used. Allowed methods include "Accuracy", "Sensitivity", "Specificity",
+"Positive Predictive Value", "Negative Predictive Value", "Precision",
+"Recall", "F1", "Prevalence", "Detection Rate", "Detection Prevalence",
+"Balance Accuracy".}
+
+\item{plotly}{Logical value. If TRUE, return the resulting plots dynamically.}
 }
 \value{
 Return a list of 1 tibble and 1plot.
@@ -19,16 +26,21 @@ Return a list of 1 tibble and 1plot.
 }
 }
 \description{
-This function provides useful indicators for users to evaluate model performance, such as the average value and 95% confidence interval of accuracy, sensitivity (recall), specificity, positive predictive value (precision), negative predictive value, F1 score, prevalence, detection rate, detection prevalence, balanced accuracy.
+This function provides useful indicators for users to evaluate
+model performance, such as the average value and 95% confidence interval
+of accuracy, sensitivity (recall), specificity,
+positive predictive value (precision), negative predictive value, F1 score,
+ prevalence, detection rate, detection prevalence, balanced accuracy.
 }
 \examples{
 library(dplyr)
 data("ML_exp_data")
 data("ML_lipid_char_table")
 data("ML_condition_table")
-exp_data <- ML_exp_data
-lipid_char_table <- ML_lipid_char_table
-condition_table <- ML_condition_table
+condition_table <- ML_condition_table[85:144, ]
+exp_data <- ML_exp_data[1:40, ] \%>\%
+     select(feature, condition_table$sample_name)
+lipid_char_table <- ML_lipid_char_table[1:40, ]
 char_var <- colnames(lipid_char_table)[-1]
 ML_data <- ML_data_process(exp_data, group_info = condition_table,
                            lipid_char_table, char_var[1],
@@ -38,6 +50,6 @@ ML_data <- ML_data_process(exp_data, group_info = condition_table,
                            pct_transform=TRUE, data_transform=TRUE,
                            trans_type='log', centering=FALSE, scaling=FALSE)
 ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
-                      ML_method='Random_forest', split_prop=0.3, nfold=10)
-evalution_plot(ML_output[[2]], method='Accuracy')
+                      ML_method='Random_forest', split_prop=0.3, nfold=3)
+evalution_plot(ML_output[[2]], method='Accuracy', plotly=TRUE)
 }

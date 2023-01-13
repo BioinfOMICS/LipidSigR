@@ -12,25 +12,43 @@ DE_sub_char_plot_2(
   split_var,
   split_class,
   insert_ref_group = NULL,
-  ref_group = NULL
+  ref_group = NULL,
+  plotly = TRUE
 )
 }
 \arguments{
-\item{DE_split_char_table_all}{A data frame. The output of \code{\link{DE_sub_char_2}}.}
+\item{DE_split_char_table_all}{A data frame. The output of 
+\code{\link{DE_sub_char_2}}.}
 
-\item{DE_split_char_index}{A data frame. The output of \code{\link{DE_sub_char_2}}.}
+\item{DE_split_char_index}{A data frame. The output of 
+\code{\link{DE_sub_char_2}}.}
 
-\item{group_info}{A data frame comprises the name of the sample, the label of the sample, the group name of the sample, and the pair number represents ‘the pair’ for the t-test/Wilcoxon test. NAs are allowed. NAs are allowed.}
+\item{group_info}{A data frame comprises the name of the sample, the label 
+of the sample, the group name of the sample, and the pair number represents 
+‘the pair’ for the t-test/Wilcoxon test. NAs are allowed. NAs are allowed.}
 
-\item{char_var}{A character string of the first lipid characteristic selected by users from the column name of \bold{lipid_char_table}, such as total length.}
+\item{char_var}{A character string of the first lipid characteristic 
+selected by users from the column name of \bold{lipid_char_table}, 
+such as total length.}
 
-\item{split_var}{A character string of the second lipid characteristic selected by users from \bold{lipid_char_table} for the subgroup analysis, such as class. \emph{NOTE: This parameter will be used to split data before entering main lipid characteristic 'char_var'.}}
+\item{split_var}{A character string of the second lipid characteristic 
+selected by users from \bold{lipid_char_table} for the subgroup analysis, 
+such as class. \emph{NOTE: This parameter will be used to split data before 
+entering main lipid characteristic 'char_var'.}}
 
-\item{split_class}{A character string selected by users from the second user-selected lipid characteristic (\bold{split_var}) to visualise the specific plot for the selected category of that characteristic. For example, when user set split_var= 'class', and split_class='PC', this indicates the results will be plots of PC.}
+\item{split_class}{A character string selected by users from the second 
+user-selected lipid characteristic (\bold{split_var}) to visualise the 
+specific plot for the selected category of that characteristic. For 
+example, when user set split_var= 'class', and split_class='PC', this 
+indicates the results will be plots of PC.}
 
-\item{insert_ref_group}{A character string. The name of 'ctrl' after name conversion.}
+\item{insert_ref_group}{A character string. The name of 'ctrl' 
+after name conversion.}
 
-\item{ref_group}{A character string. The name of 'exp' after name conversion.}
+\item{ref_group}{A character string. The name of 'exp' 
+after name conversion.}
+
+\item{plotly}{Logical value. If TRUE, return the resulting plots dynamically.}
 }
 \value{
 Return a list with 5 figures.
@@ -43,24 +61,26 @@ Return a list with 5 figures.
 }
 }
 \description{
-This \code{\link{DE_sub_char_plot_2}} is to visualise the result of \code{\link{DE_sub_char_2}}.
+This \code{\link{DE_sub_char_plot_2}} is to visualise the 
+result of \code{\link{DE_sub_char_2}}.
 \enumerate{
 \item The subgroup analysis of the first user-selected characteristics.
-\item Print a box plot, line plots (raw & sqrt scale), and bar plots (raw & sqrt scale).
+\item Print a box plot, line plots (raw & sqrt scale), 
+and bar plots (raw & sqrt scale).
 }
 }
 \examples{
 data("DE_exp_data")
 data("DE_lipid_char_table")
 data("DE_group_info")
-exp_data <- DE_exp_data
-lipid_char_table <- DE_lipid_char_table
-group_info <- DE_group_info
+group_info <- DE_group_info[c(1:5, 11:15), ]
+exp_data <- DE_exp_data[1:100, c("feature", group_info$sample_name)]
+lipid_char_table <- DE_lipid_char_table[1:100, ]
 char_var <- colnames(lipid_char_table)[-1]
 DE.sub.char.2 <- DE_sub_char_2(exp_data, data_transform=TRUE,
                                lipid_char_table = lipid_char_table,
-                               split_var = char_var[1],
-                               char_var = char_var[4],
+                               split_var = char_var[2],
+                               char_var = char_var[6],
                                group_info = group_info,paired = FALSE,
                                sig_pvalue=0.05, sig_FC=2,
                                exclude_var_missing=TRUE,
@@ -72,8 +92,9 @@ DE.sub.char.2 <- DE_sub_char_2(exp_data, data_transform=TRUE,
 char.class <- unique(DE.sub.char.2[[2]][1])
 DE_sub_char_plot_2(DE.sub.char.2[[2]],
                    DE_split_char_index = DE.sub.char.2[[3]],
-                   group_info = group_info, char_var = char_var[4],
-                   split_var = char_var[1],
-                   split_class = char.class[5,],
-                   insert_ref_group=NULL, ref_group=NULL)
+                   group_info = group_info, char_var = char_var[6],
+                   split_var = char_var[2],
+                   split_class = char.class[3,],
+                   insert_ref_group=NULL, ref_group=NULL,
+                   plotly=TRUE)
 }

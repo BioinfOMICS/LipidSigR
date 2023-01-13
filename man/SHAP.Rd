@@ -4,20 +4,36 @@
 \alias{SHAP}
 \title{SHAP}
 \usage{
-SHAP(data, best_model, best_model_feature, ML_method, feature_n, nsim)
+SHAP(
+  data,
+  best_model,
+  best_model_feature,
+  ML_method,
+  feature_n,
+  nsim,
+  plotly = TRUE
+)
 }
 \arguments{
-\item{data}{The output data frame(list[[2]]) of \code{\link{ML_data_process}}.}
+\item{data}{The output data frame(list[[2]]) of
+\code{\link{ML_data_process}}.}
 
-\item{best_model}{The ouput list of \code{\link{ML_data_process}} (list[[8]]).}
+\item{best_model}{The ouput list of
+\code{\link{ML_data_process}} (list[[8]]).}
 
-\item{best_model_feature}{The ouput list of \code{\link{ML_data_process}} (list[[9]]).}
+\item{best_model_feature}{The ouput list of
+\code{\link{ML_data_process}} (list[[9]]).}
 
-\item{ML_method}{A character string for the machine learning method to be computed. Allowed methods include 'xgboost', 'Random_forest', 'SVM', 'Lasso', 'Ridge', 'ElasticNet'.}
+\item{ML_method}{A character string for the machine learning method to be
+computed. Allowed methods include 'xgboost', 'Random_forest', 'SVM',
+'Lasso', 'Ridge', 'ElasticNet'.}
 
-\item{feature_n}{A numeric value specifying the number of features to be shown.}
+\item{feature_n}{A numeric value specifying the number of features
+to be shown.}
 
 \item{nsim}{A positive integer indicating the times of simulation.}
+
+\item{plotly}{Logical value. If TRUE, return the resulting plots dynamically.}
 }
 \value{
 Return a list of 1 table, 1 data frame, and 2 plots.
@@ -29,16 +45,19 @@ Return a list of 1 table, 1 data frame, and 2 plots.
 }
 }
 \description{
-This function uses the Shapley Additive exPlanations (SHAP) approach to rank and visualize the feature importance based on a user-defined feature number.
+This function uses the Shapley Additive exPlanations (SHAP)
+approach to rank and visualize the feature importance based on a
+user-defined feature number.
 }
 \examples{
 library(SHAPforxgboost)
 data("ML_exp_data")
 data("ML_lipid_char_table")
 data("ML_condition_table")
-exp_data <- ML_exp_data
-lipid_char_table <- ML_lipid_char_table
-condition_table <- ML_condition_table
+condition_table <- ML_condition_table[85:144, ]
+exp_data <- ML_exp_data[1:40, ] \%>\%
+  select(feature, condition_table$sample_name)
+lipid_char_table <- ML_lipid_char_table[1:40, ]
 char_var <- colnames(lipid_char_table)[-1]
 ML_data <- ML_data_process(exp_data, group_info = condition_table,
                            lipid_char_table, char_var[1],
@@ -48,8 +67,8 @@ ML_data <- ML_data_process(exp_data, group_info = condition_table,
                            pct_transform=TRUE, data_transform=TRUE,
                            trans_type='log', centering=FALSE, scaling=FALSE)
 ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
-                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+                      ML_method='Random_forest', split_prop=0.3, nfold=3)
 SHAP(ML_data[[2]], best_model=ML_output[[8]],
      best_model_feature=ML_output[[9]],
-     ML_method='Random_forest', feature_n=10, nsim=5)
+     ML_method='Random_forest', feature_n=10, nsim=5, plotly=TRUE)
 }

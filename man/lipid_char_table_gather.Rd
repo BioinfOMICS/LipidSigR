@@ -7,15 +7,21 @@
 lipid_char_table_gather(lipid_char_table, char_var)
 }
 \arguments{
-\item{lipid_char_table}{A data frame of lipid characteristics such as name(feature) of lipid, class of lipid, the total length of lipid, and Fatty acid (FA_) related characteristics. NAs are allowed. The name of the first column must be "feature" (lipid species).}
+\item{lipid_char_table}{A data frame of lipid characteristics such as 
+name(feature) of lipid, class of lipid, the total length of lipid, and 
+Fatty acid (FA_) related characteristics. NAs are allowed. The name of the 
+first column must be "feature" (lipid species).}
 
-\item{char_var}{A character string of the lipid characteristic selected by users from the column name of \bold{lipid_char_table}, such as 'class'.}
+\item{char_var}{A character string of the lipid characteristic selected by 
+users from the column name of \bold{lipid_char_table}, such as 'class'.}
 }
 \value{
-Return 1 long matrix of lipid species with user-selected lipid characteristics.
+Return 1 long matrix of lipid species with user-selected 
+lipid characteristics.
 }
 \description{
-Select the user-selected characteristics, and make it become a long table.
+Select the user-selected characteristics, and make it become 
+a long table.
 }
 \examples{
 data("profiling_lipid_char_table")

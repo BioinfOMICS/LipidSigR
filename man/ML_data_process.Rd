@@ -25,49 +25,80 @@ ML_data_process(
 )
 }
 \arguments{
-\item{exp_data}{A data frame of predictors, including features (molecule, lipid class, etc.) and their expression of each sample. NAs are not allowed. The name of the first column must be "feature" (lipid species).}
+\item{exp_data}{A data frame of predictors, including features
+(molecule, lipid class, etc.) and their expression of each sample.
+ NAs are not allowed. The name of the first column must be
+  "feature" (lipid species).}
 
-\item{group_info}{A data frame of one clinical term (or one set of clinical terms) from demographic data.  The first column is the sample name and the second column is the group number assigned to each sample. The group number can only be 0 or 1. NAs are not allowed.}
+\item{group_info}{A data frame of one clinical term
+(or one set of clinical terms) from demographic data.
+The first column is the sample name and the second column is the group
+number assigned to each sample. The group number can only be 0 or 1.
+NAs are not allowed.}
 
-\item{lipid_char_table}{A data frame of lipid characteristics such as name(feature) of lipid, class of lipid, the total length of lipid, and Fatty acid (FA_) related characteristics. NAs are allowed. The name of the first column must be "feature" (lipid species).}
+\item{lipid_char_table}{A data frame of lipid characteristics such as
+name(feature) of lipid, class of lipid, the total length of lipid, and
+Fatty acid (FA_) related characteristics. NAs are allowed. The name of the
+first column must be "feature" (lipid species).}
 
-\item{char_var}{A character string of the lipid characteristic selected by users from the column name of \bold{lipid_char_table}, such as 'class', 'total length'.}
+\item{char_var}{A character string of the lipid characteristic selected by
+users from the column name of \bold{lipid_char_table}, such as 'class',
+'total length'.}
 
-\item{exclude_var_missing}{Logical. Remove Lipid with too many missing values. (default: TRUE)}
+\item{exclude_var_missing}{Logical. Remove Lipid with too many
+missing values. (default: TRUE)}
 
-\item{missing_pct_limit}{An integer indicating the missing values over a certain percentage should be removed.}
+\item{missing_pct_limit}{An integer indicating the missing values over a
+certain percentage should be removed.}
 
 \item{replace_zero}{Logical. Replace 0. (default: TRUE)}
 
-\item{zero2what}{A character string indicating the value to replace 0. Value include 'mean', 'median', 'min'. (default: min)}
+\item{zero2what}{A character string indicating the value to replace 0.
+Value include 'mean', 'median', 'min'. (default: min)}
 
 \item{xmin}{A numeric value indicating the min value to replace 0.}
 
-\item{replace_NA}{Logical. If remove_na = TRUE, all NA will be removed. (default: TRUE)}
+\item{replace_NA}{Logical. If remove_na = TRUE, all NA will be removed.
+(default: TRUE)}
 
-\item{NA2what}{A character string indicating the value to replace NA. Value include 'mean', 'median', 'min'. (default: min)}
+\item{NA2what}{A character string indicating the value to replace NA.
+Value include 'mean', 'median', 'min'. (default: min)}
 
 \item{ymin}{A numeric value indicating the min value to replace NA.}
 
-\item{pct_transform}{Logical. Transform lipid value into a percentage. (default:TRUE)}
+\item{pct_transform}{Logical. Transform lipid value into a percentage.
+(default:TRUE)}
 
-\item{data_transform}{Logical. Data transformation(log). (default:TRUE)}
+\item{data_transform}{Logical. Data transformation(log).
+(default:TRUE)}
 
-\item{trans_type}{A character string of data transformation type. (default:'log')}
+\item{trans_type}{A character string of data transformation type.
+(default:'log')}
 
-\item{centering}{A logical value indicating whether the variables should be shifted to be zero centered. Alternately, a vector of length equal the number of columns of x can be supplied. The value is passed to scale. (default: FALSE)}
+\item{centering}{A logical value indicating whether the variables
+should be shifted to be zero centered. Alternately, a vector of length
+equal the number of columns of x can be supplied. The value is passed to
+scale. (default: FALSE)}
 
-\item{scaling}{A logical value. If scaling = TRUE, each block is standardized to zero means and unit variances. (default: FALSE).}
+\item{scaling}{A logical value. If scaling = TRUE, each block is
+standardized to zero means and unit variances. (default: FALSE).}
 }
 \value{
 Return a list of 2 data frames.
 \enumerate{
-\item [[1]]: the processed data can be used as input of machine learning analysis. The value of this data frame is adding the lipid (feature)'s original expression to the expression of user-selected lipid characteristics.
-\item [[2]]: The transpose data frame of \bold{[[1]]}, which is also processed data and can be used as the input of machine learning analysis. The value of this data frame is adding the lipid (feature)'s original expression to the expression of user-selected lipid characteristics.
+\item [[1]]: the processed data can be used as input of machine
+learning analysis. The value of this data frame is adding the
+lipid (feature)'s original expression to the expression of user-selected
+lipid characteristics.
+\item [[2]]: The transpose data frame of \bold{[[1]]}, which is also
+processed data and can be used as the input of machine learning analysis.
+The value of this data frame is adding the lipid (feature)'s original
+expression to the expression of user-selected lipid characteristics.
 }
 }
 \description{
-This function provides data preprocessing and output processed data for machine learning.
+This function provides data preprocessing and output processed
+data for machine learning.
 }
 \examples{
 data("ML_exp_data")

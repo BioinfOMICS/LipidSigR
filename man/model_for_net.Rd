@@ -15,36 +15,49 @@ model_for_net(
 )
 }
 \arguments{
-\item{data}{The output data frame(list[[2]]) of \code{\link{ML_data_process}}.}
+\item{data}{The output data frame(list[[2]]) of
+\code{\link{ML_data_process}}.}
 
-\item{ML_method}{A character string for the machine learning method to be computed. Allowed methods include 'Random_forest', 'SVM', 'Lasso', 'Ridge', 'ElasticNet', 'xgboost'.}
+\item{ML_method}{A character string for the machine learning method to
+be computed. Allowed methods include 'Random_forest', 'SVM', 'Lasso',
+'Ridge', 'ElasticNet', 'xgboost'.}
 
-\item{varimp_method}{A character string indicating the method to input feature importance. Allowed methods are \bold{Algorithm-based} and \bold{SHAP}.}
+\item{varimp_method}{A character string indicating the method to input
+feature importance. Allowed methods are
+\bold{Algorithm-based} and \bold{SHAP}.}
 
 \item{best_model}{The output list of \code{\link{ML_final}}.}
 
 \item{best_model_feature}{The ouput list of \code{\link{ML_final}}.}
 
-\item{feature_num}{A numeric value specifying the number of features to be computed.}
+\item{feature_num}{A numeric value specifying the number of features to
+be computed.}
 
 \item{nsim}{A positive integer indicating the times of simulation.}
 }
 \value{
 Return 1 data frame.
 \enumerate{
-\item varImp_result: data frame of variable importance. \emph{NOTE: This result can be further used for \code{\link{cor_network}}}
+\item varImp_result: data frame of variable importance.
+\emph{NOTE: This result can be further used for \code{\link{cor_network}}}
 }
 }
 \description{
-Select feature importance from the model of \code{\link{ML_final}}. Two methods can be applied, namely ‘Algorithm-based’ and ‘SHAP analysis’, to rank and the feature importance. By choosing a certain feature number, specifying the number of features to be computed, and the average feature importance of the top 10 features from all CV runs will be displayed.
+Select feature importance from the model of
+\code{\link{ML_final}}. Two methods can be applied, namely
+‘Algorithm-based’ and ‘SHAP analysis’, to rank and the feature importance.
+By choosing a certain feature number, specifying the number of features to
+be computed, and the average feature importance of the top 10 features from
+all CV runs will be displayed.
 }
 \examples{
 data("ML_exp_data")
 data("ML_lipid_char_table")
 data("ML_condition_table")
-exp_data <- ML_exp_data
-lipid_char_table <- ML_lipid_char_table
-condition_table <- ML_condition_table
+condition_table <- ML_condition_table[85:144, ]
+exp_data <- ML_exp_data[1:40, ] \%>\%
+    select(feature, condition_table$sample_name)
+lipid_char_table <- ML_lipid_char_table[1:40, ]
 char_var <- colnames(lipid_char_table)[-1]
 ML_data <- ML_data_process(exp_data, group_info = condition_table,
                            lipid_char_table, char_var[1],
@@ -54,7 +67,7 @@ ML_data <- ML_data_process(exp_data, group_info = condition_table,
                            pct_transform=TRUE, data_transform=TRUE,
                            trans_type='log', centering=FALSE, scaling=FALSE)
 ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
-                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+                      ML_method='Random_forest', split_prop=0.3, nfold=3)
 model_for_net(ML_data[[2]], ML_method='Random_forest',
               varimp_method='Algorithm-based', ML_output[[8]],
               ML_output[[9]], feature_num=10, nsim=5)

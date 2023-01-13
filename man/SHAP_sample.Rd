@@ -4,12 +4,15 @@
 \alias{SHAP_sample}
 \title{SHAP_sample}
 \usage{
-SHAP_sample(shap_long, n_sample)
+SHAP_sample(shap_long, n_sample, plotly = TRUE)
 }
 \arguments{
 \item{shap_long}{The output data frame of \code{\link{SHAP}} (list[[2]]).}
 
-\item{n_sample}{A numeric value specifying N samples of each feature to be shown.}
+\item{n_sample}{A numeric value specifying N samples of each feature 
+to be shown.}
+
+\item{plotly}{Logical value. If TRUE, return the resulting plots dynamically.}
 }
 \value{
 Return a list of 1 plot.
@@ -25,9 +28,10 @@ library(SHAPforxgboost)
 data("ML_exp_data")
 data("ML_lipid_char_table")
 data("ML_condition_table")
-exp_data <- ML_exp_data
-lipid_char_table <- ML_lipid_char_table
-condition_table <- ML_condition_table
+condition_table <- ML_condition_table[85:144, ]
+exp_data <- ML_exp_data[1:40, ] \%>\%
+    select(feature, condition_table$sample_name)
+lipid_char_table <- ML_lipid_char_table[1:40, ]
 char_var <- colnames(lipid_char_table)[-1]
 ML_data <- ML_data_process(exp_data, group_info = condition_table,
                            lipid_char_table, char_var[1],
@@ -37,9 +41,10 @@ ML_data <- ML_data_process(exp_data, group_info = condition_table,
                            pct_transform=TRUE, data_transform=TRUE,
                            trans_type='log', centering=FALSE, scaling=FALSE)
 ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
-                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+                      ML_method='Random_forest', split_prop=0.3, nfold=3)
 SHAP_output <- SHAP(ML_data[[2]], best_model=ML_output[[8]],
                     best_model_feature=ML_output[[9]],
-                    ML_method='Random_forest', feature_n=10, nsim=5)
-SHAP_sample(SHAP_output[[2]], n_sample=10)
+                    ML_method='Random_forest', feature_n=10, nsim=5,
+                    plotly=TRUE)
+SHAP_sample(SHAP_output[[2]], n_sample=10, plotly=TRUE)
 }

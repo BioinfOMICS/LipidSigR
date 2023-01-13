@@ -4,27 +4,43 @@
 \alias{Enrichment}
 \title{Enrichment}
 \usage{
-Enrichment(DE_species_table_sig, lipid_char_table, char_var, sig_pvalue = 0.05)
+Enrichment(
+  DE_species_table_sig,
+  lipid_char_table,
+  char_var,
+  sig_pvalue = 0.05,
+  plotly = TRUE
+)
 }
 \arguments{
-\item{DE_species_table_sig}{A data frame comprises the significant results of differential expression analysis, including fold change, p-value, adjusted p-value. The output of \code{\link{DE_species_2}}.}
+\item{DE_species_table_sig}{A data frame comprises the significant results
+of differential expression analysis, including fold change, p-value,
+adjusted p-value. The output of \code{\link{DE_species_2}}.}
 
-\item{lipid_char_table}{A data frame with lipid features, such as class, total length. NAs are allowed. The name of first column must be "feature".}
+\item{lipid_char_table}{A data frame with lipid features, such as class,
+total length. NAs are allowed. The name of first column must be "feature".}
 
-\item{char_var}{A character string of the first lipid characteristic selected by users from the column name of \bold{lipid_char_table}, such as total length.}
+\item{char_var}{A character string of the first lipid characteristic
+selected by users from the column name of \bold{lipid_char_table},
+such as total length.}
 
 \item{sig_pvalue}{Numeric. Significant level. (default: 0.05)}
+
+\item{plotly}{Logical value. If TRUE, return the resulting plots dynamically.}
 }
 \value{
 Return a list with 1 tibble and 1 plot.
 \enumerate{
-\item enrich_char_table: a data frame encompasses condition, characteristic, p-value, and significance.
-\item enrich_char_barplot: the enrichment plot for up/down/non-significant groups
+\item enrich_char_table: a data frame encompasses condition, characteristic,
+ p-value, and significance.
+\item enrich_char_barplot: the enrichment plot for
+up/down/non-significant groups
 }
 }
 \description{
 \enumerate{
-\item Determine whether significant lipid species are enriched in user-selected characteristics.
+\item Determine whether significant lipid species are enriched in
+user-selected characteristics.
 \item Print a summary table and enrichment bar chart.
 }
 }
@@ -55,12 +71,13 @@ exp_transform_non_log <- data_process(exp_data, exclude_var_missing=TRUE,
 lipid_char_filter <- lipid_char_table \%>\%
     filter(feature \%in\% exp_transform$feature)
 DE_species_table_sig <- DE_species_2(exp_transform_non_log,
-                                     data_transform = TRUE,
-                                     group_info = group_info, paired = FALSE,
-                                     test = 't.test', adjust_p_method = 'BH',
-                                     sig_stat = 'p.adj', sig_pvalue = 0.05,
-                                     sig_FC = 2)$DE_species_table_sig
+                                     data_transform=TRUE,
+                                     group_info=group_info, paired=FALSE,
+                                     test='t.test', adjust_p_method='BH',
+                                     sig_stat='p.adj', sig_pvalue=0.05,
+                                     sig_FC=2,
+                                     plotly=TRUE)$DE_species_table_sig
 char_var <- colnames(lipid_char_filter)[-1]
-Enrichment (DE_species_table_sig, lipid_char_table= lipid_char_filter,
-            char_var = char_var[1], sig_pvalue = 0.05)
+Enrichment (DE_species_table_sig, lipid_char_table=lipid_char_filter,
+            char_var=char_var[1], sig_pvalue=0.05, plotly=TRUE)
 }

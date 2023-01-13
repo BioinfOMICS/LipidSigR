@@ -10,21 +10,30 @@ cor_network(
   sig_feature,
   node_col,
   cor_method,
-  edge_cutoff
+  edge_cutoff,
+  plotly = TRUE
 )
 }
 \arguments{
-\item{exp_transform_table}{The output data frame(list[[1]]) of \code{\link{ML_data_process}}.}
+\item{exp_transform_table}{The output data frame(list[[1]]) of
+\code{\link{ML_data_process}}.}
 
-\item{lipid_char_table}{A data frame of lipid characteristics such as name(feature) of lipid, class of lipid, the total length of lipid, and Fatty acid (FA_) related characteristics. NAs are allowed. The name of the first column must be "feature" (lipid species).}
+\item{lipid_char_table}{A data frame of lipid characteristics such as
+name(feature) of lipid, class of lipid, the total length of lipid, and
+Fatty acid (FA_) related characteristics. NAs are allowed. The name of
+the first column must be "feature" (lipid species).}
 
-\item{sig_feature}{The output of \code{\link{model_for_net}} column \bold{'feature'}.}
+\item{sig_feature}{The output of \code{\link{model_for_net}} column
+\bold{'feature'}.}
 
-\item{node_col}{The output of \code{\link{model_for_net}} column \bold{'importance'}.}
+\item{node_col}{The output of \code{\link{model_for_net}} column
+\bold{'importance'}.}
 
-\item{cor_method}{A character string indicating which correlation coefficient is to be computed. One of "Pearson", "Kendall", or "spearman".}
+\item{cor_method}{A character string indicating which correlation coefficient
+is to be computed. One of "Pearson", "Kendall", or "spearman".}
 
-\item{edge_cutoff}{A numeric value between 0 and 1. Only the correlation coefficient larger than it will be shown as a line in the plot.}
+\item{edge_cutoff}{A numeric value between 0 and 1. Only the correlation
+coefficient larger than it will be shown as a line in the plot.}
 }
 \value{
 Return 1 plot.
@@ -33,17 +42,24 @@ Return 1 plot.
 }
 }
 \description{
-A correlation network provides users to interrogate the interaction of features in a machine learning model. Users can choose an appropriate feature number according to previous cross-validation results and the features in the best model (based on ROC-AUC+PR-AUC) will be picked up to compute the correlation coefficients between each other.
+A correlation network provides users to interrogate the
+    interaction of features in a machine learning model. Users can choose an
+    appropriate feature number according to previous cross-validation results
+    and the features in the best model (based on ROC-AUC+PR-AUC) will be
+    picked up to compute the correlation coefficients between each other.
 
-The function computes the correlation coefficients according to the results of \code{\link{model_for_net}} and visualizes the correlation network.
+The function computes the correlation coefficients according to
+    the results of \code{\link{model_for_net}} and visualizes the
+    correlation network.
 }
 \examples{
 data("ML_exp_data")
 data("ML_lipid_char_table")
 data("ML_condition_table")
-exp_data <- ML_exp_data
-lipid_char_table <- ML_lipid_char_table
-condition_table <- ML_condition_table
+condition_table <- ML_condition_table[85:144, ]
+exp_data <- ML_exp_data[1:40, ] \%>\%
+   select(feature, condition_table$sample_name)
+lipid_char_table <- ML_lipid_char_table[1:40, ]
 char_var <- colnames(lipid_char_table)[-1]
 ML_data <- ML_data_process(exp_data, group_info = condition_table,
                            lipid_char_table, char_var[1],
@@ -53,7 +69,7 @@ ML_data <- ML_data_process(exp_data, group_info = condition_table,
                            pct_transform=TRUE, data_transform=TRUE,
                            trans_type='log', centering=FALSE, scaling=FALSE)
 ML_output <- ML_final(ML_data[[2]],ranking_method='Random_forest',
-                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+                      ML_method='Random_forest', split_prop=0.3, nfold=3)
 model_net <- model_for_net(ML_data[[2]], ML_method='Random_forest',
                            varimp_method='Algorithm-based', ML_output[[8]],
                            ML_output[[9]], feature_num=10, nsim=5)
