@@ -55,7 +55,9 @@ Imports:
     heatmaply,
     pathview,
     wordcloud,
-    ggraph
+    ggraph,
+    tidygraph,
+    igraph
 Suggests:
     devtools,
     roxygen2,
