@@ -1,31 +1,31 @@
 #' @title data_process
-#' @description This function conducts data processing according to users' 
-#'     options, including removing features with missing values, missing values 
+#' @description This function conducts data processing according to users'
+#'     options, including removing features with missing values, missing values
 #'     imputation, percentage transformation, log10 transformation, etc.
-#' @param exp_data A data frame of predictors, including features 
-#'     (molecule, lipid class, etc.) and their expression of each sample. 
-#'     NAs are not allowed. The name of the first column must be "feature" 
+#' @param exp_data A data frame of predictors, including features
+#'     (molecule, lipid class, etc.) and their expression of each sample.
+#'     NAs are not allowed. The name of the first column must be "feature"
 #'     (lipid species).
-#' @param exclude_var_missing Logical. Remove Lipid with too many 
+#' @param exclude_var_missing Logical. Remove Lipid with too many
 #'     missing values. (default: TRUE)
-#' @param missing_pct_limit An integer indicating the missing values over a 
+#' @param missing_pct_limit An integer indicating the missing values over a
 #'     certain percentage should be removed. (default: 50)
 #' @param replace_zero Logical. Replace 0. (default: TRUE)
-#' @param zero2what A character string indicating the value to replace 0. 
+#' @param zero2what A character string indicating the value to replace 0.
 #'     Value include "mean", "median", "min". (default: min)
 #' @param xmin A numeric value indicating the min value to replace 0.
-#' @param replace_NA Logical. If remove_na = TRUE, all NA will be removed. 
+#' @param replace_NA Logical. If remove_na = TRUE, all NA will be removed.
 #'     (default: TRUE)
-#' @param NA2what A character string indicating the value to replace NA. 
+#' @param NA2what A character string indicating the value to replace NA.
 #'     Value include "mean", "median", "min". (default: min)
 #' @param ymin A numeric value indicating the min value to replace NA.
-#' @param pct_transform Logical. If \bold{pct_transform = TRUE}, transform 
+#' @param pct_transform Logical. If \bold{pct_transform = TRUE}, transform
 #'     lipid value into a percentage. (default:TRUE)
-#' @param data_transform Logical. If \bold{data_transform = TRUE}, 
+#' @param data_transform Logical. If \bold{data_transform = TRUE},
 #'     transform exp_data by log10.
 #' @param trans_type A character string of transformation type.
-#' @param centering A logical value indicating whether the variables should be 
-#'     shifted to be zero centered. AAlternately, a vector of length equal to 
+#' @param centering A logical value indicating whether the variables should be
+#'     shifted to be zero centered. AAlternately, a vector of length equal to
 #'     the number of columns of x can be supplied. The value is passed to scale.
 #'     (default: FALSE)
 #' @param scaling A logical value. If scaling = TRUE, each block is standardized
@@ -48,19 +48,19 @@ data_process <- function(exp_data, exclude_var_missing=TRUE,
                          data_transform=TRUE,trans_type='log',
                          centering=FALSE,
                          scaling=FALSE){
-  
+
   exp_data <- as.data.frame(exp_data)
   if(ncol(exp_data) == 2){
     if(sum(class(exp_data[,-1]) %in% c("numeric","integer")) != 1){
       stop("First column type must be 'character',others must be 'numeric'")
     }
   }else{
-    if(sum(vapply(exp_data[,-1], class, character(1)) %in% 
+    if(sum(vapply(exp_data[,-1], class, character(1)) %in%
            c("numeric","integer")) != ncol(exp_data[,-1])){
       stop("First column type must be 'character',others must be 'numeric'")
     }
   }
-  if(tibble::is.tibble(exp_data)){
+  if(tibble::is_tibble(exp_data)){
     if(nrow(exp_data) != nrow(unique(exp_data[,1]))){
       stop("The lipids name (features) must be unique")
     }
@@ -91,7 +91,7 @@ data_process <- function(exp_data, exclude_var_missing=TRUE,
     }
     exp_data <- cbind(exp_data[1], exp_data2)
   }
-  
+
   exp_data2 <- exp_data[-1]
   #exclude_var_missing
   if(exclude_var_missing == TRUE){
@@ -103,7 +103,7 @@ data_process <- function(exp_data, exclude_var_missing=TRUE,
     return(NULL)
   }
   exp_data2 <- exp_data[-1]
-  
+
   #replace NA with: min, mean, median, specfic num
   if(replace_NA == TRUE){
     if(NA2what == 'min'){
@@ -112,12 +112,12 @@ data_process <- function(exp_data, exclude_var_missing=TRUE,
       }
     }else if(NA2what == 'mean'){
       for(a in seq_len(nrow(exp_data2))){
-        exp_data2[a,][is.na(exp_data2[a,])] <- 
+        exp_data2[a,][is.na(exp_data2[a,])] <-
           mean(unlist(exp_data2[a,]), na.rm=TRUE)
       }
     }else if(NA2what == 'median'){
       for(a in seq_len(nrow(exp_data2))){
-        exp_data2[a,][is.na(exp_data2[a,])] <- 
+        exp_data2[a,][is.na(exp_data2[a,])] <-
           stats::median(unlist(exp_data2[a,]), na.rm=TRUE)
       }
     }else if(is.numeric(NA2what)){
@@ -125,7 +125,7 @@ data_process <- function(exp_data, exclude_var_missing=TRUE,
     }
     exp_data <- cbind(exp_data[1], exp_data2)
   }
-  
+
   if(pct_transform == TRUE){
     exp_data[-1] <- purrr::map2(exp_data[-1],
                                 colSums(exp_data[-1], na.rm=TRUE),
@@ -138,17 +138,17 @@ data_process <- function(exp_data, exclude_var_missing=TRUE,
       exp_data[-1] <- log10(exp_data[-1])
     }
   }
-  
+
   #centering
   if(centering == TRUE){
-    exp_data[-1] <- exp_data[-1] %>% t() %>% scale(scale=FALSE) %>% t() %>% 
+    exp_data[-1] <- exp_data[-1] %>% t() %>% scale(scale=FALSE) %>% t() %>%
       as.data.frame()
   }
-  
+
   #scaling
   if(scaling == TRUE){
     exp_data[-1] <- exp_data[-1] %>% t() %>% scale() %>% t() %>% as.data.frame()
   }
-  
+
   return(exp_data)
 } #function: data_process()

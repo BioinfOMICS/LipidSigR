@@ -31,8 +31,8 @@
 #' data("DE_group_info")
 #' data("DE_lipid_gene_path")
 #' data("DE_pathway_gene_list")
-#' exp_data <- DE_exp_data
-#' lipid_char_table <- DE_lipid_char_table
+#' exp_data <- DE_exp_data[1:120,]
+#' lipid_char_table <- DE_lipid_char_table[1:120,]
 #' group_info <- DE_group_info
 #' DE.lipid.gene.path <- DE_lipid_gene_path
 #' DE.pathway.gene.list <- DE_pathway_gene_list
@@ -58,12 +58,14 @@
 #'                                      group_info = group_info, paired = FALSE,
 #'                                      test = 't.test', adjust_p_method = 'BH',
 #'                                      sig_stat = 'p.adj', sig_pvalue = 0.05,
-#'                                      sig_FC = 2)$DE_species_table_sig
+#'                                      sig_FC = 2, 
+#'                                      plotly=TRUE)$DE_species_table_sig
 #' char_var <- colnames(lipid_char_filter)[-1]
 #' enrich_char_table <- Enrichment (DE_species_table_sig,
 #'                                  lipid_char_table = lipid_char_filter,
 #'                                  char_var = char_var[1],
-#'                                  sig_pvalue = 0.05)$enrich_char_table
+#'                                  sig_pvalue = 0.05, 
+#'                                  plotly=TRUE)$enrich_char_table
 #' sig_enrich_class <- enrich_char_table %>% filter(significant == 'YES') %>%
 #'                     distinct(characteristic) %>% .$characteristic
 #' dir.create(file.path(getwd(),"pathview_result"), recursive=TRUE)

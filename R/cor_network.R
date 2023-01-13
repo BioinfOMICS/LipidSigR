@@ -1,25 +1,25 @@
 #' @title cor_network
-#' @description A correlation network provides users to interrogate the 
-#'     interaction of features in a machine learning model. Users can choose an 
-#'     appropriate feature number according to previous cross-validation results 
-#'     and the features in the best model (based on ROC-AUC+PR-AUC) will be 
+#' @description A correlation network provides users to interrogate the
+#'     interaction of features in a machine learning model. Users can choose an
+#'     appropriate feature number according to previous cross-validation results
+#'     and the features in the best model (based on ROC-AUC+PR-AUC) will be
 #'     picked up to compute the correlation coefficients between each other.
-#' @description The function computes the correlation coefficients according to 
-#'     the results of \code{\link{model_for_net}} and visualizes the 
+#' @description The function computes the correlation coefficients according to
+#'     the results of \code{\link{model_for_net}} and visualizes the
 #'     correlation network.
-#' @param exp_transform_table The output data frame(list[[1]]) of 
+#' @param exp_transform_table The output data frame(list[[1]]) of
 #'     \code{\link{ML_data_process}}.
-#' @param lipid_char_table A data frame of lipid characteristics such as 
-#'     name(feature) of lipid, class of lipid, the total length of lipid, and 
-#'     Fatty acid (FA_) related characteristics. NAs are allowed. The name of 
+#' @param lipid_char_table A data frame of lipid characteristics such as
+#'     name(feature) of lipid, class of lipid, the total length of lipid, and
+#'     Fatty acid (FA_) related characteristics. NAs are allowed. The name of
 #'     the first column must be "feature" (lipid species).
-#' @param sig_feature The output of \code{\link{model_for_net}} column 
+#' @param sig_feature The output of \code{\link{model_for_net}} column
 #'     \bold{'feature'}.
-#' @param node_col The output of \code{\link{model_for_net}} column 
+#' @param node_col The output of \code{\link{model_for_net}} column
 #'     \bold{'importance'}.
 #' @param cor_method A character string indicating which correlation coefficient
 #'     is to be computed. One of "Pearson", "Kendall", or "spearman".
-#' @param edge_cutoff A numeric value between 0 and 1. Only the correlation 
+#' @param edge_cutoff A numeric value between 0 and 1. Only the correlation
 #'     coefficient larger than it will be shown as a line in the plot.
 #' @return Return 1 plot.
 #' \enumerate{
@@ -30,9 +30,10 @@
 #' data("ML_exp_data")
 #' data("ML_lipid_char_table")
 #' data("ML_condition_table")
-#' exp_data <- ML_exp_data
-#' lipid_char_table <- ML_lipid_char_table
-#' condition_table <- ML_condition_table
+#' condition_table <- ML_condition_table[85:144, ]
+#' exp_data <- ML_exp_data[1:40, ] %>%
+#'    select(feature, condition_table$sample_name)
+#' lipid_char_table <- ML_lipid_char_table[1:40, ]
 #' char_var <- colnames(lipid_char_table)[-1]
 #' ML_data <- ML_data_process(exp_data, group_info = condition_table,
 #'                            lipid_char_table, char_var[1],
@@ -42,7 +43,7 @@
 #'                            pct_transform=TRUE, data_transform=TRUE,
 #'                            trans_type='log', centering=FALSE, scaling=FALSE)
 #' ML_output <- ML_final(ML_data[[2]],ranking_method='Random_forest',
-#'                       ML_method='Random_forest', split_prop=0.3, nfold=10)
+#'                       ML_method='Random_forest', split_prop=0.3, nfold=3)
 #' model_net <- model_for_net(ML_data[[2]], ML_method='Random_forest',
 #'                            varimp_method='Algorithm-based', ML_output[[8]],
 #'                            ML_output[[9]], feature_num=10, nsim=5)
@@ -50,24 +51,25 @@
 #'             cor_method='pearson', edge_cutoff=0)
 cor_network <- function(exp_transform_table, lipid_char_table,
                         sig_feature, node_col,
-                        cor_method, edge_cutoff){
-  
+                        cor_method, edge_cutoff, plotly=TRUE){
+
   exp_transform_table <- as.data.frame(exp_transform_table)
   lipid_char_table <- as.data.frame(lipid_char_table)
-  if(!is(exp_transform_table[,1], 'character')){
-    stop("exp_transform_table first column must contain a list of 
+  if(!is(exp_transform_table[, 1], 'character')){
+    stop("exp_transform_table first column must contain a list of
          lipids names (features)")
   }
   if(ncol(exp_transform_table) == 2){
-    if(!is(exp_transform_table[,1], 'character') | 
-       sum(class(exp_transform_table[,-1]) %in% c("numeric", "integer"))!=1){
+    if(!is(exp_transform_table[, 1], 'character') |
+       sum(class(exp_transform_table[, -1]) %in%
+           c("numeric", "integer")) != 1){
       stop("exp_transform_table first column type must be 'character',
            others must be 'numeric'")
     }
   }else{
-    if(!is(exp_transform_table[,1], 'character') | 
-       sum(vapply(exp_transform_table[,-1], class,character(1)) %in% 
-           c("numeric","integer")) != ncol(exp_transform_table[,-1])){
+    if(!is(exp_transform_table[, 1], 'character') |
+       sum(vapply(exp_transform_table[, -1], class,character(1)) %in%
+           c("numeric", "integer")) != ncol(exp_transform_table[, -1])){
       stop("exp_transform_table first column type must be 'character',
            others must be 'numeric'")
     }
@@ -79,57 +81,57 @@ cor_network <- function(exp_transform_table, lipid_char_table,
     stop("exp_transform_table at least 60 samples.")
   }
   if(nrow(exp_transform_table) < 10){
-    stop("exp_transform_table number of lipids names (features) 
+    stop("exp_transform_table number of lipids names (features)
          must be more than 10.")
   }
-  if(sum(!is.na(exp_transform_table[,-1])) == 0 | 
+  if(sum(!is.na(exp_transform_table[,-1])) == 0 |
      sum(!is.null(exp_transform_table[,-1])) == 0){
     stop("exp_transform_table variables can not be all NULL/NA")
   }
-  
-  if(!is(lipid_char_table[,1], 'character')){
+
+  if(!is(lipid_char_table[, 1], 'character')){
     stop("lipid_char_table first column must contain
          a list of lipids names (features).")
   }
-  if(tibble::is.tibble(lipid_char_table)){
-    if(nrow(lipid_char_table) != nrow(unique(lipid_char_table[,1]))){
+  if(tibble::is_tibble(lipid_char_table)){
+    if(nrow(lipid_char_table) != nrow(unique(lipid_char_table[, 1]))){
       stop("The lipids name (features) must be unique")
     }
   }else{
-    if(nrow(lipid_char_table) != length(unique(lipid_char_table[,1]))){
+    if(nrow(lipid_char_table) != length(unique(lipid_char_table[, 1]))){
       stop("The lipids name (features) must be unique")
     }
   }
   if("class" %in% colnames(lipid_char_table)){
-    if(!is(lipid_char_table[,'class'], 'character')){
+    if(!is(lipid_char_table[, 'class'], 'character')){
       stop("lipid_char_table content of column 'class' must be characters")
     }
   }
   if("totallength" %in% colnames(lipid_char_table)){
-    if(!class(lipid_char_table[,'totallength']) %in% c("integer", "numeric")){
+    if(!class(lipid_char_table[, 'totallength']) %in% c("integer", "numeric")){
       stop("lipid_char_table content of column 'totallength' must be numeric")
     }
   }
   if("totaldb" %in% colnames(lipid_char_table)){
-    if(!class(lipid_char_table[,'totaldb']) %in% c("integer", "numeric")){
+    if(!class(lipid_char_table[, 'totaldb']) %in% c("integer", "numeric")){
       stop("lipid_char_table content of column 'totaldb' must be numeric")
     }
   }
   if("totaloh" %in% colnames(lipid_char_table)){
-    if(!class(lipid_char_table[,'totaloh']) %in% c("integer", "numeric")){
+    if(!class(lipid_char_table[, 'totaloh']) %in% c("integer", "numeric")){
       stop("Thlipid_char_tablee content of column 'totaloh' must be numeric")
     }
   }
-  
+
   rownames(exp_transform_table) <- exp_transform_table$feature
-  edge_table <- exp_transform_table %>% 
+  edge_table <- exp_transform_table %>%
     dplyr::filter(feature %in% sig_feature) %>%
     dplyr::select(-1) %>% t() %>% stats::cor(method=cor_method,
                                              use='pairwise.complete.obs') %>%
     as.data.frame() %>% dplyr::mutate(from=rownames(.)) %>%
     tidyr::gather(-from, key='to', value='cor_coef') %>%
     dplyr::filter(abs(cor_coef) >= edge_cutoff)
-  
+
   node_table <- data.frame(feature=sig_feature, node_col=node_col) %>%
     dplyr::filter(feature%in%c(edge_table$from, edge_table$to))
   if(!is.null(lipid_char_table)){
@@ -140,7 +142,7 @@ cor_network <- function(exp_transform_table, lipid_char_table,
     dplyr::select(feature, node_col)
   colnames(node_table)[which(colnames(node_table) == "node_col")] <- "color"
   colnames(node_table)[which(colnames(node_table) == "feature")] <- "id"
-  
+
   node_table <- node_table %>%
     dplyr::mutate(lebel=id,
                   shpae="diamond",
@@ -177,7 +179,6 @@ cor_network <- function(exp_transform_table, lipid_char_table,
       }
     }
   }
-  
   edge_table <- edge_table %>%
     dplyr::mutate(width=abs(cor_coef)) %>%
     dplyr::select(from, to, width, cor_coef) %>%
@@ -187,41 +188,82 @@ cor_network <- function(exp_transform_table, lipid_char_table,
                   shadow=FALSE,
                   color=ifelse(cor_coef > 0, '#FFDDAA', '#CCBBFF'),
                   title=paste0("<p><b>", edge_table$from, " vs ", edge_table$to,
-                               "</b><br>cor_coef = ", round(edge_table$cor_coef, 5), 
+                               "</b><br>cor_coef = ",
+                               round(edge_table$cor_coef, 5),
                                "</p>"))
   edge_table <-  edge_table[-which(edge_table$from == edge_table$to),]
-  
-  color_ledges_n <- c(1,
-                      which(nodes$color == unique(nodes$color)
-                            [round(length(unique(nodes$color))/4)])[1],
-                      which(nodes$color == unique(nodes$color)
-                            [round(2*length(unique(nodes$color))/4)])[1],
-                      which(nodes$color == unique(nodes$color)
-                            [round(3*length(unique(nodes$color))/4)])[1],
-                      which(nodes$color == unique(nodes$color)
-                            [length(unique(nodes$color))])[1])
-  
-  ledges <- data.frame(color=c("white",node_table$color[color_ledges_n]),
-                       label=c("Feature\nimportance",
-                               as.character(
-                                 round(nodes$color[color_ledges_n],3))),
-                       shape=c("box", rep("dot", 5)),
-                       size=c(30, rep(20, 5)),
-                       font.size=c(35, rep(30, 5)))
-  
-  visNet <- visNetwork::visNetwork(node_table, edge_table) %>%
-    visNetwork::visLayout(randomSeed=12) %>%
-    visNetwork::visOptions(highlightNearest=list(enabled=TRUE,
-                                                 degree=1,
-                                                 hover=TRUE))%>%
-    visNetwork::visEdges(color=list(highlight="#C62F4B")) %>%
-    visNetwork::visPhysics(solver='barnesHut',
-                           stabilization=TRUE,
-                           barnesHut=list(gravitationalConstant = -1000)) %>%
-    visNetwork::visIgraphLayout(layout="layout_nicely") %>%
-    visNetwork::visInteraction(navigationButtons=TRUE)  %>%
-    visNetwork::visEvents(dragEnd=
-                            "function(){this.setOptions({physics:false});}") %>%
-    visNetwork::visLegend(useGroups=FALSE, addNodes=ledges, width=0.15)
-  return(visNetwork_plot = visNet)
+  if(plotly == TRUE){
+    color_ledges_n <- c(1,
+                        which(nodes$color == unique(nodes$color)
+                              [round(length(unique(nodes$color))/4)])[1],
+                        which(nodes$color == unique(nodes$color)
+                              [round(2*length(unique(nodes$color))/4)])[1],
+                        which(nodes$color == unique(nodes$color)
+                              [round(3*length(unique(nodes$color))/4)])[1],
+                        which(nodes$color == unique(nodes$color)
+                              [length(unique(nodes$color))])[1])
+
+    ledges <- data.frame(color=c("white", node_table$color[color_ledges_n]),
+                         label=c("Feature\nimportance",
+                                 as.character(
+                                   round(nodes$color[color_ledges_n], 3))),
+                         shape=c("box", rep("dot", 5)),
+                         size=c(30, rep(20, 5)),
+                         font.size=c(35, rep(30, 5)))
+
+    visNet <- visNetwork::visNetwork(node_table, edge_table) %>%
+      visNetwork::visLayout(randomSeed=12) %>%
+      visNetwork::visOptions(highlightNearest=list(enabled=TRUE,
+                                                   degree=1,
+                                                   hover=TRUE))%>%
+      visNetwork::visEdges(color=list(highlight="#C62F4B")) %>%
+      visNetwork::visPhysics(solver='barnesHut',
+                             stabilization=TRUE,
+                             barnesHut=
+                               list(gravitationalConstant=-1000)) %>%
+      visNetwork::visIgraphLayout(layout="layout_nicely") %>%
+      visNetwork::visInteraction(navigationButtons=TRUE)  %>%
+      visNetwork::visEvents(
+        dragEnd="function(){this.setOptions({physics:false});}") %>%
+      visNetwork::visLegend(useGroups=FALSE, addNodes=ledges, width=0.15)
+  }else{
+    unique_color_label <- round(unique_color,3)
+    unique_color <- unique(node_table$color)
+    edge_color <- unique(edge_table$color)
+    colnames(node_table)[which(colnames(node_table) == 'color')] <-
+      "Feature importance"
+    ig <- igraph::graph_from_data_frame(d=edge_table,
+                                        vertices=node_table,
+                                        directed=FALSE)
+    tg <- tidygraph::as_tbl_graph(ig) %>%
+      tidygraph::activate(nodes) %>%
+      dplyr::mutate(label=name)
+    visNet <- tg %>%
+      ggraph::ggraph(layout="fr") +
+      ggraph::geom_edge_arc(colour="gray50",
+                            lineend="round",
+                            strength=.1,
+                            alpha=.1) +
+      ggraph::geom_edge_fan(
+        ggplot2::aes(color=color),
+        show.legend=FALSE) +
+      ggraph::scale_edge_color_manual(
+        breaks=edge_color,
+        values=edge_color) +
+      ggraph::geom_node_point(size=6,
+                              ggplot2::aes(color=`Feature importance`)) +
+      ggplot2::scale_color_manual(
+        breaks=unique_color,
+        values=unique_color,
+        labels=unique_color_label) +
+      ggraph::geom_node_text(ggplot2::aes(label=label),
+                             repel=TRUE,
+                             point.padding=ggplot2::unit(0.2, "lines"),
+                             colour="gray10") +
+      ggraph::theme_graph(background="white") +
+      ggplot2::guides(edge_width="none",
+                      edge_alpha="none")
+  }
+
+  return(visNetwork_plot=visNet)
 }
