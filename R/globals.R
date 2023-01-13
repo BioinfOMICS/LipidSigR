@@ -23,4 +23,6 @@ utils::globalVariables(c("sample_name", "p_adj", "sig_p", "sig_p_adj",
                          "stdfvalue", "mean_value", "shapley_value", 
                          "raw_value", "mean_shapley_value", "key_name", "DB", 
                          "ID", "pred_prob", "true_label", "Reference", "Freq", 
-                         "pct", "Prediction", "label", "sorted_id"))
+                         "pct", "Prediction", "label", "sorted_id","A", "Feature importance", "a", "b", "expr.count", "feature_num_label", "highest", 
+                         "lipid_amount", "lower", "name", "r", "sd_value", "sig_log2fc.pvalue_colors", 
+                         "stat_compare_means", "upper", "x", "x0", "y", "y0"))

@@ -21,12 +21,14 @@
 #'     is to be computed. One of "Pearson", "Kendall", or "spearman".
 #' @param edge_cutoff A numeric value between 0 and 1. Only the correlation
 #'     coefficient larger than it will be shown as a line in the plot.
+#' @param plotly Logical value. If TRUE, return the resulting plots dynamically.
 #' @return Return 1 plot.
 #' \enumerate{
 #' \item visNetwork_plot: the network of feature importance.
 #' }
 #' @export
 #' @examples
+#' library(dplyr)
 #' data("ML_exp_data")
 #' data("ML_lipid_char_table")
 #' data("ML_condition_table")

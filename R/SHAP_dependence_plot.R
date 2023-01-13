@@ -16,6 +16,7 @@
 #' @export
 #' @examples
 #' library(SHAPforxgboost)
+#' library(dplyr)
 #' data("ML_exp_data")
 #' data("ML_lipid_char_table")
 #' data("ML_condition_table")
