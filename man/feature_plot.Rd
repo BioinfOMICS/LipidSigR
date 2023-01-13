@@ -41,6 +41,7 @@ coefficients in the algorithm, while Random Forest and XGBoost use built-in
 feature importance results.
 }
 \examples{
+library(dplyr)
 data("ML_exp_data")
 data("ML_lipid_char_table")
 data("ML_condition_table")

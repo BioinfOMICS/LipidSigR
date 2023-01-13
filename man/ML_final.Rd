@@ -50,6 +50,7 @@ This function constructs the machine learning model based on
 the output data processed by \code{\link{ML_data_process}}.
 }
 \examples{
+library(dplyr)
 data("ML_exp_data")
 data("ML_lipid_char_table")
 data("ML_condition_table")

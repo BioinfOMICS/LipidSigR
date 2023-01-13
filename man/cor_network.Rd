@@ -34,6 +34,8 @@ is to be computed. One of "Pearson", "Kendall", or "spearman".}
 
 \item{edge_cutoff}{A numeric value between 0 and 1. Only the correlation
 coefficient larger than it will be shown as a line in the plot.}
+
+\item{plotly}{Logical value. If TRUE, return the resulting plots dynamically.}
 }
 \value{
 Return 1 plot.
@@ -53,6 +55,7 @@ The function computes the correlation coefficients according to
     correlation network.
 }
 \examples{
+library(dplyr)
 data("ML_exp_data")
 data("ML_lipid_char_table")
 data("ML_condition_table")
