@@ -1,33 +1,33 @@
 #' @title DE_sub_char_plot_2
-#' @description This \code{\link{DE_sub_char_plot_2}} is to visualise the 
+#' @description This \code{\link{DE_sub_char_plot_2}} is to visualize the
 #' result of \code{\link{DE_sub_char_2}}.
 #' \enumerate{
 #' \item The subgroup analysis of the first user-selected characteristics.
-#' \item Print a box plot, line plots (raw & sqrt scale), 
+#' \item Print a box plot, line plots (raw & sqrt scale),
 #' and bar plots (raw & sqrt scale).
 #' }
-#' @param DE_split_char_table_all A data frame. The output of 
+#' @param DE_split_char_table_all A data frame. The output of
 #' \code{\link{DE_sub_char_2}}.
-#' @param DE_split_char_index A data frame. The output of 
+#' @param DE_split_char_index A data frame. The output of
 #' \code{\link{DE_sub_char_2}}.
-#' @param group_info A data frame comprises the name of the sample, the label 
-#' of the sample, the group name of the sample, and the pair number represents 
-#' ‘the pair’ for the t-test/Wilcoxon test. NAs are allowed. NAs are allowed.
-#' @param char_var A character string of the first lipid characteristic 
-#' selected by users from the column name of \bold{lipid_char_table}, 
+#' @param group_info A data frame comprises the name of the sample, the label
+#' of the sample, the group name of the sample, and the pair number represents
+#' 'the pair' for the t-test/Wilcoxon test. NAs are allowed. NAs are allowed.
+#' @param char_var A character string of the first lipid characteristic
+#' selected by users from the column name of \bold{lipid_char_table},
 #' such as total length.
-#' @param split_var A character string of the second lipid characteristic 
-#' selected by users from \bold{lipid_char_table} for the subgroup analysis, 
-#' such as class. \emph{NOTE: This parameter will be used to split data before 
+#' @param split_var A character string of the second lipid characteristic
+#' selected by users from \bold{lipid_char_table} for the subgroup analysis,
+#' such as class. \emph{NOTE: This parameter will be used to split data before
 #' entering main lipid characteristic 'char_var'.}
-#' @param split_class A character string selected by users from the second 
-#' user-selected lipid characteristic (\bold{split_var}) to visualise the 
-#' specific plot for the selected category of that characteristic. For 
-#' example, when user set split_var= 'class', and split_class='PC', this 
+#' @param split_class A character string selected by users from the second
+#' user-selected lipid characteristic (\bold{split_var}) to visualize the
+#' specific plot for the selected category of that characteristic. For
+#' example, when user set split_var= 'class', and split_class='PC', this
 #' indicates the results will be plots of PC.
-#' @param insert_ref_group A character string. The name of 'ctrl' 
+#' @param insert_ref_group A character string. The name of 'ctrl'
 #' after name conversion.
-#' @param ref_group A character string. The name of 'exp' 
+#' @param ref_group A character string. The name of 'exp'
 #' after name conversion.
 #' @param plotly Logical value. If TRUE, return the resulting plots dynamically.
 #' @return Return a list with 5 figures.
@@ -67,37 +67,37 @@
 #'                    split_class = char.class[3,],
 #'                    insert_ref_group=NULL, ref_group=NULL,
 #'                    plotly=TRUE)
-DE_sub_char_plot_2 <- function(DE_split_char_table_all, 
+DE_sub_char_plot_2 <- function(DE_split_char_table_all,
                                DE_split_char_index, group_info,
                                char_var='Category', split_var, split_class,
-                               insert_ref_group=NULL, ref_group=NULL, 
+                               insert_ref_group=NULL, ref_group=NULL,
                                plotly=TRUE){
-  
+
   DE_split_char_table_all <- as.data.frame(DE_split_char_table_all)
   #### Plot ####
 
   CTRL.RES <- DE_split_char_table_all %>%
     dplyr::select(seq_len(2), sig, mean_ctrl, sd_ctrl) %>%
     dplyr::mutate(Group='Ctrl')
-  colnames(CTRL.RES) <- c('Split_category', 'Category', 
+  colnames(CTRL.RES) <- c('Split_category', 'Category',
                           'Significant', 'Mean', 'SD', 'Group')
 
   EXP.RES <- DE_split_char_table_all %>%
     dplyr::select(seq_len(2), sig, mean_exp, sd_exp) %>%
     dplyr::mutate(Group='Exp')
-  colnames(EXP.RES) <- c('Split_category', 'Category', 
+  colnames(EXP.RES) <- c('Split_category', 'Category',
                          'Significant', 'Mean', 'SD', 'Group')
 
 
   ## Fig.1 bar chart
-  barTab <- data.table::rbindlist(l=list(CTRL.RES, EXP.RES), 
+  barTab <- data.table::rbindlist(l=list(CTRL.RES, EXP.RES),
                                   use.names=TRUE, fill=TRUE)
   if(sum(is.na(as.numeric(barTab$Category))) == 0){
     barTab$Category <- as.factor(as.numeric(barTab$Category))
   }
 
   splitTab <- barTab %>% dplyr::filter(Split_category == split_class)
-  splitTab <- splitTab %>% dplyr::group_by(Category) %>% 
+  splitTab <- splitTab %>% dplyr::group_by(Category) %>%
     dplyr::mutate(max_error_bar=max(Mean+SD)) %>% dplyr::ungroup()
   splitTab$post_hoc_pvalue <- NA
   for(i in seq_len(nrow(splitTab))){
@@ -110,26 +110,26 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all,
     exp_raw_name <- ref_group[-which(insert_ref_group == ref_group)]
     splitTab$Group[which(splitTab$Group == 'Ctrl')] <-  insert_ref_group
     splitTab$Group[which(splitTab$Group == 'Exp')] <-  exp_raw_name
-    splitTab$Group <- factor(splitTab$Group, 
+    splitTab$Group <- factor(splitTab$Group,
                              levels=c(insert_ref_group, exp_raw_name))
 
   }
-  splitTab_sig <- splitTab %>% 
-    dplyr::filter(Significant == 'yes') %>% 
+  splitTab_sig <- splitTab %>%
+    dplyr::filter(Significant == 'yes') %>%
     dplyr::mutate(pvalue_text=
                     ifelse(post_hoc_pvalue <= 0.001 , "***",
                            ifelse(post_hoc_pvalue <= 0.01 , "**",
                                   ifelse(post_hoc_pvalue <= 0.05 , "*", ""))))
 
-  barPlot <- ggplot2::ggplot(data=splitTab, 
+  barPlot <- ggplot2::ggplot(data=splitTab,
                              ggplot2::aes(x=Category, y=Mean, fill=Group)) +
     ggplot2::geom_bar(stat="identity", position=ggplot2::position_dodge()) +
     ggplot2::scale_fill_manual(values=c('lightslateblue', 'sienna2')) +
-    ggplot2::geom_errorbar(ggplot2::aes(ymin=Mean, ymax=Mean+SD), 
-                           color="gray39", width=.9, 
+    ggplot2::geom_errorbar(ggplot2::aes(ymin=Mean, ymax=Mean+SD),
+                           color="gray39", width=.9,
                            position=ggplot2::position_dodge()) +
-    ggplot2::geom_text(data=splitTab_sig, 
-                       ggplot2::aes(x=Category, y=max_error_bar+5 , 
+    ggplot2::geom_text(data=splitTab_sig,
+                       ggplot2::aes(x=Category, y=max_error_bar+5 ,
                                     label=pvalue_text), color="red") +
     ggplot2::theme_minimal() +
     ggplot2::labs(x=char_var)
@@ -149,7 +149,7 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all,
                                                "\nGroup :", data$Group)
     }
     for (i in seq_len(length(barggplotly$x$data))) {
-      text <- stringr::str_split(barggplotly$x$data[[i]]$hovertext, 
+      text <- stringr::str_split(barggplotly$x$data[[i]]$hovertext,
                                  "<br />max_error_bar")
       hovertext <- list()
       if(length(text) > 0){
@@ -163,17 +163,17 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all,
   }
 
   ## Fig.1-1 bar chart sqrt scale
-  
-  barPlot_sqrt <- ggplot2::ggplot(data=splitTab, 
-                                  ggplot2::aes(x=Category, y=Mean, 
+
+  barPlot_sqrt <- ggplot2::ggplot(data=splitTab,
+                                  ggplot2::aes(x=Category, y=Mean,
                                                fill=Group)) +
     ggplot2::geom_bar(stat="identity", position=ggplot2::position_dodge()) +
     ggplot2::scale_fill_manual(values=c('lightslateblue', 'sienna2')) +
-    ggplot2::geom_errorbar(ggplot2::aes(ymin=Mean, ymax=Mean+SD), 
-                           color="gray39", width=.9, 
+    ggplot2::geom_errorbar(ggplot2::aes(ymin=Mean, ymax=Mean+SD),
+                           color="gray39", width=.9,
                            position=ggplot2::position_dodge()) +
-    ggplot2::geom_text(data=splitTab_sig, 
-                       ggplot2::aes(x=Category, y=max_error_bar+5 , 
+    ggplot2::geom_text(data=splitTab_sig,
+                       ggplot2::aes(x=Category, y=max_error_bar+5 ,
                                     label=pvalue_text), color="red") +
     ggplot2::scale_y_sqrt() +
     ggplot2::theme_minimal() +
@@ -185,21 +185,21 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all,
       data <- barPlot_sqrt$data[which(
         barPlot_sqrt$data$Group == unique(barPlot_sqrt$data$Group)[i]), ]
       bar_ggplotly_sqrt$x$data[[i]]$text <- paste0("Category :", data$Category,
-                                                   "\nMean :", 
+                                                   "\nMean :",
                                                    round(data$Mean, 3),
-                                                   "\nSD :", 
+                                                   "\nSD :",
                                                    round(data$SD, 3),
                                                    "\nGroup :", data$Group)
-      bar_ggplotly_sqrt$x$data[[i+n]]$text <- paste0("Category :", 
+      bar_ggplotly_sqrt$x$data[[i+n]]$text <- paste0("Category :",
                                                      data$Category,
-                                                     "\nMean :", 
+                                                     "\nMean :",
                                                      round(data$Mean, 3),
-                                                     "\nSD :", 
+                                                     "\nSD :",
                                                      round(data$SD, 3),
                                                      "\nGroup :", data$Group)
     }
     for (i in seq_len(length(bar_ggplotly_sqrt$x$data))){
-      text <- stringr::str_split(bar_ggplotly_sqrt$x$data[[i]]$hovertext, 
+      text <- stringr::str_split(bar_ggplotly_sqrt$x$data[[i]]$hovertext,
                                  "<br />max_error_bar")
       hovertext <- list()
       if(length(text) > 0){
@@ -213,28 +213,28 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all,
   }
 
   ## Fig.3 trend plot
-  linePlot <- ggplot2::ggplot(data=splitTab, 
-                              ggplot2::aes(x=Category, y=Mean, 
+  linePlot <- ggplot2::ggplot(data=splitTab,
+                              ggplot2::aes(x=Category, y=Mean,
                                            group=Group, color=Group)) +
-    ggplot2::geom_line(stat="identity", 
+    ggplot2::geom_line(stat="identity",
                        position=ggplot2::position_dodge(0.05))+
     ggplot2::scale_color_manual(values=c('lightslateblue', 'sienna2')) +
-    ggplot2::geom_errorbar(ggplot2::aes(ymin=Mean-SD, ymax=Mean+SD), 
-                           color="gray39", 
+    ggplot2::geom_errorbar(ggplot2::aes(ymin=Mean-SD, ymax=Mean+SD),
+                           color="gray39",
                            position=ggplot2::position_dodge(0.05)) +
-    ggplot2::geom_text(data=splitTab_sig, 
-                       ggplot2::aes(x=Category, y=max_error_bar+5, 
+    ggplot2::geom_text(data=splitTab_sig,
+                       ggplot2::aes(x=Category, y=max_error_bar+5,
                                     label=pvalue_text), color="red") +
     ggplot2::theme_minimal() +
     ggplot2::labs(x=char_var)
-  
+
   if(plotly == TRUE){
     lineggplotly <- plotly::ggplotly(linePlot)
     for(i in seq_len(length(lineggplotly$x$data))){
       if(!is.null(lineggplotly$x$data[i]$name)){
-        lineggplotly$x$data[i]$name <- gsub("\\(", "", 
+        lineggplotly$x$data[i]$name <- gsub("\\(", "",
                                             stringr::str_split(
-                                              lineggplotly$x$data[i]$name, 
+                                              lineggplotly$x$data[i]$name,
                                               ",")[[1]][1])
       }
     }
@@ -248,14 +248,14 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all,
                                               "\nGroup :", data$Group)
       if(sum(grepl("\\*", lineggplotly$x$data[[i+n]]$text)) == 0){
         lineggplotly$x$data[[i+n]]$text <- paste0("Category :", data$Category,
-                                                  "\nMean :", 
+                                                  "\nMean :",
                                                   round(data$Mean, 3),
                                                   "\nSD :", round(data$SD, 3),
                                                   "\nGroup :", data$Group)
       }
     }
     for (i in seq_len(length(lineggplotly$x$data))) {
-      text <- stringr::str_split(lineggplotly$x$data[[i]]$hovertext, 
+      text <- stringr::str_split(lineggplotly$x$data[[i]]$hovertext,
                                  "<br />max_error_bar")
       hovertext <- list()
       if(length(text) > 0){
@@ -269,29 +269,29 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all,
   }
 
   ## Fig.3_1 trend plot sqrt scale
-  linePlot_sqrt <- ggplot2::ggplot(data=splitTab, 
-                                   ggplot2::aes(x=Category, 
-                                                y=Mean, 
+  linePlot_sqrt <- ggplot2::ggplot(data=splitTab,
+                                   ggplot2::aes(x=Category,
+                                                y=Mean,
                                                 group=Group, color=Group)) +
-    ggplot2::geom_line(stat="identity", 
+    ggplot2::geom_line(stat="identity",
                        position=ggplot2::position_dodge(0.05))+
     ggplot2::scale_color_manual(values=c('lightslateblue', 'sienna2')) +
-    ggplot2::geom_errorbar(ggplot2::aes(ymin=Mean-SD, ymax=Mean+SD), 
-                           color="gray39", 
+    ggplot2::geom_errorbar(ggplot2::aes(ymin=Mean-SD, ymax=Mean+SD),
+                           color="gray39",
                            position=ggplot2::position_dodge(0.05)) +
     ggplot2::geom_text(data=splitTab_sig,
-                       ggplot2::aes(x=Category, y=max_error_bar+5, 
+                       ggplot2::aes(x=Category, y=max_error_bar+5,
                                     label=pvalue_text), color="red") +
     ggplot2::scale_y_sqrt() +
     ggplot2::theme_minimal() +
     ggplot2::labs(x=char_var)
-  
+
   if(plotly == TRUE){
     line_ggplotly_sqrt <- plotly::ggplotly(linePlot_sqrt)
     for(i in seq_len(length(line_ggplotly_sqrt$x$data))){
       if(!is.null(line_ggplotly_sqrt$x$data[i]$name)){
-        line_ggplotly_sqrt$x$data[i]$name <- 
-          gsub("\\(", "", stringr::str_split(line_ggplotly_sqrt$x$data[i]$name, 
+        line_ggplotly_sqrt$x$data[i]$name <-
+          gsub("\\(", "", stringr::str_split(line_ggplotly_sqrt$x$data[i]$name,
                                              ",")[[1]][1])
       }
     }
@@ -299,26 +299,26 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all,
       n <- length(unique(linePlot_sqrt$data$Group))
       data <- linePlot_sqrt$data[which(
         linePlot_sqrt$data$Group == unique(linePlot_sqrt$data$Group)[i]),]
-      line_ggplotly_sqrt$x$data[[i]]$text <- paste0("Category :", 
+      line_ggplotly_sqrt$x$data[[i]]$text <- paste0("Category :",
                                                     data$Category,
-                                                    "\nMean :", 
+                                                    "\nMean :",
                                                     round(data$Mean, 3),
-                                                    "\nSD :", 
+                                                    "\nSD :",
                                                     round(data$SD, 3),
                                                     "\nGroup :", data$Group)
       if(sum(grepl("\\*",line_ggplotly_sqrt$x$data[[i+n]]$text)) == 0){
-        line_ggplotly_sqrt$x$data[[i+n]]$text <- paste0("Category :", 
+        line_ggplotly_sqrt$x$data[[i+n]]$text <- paste0("Category :",
                                                         data$Category,
-                                                        "\nMean :", 
+                                                        "\nMean :",
                                                         round(data$Mean, 3),
-                                                        "\nSD :", 
+                                                        "\nSD :",
                                                         round(data$SD, 3),
-                                                        "\nGroup :", 
+                                                        "\nGroup :",
                                                         data$Group)
       }
     }
     for (i in seq_len(length(line_ggplotly_sqrt$x$data))) {
-      text <- stringr::str_split(line_ggplotly_sqrt$x$data[[i]]$hovertext, 
+      text <- stringr::str_split(line_ggplotly_sqrt$x$data[[i]]$hovertext,
                                  "<br />max_error_bar")
       hovertext <- list()
       if(length(text) > 0){
@@ -346,15 +346,15 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all,
     boxTab$group[which(boxTab$group == 'ctrl')] <-  insert_ref_group
     boxTab$group[which(boxTab$group == 'exp')] <-  exp_raw_name
   }
-  t.test.pvalue <- tryCatch({stats::t.test(Category~group, 
-                                           data=boxTab, 
+  t.test.pvalue <- tryCatch({stats::t.test(Category~group,
+                                           data=boxTab,
                                            var.equal=TRUE)["p.value"]},
                             warning=function(w) {NA},error=function(e){NA})
   if(!is.na(t.test.pvalue)){
     if(t.test.pvalue <= 0.05){
       if(plotly == TRUE){
-        group_name <- c(unique(boxTab$group)[1], 
-                        paste0(unique(boxTab$group)[1], "0"), 
+        group_name <- c(unique(boxTab$group)[1],
+                        paste0(unique(boxTab$group)[1], "0"),
                         unique(boxTab$group)[2])
         group_max <- max(boxTab$Category) %>% unique()
         group_min <- min(boxTab$Category) %>% unique()
@@ -381,9 +381,9 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all,
                            hoverinfo='none',
                            textposition='outside',
                            legendgroup="1") %>%
-          plotly::add_lines(x=c(rep(paste(unique(boxTab$group)[1]), 2), 
-                                rep(paste(unique(boxTab$group)[2]), 2)), 
-                            y=c(group_max+0.1, group_max+0.15, 
+          plotly::add_lines(x=c(rep(paste(unique(boxTab$group)[1]), 2),
+                                rep(paste(unique(boxTab$group)[2]), 2)),
+                            y=c(group_max+0.1, group_max+0.15,
                                 group_max+0.15, group_max+0.1),
                             showlegend=FALSE,
                             line=list(color='black'),
@@ -402,9 +402,9 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all,
           plotly::layout(title=split_class,
                          xaxis=list(title='Group',
                                     tickmode='array',
-                                    tickvals= c(unique(boxTab$group)[1], 
+                                    tickvals= c(unique(boxTab$group)[1],
                                                 '', unique(boxTab$group)[2]),
-                                    ticktext=c(unique(boxTab$group)[1], 
+                                    ticktext=c(unique(boxTab$group)[1],
                                                '', unique(boxTab$group)[2]),
                                     titlefont=list(size=16),
                                     tickfont=list(size=14)),
@@ -416,14 +416,14 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all,
                          legend=list(font=list(size=14), y=0.5),
                          margin=list(l=70, r=70, b=80, t=60))
       }else{
-        boxPlot <- ggpubr::ggboxplot(boxTab, x = "group", y = "Category", 
-                                     color = "group", 
+        boxPlot <- ggpubr::ggboxplot(boxTab, x = "group", y = "Category",
+                                     color = "group",
                                      add = "jitter") +
           ggplot2::scale_color_manual(values=c("lightslateblue", "sienna2")) +
-          stat_compare_means(method = "t.test") + 
+          stat_compare_means(method = "t.test") +
           ggplot2::labs(y=paste0(char_var, ' index'),
                         x='Group',
-                        title=split_class) + 
+                        title=split_class) +
           ggplot2::guides(color="none")
       }
 
@@ -450,13 +450,13 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all,
                          legend=list(font=list(size=14), y=0.5),
                          margin=list(l=70, r=70, b=80, t=60))
       }else{
-        boxPlot <- ggpubr::ggboxplot(boxTab, x = "group", y = "Category", 
-                             color = "group", 
+        boxPlot <- ggpubr::ggboxplot(boxTab, x = "group", y = "Category",
+                             color = "group",
                              add = "jitter") +
           ggplot2::scale_color_manual(values=c("lightslateblue", "sienna2")) +
           ggplot2::labs(y=paste0(char_var, ' index'),
                         x='Group',
-                        title=split_class) + 
+                        title=split_class) +
           ggplot2::guides(color="none")
       }
     }
@@ -483,13 +483,13 @@ DE_sub_char_plot_2 <- function(DE_split_char_table_all,
                        legend=list(font=list(size=14), y=0.5),
                        margin=list(l=70, r=70, b=80, t=60))
     }else{
-      boxPlot <- ggpubr::ggboxplot(boxTab, x = "group", y = "Category", 
-                                   color = "group", 
+      boxPlot <- ggpubr::ggboxplot(boxTab, x = "group", y = "Category",
+                                   color = "group",
                                    add = "jitter") +
         ggplot2::scale_color_manual(values=c("lightslateblue", "sienna2")) +
         ggplot2::labs(y=paste0(char_var, ' index'),
                       x='Group',
-                      title=split_class) + 
+                      title=split_class) +
         ggplot2::guides(color="none")
     }
   }

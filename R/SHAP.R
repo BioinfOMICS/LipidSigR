@@ -1,12 +1,12 @@
 #' @title SHAP
-#' @description This function uses the Shapley Additive exPlanations (SHAP)
+#' @description This function uses the SHapley Additive exPlanations (SHAP)
 #' approach to rank and visualize the feature importance based on a
 #' user-defined feature number.
 #' @param data The output data frame(list[[2]]) of
 #' \code{\link{ML_data_process}}.
-#' @param best_model The ouput list of
+#' @param best_model The output list of
 #' \code{\link{ML_data_process}} (list[[8]]).
-#' @param best_model_feature The ouput list of
+#' @param best_model_feature The output list of
 #' \code{\link{ML_data_process}} (list[[9]]).
 #' @param ML_method A character string for the machine learning method to be
 #' computed. Allowed methods include 'xgboost', 'Random_forest', 'SVM',

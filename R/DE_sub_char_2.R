@@ -1,6 +1,6 @@
 #' @title DE_sub_char_2
 #' @description In the \code{\link{DE_sub_char_2}}, lipid Characteristics
-#' Analysis will be conducted. Lipid species are categorized and summarised
+#' Analysis will be conducted. Lipid species are categorized and summarized
 #' into a new lipid expression table according to two selected
 #' lipid characteristics, then conducted differential expressed analysis. \\
 #' Note:
@@ -52,7 +52,7 @@
 #' @param trans_type Logical. If \bold{data_transform = TRUE}, transform
 #' exp_data by log10.
 #' @param centering A logical value indicating whether the variables should be
-#' shifted to be zero centered. AAlternately, a vector of length equal to the
+#' shifted to be zero centered. Alternately, a vector of length equal to the
 #' number of columns of x can be supplied. The value is passed to scale.
 #' (default: FALSE)
 #' @param scaling A logical value. If scaling = TRUE, each block is

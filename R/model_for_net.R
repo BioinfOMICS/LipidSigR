@@ -1,7 +1,7 @@
 #' @title model_for_net
 #' @description Select feature importance from the model of
 #' \code{\link{ML_final}}. Two methods can be applied, namely
-#' ‘Algorithm-based’ and ‘SHAP analysis’, to rank and the feature importance.
+#' 'Algorithm-based' and 'SHAP analysis', to rank and the feature importance.
 #' By choosing a certain feature number, specifying the number of features to
 #' be computed, and the average feature importance of the top 10 features from
 #' all CV runs will be displayed.
@@ -14,7 +14,7 @@
 #' feature importance. Allowed methods are
 #' \bold{Algorithm-based} and \bold{SHAP}.
 #' @param best_model The output list of \code{\link{ML_final}}.
-#' @param best_model_feature The ouput list of \code{\link{ML_final}}.
+#' @param best_model_feature The output list of \code{\link{ML_final}}.
 #' @param feature_num A numeric value specifying the number of features to
 #' be computed.
 #' @param nsim A positive integer indicating the times of simulation.

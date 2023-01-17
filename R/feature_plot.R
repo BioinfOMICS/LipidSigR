@@ -1,7 +1,7 @@
 #' @title feature_plot
 #' @description The function computes and ranks the contribution of each
 #' feature based on user-defined feature number, and visualizes the feature
-#' importance. In the ‘Algorithm-based’ part, when users choose a certain
+#' importance. In the 'Algorithm-based' part, when users choose a certain
 #' feature number, the selected frequency of top N features from all CV runs
 #' will be displayed. For a Linear SVM, Lasso, Ridge, or ElasticNet model, the
 #' importance of each feature depends on the absolute value of their
