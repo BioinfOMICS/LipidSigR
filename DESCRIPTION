@@ -58,7 +58,8 @@ Imports:
     ggraph,
     tidygraph,
     igraph,
-    SHAPforxgboost
+    SHAPforxgboost,
+    fastshap
 Suggests:
     devtools,
     roxygen2,
@@ -68,7 +69,6 @@ Suggests:
 Enhances:
     rstatix,
     data.table,
-    fastshap,
     tidyverse,
     ggforce,
     parsnip,
