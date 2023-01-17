@@ -331,15 +331,15 @@ PCA_result[[6]]
 
 \subsubsection{t-SNE}
 \label{t-SNE}
-t-SNE (t-Distributed Stochastic Neighbour Embedding) is an unsupervised
+t-SNE (t-Distributed Stochastic Neighbor Embedding) is an unsupervised
 non-linear dimensionality reduction technique that tries to retain the local
-structure(cluster) of data when visualising the high-dimensional datasets.
+structure(cluster) of data when visualizing the high-dimensional datasets.
 Package \CRANpkg{Rtsne} is used for calculation, and PCA is applied as a
-pre-processing step. In t-SNE, \Robject{perplexity} and \Robject{max\_iter}
+preprocessing step. In t-SNE, \Robject{perplexity} and \Robject{max\_iter}
 are adjustable for users. The \Robject{perplexity} may be considered as a knob
-that sets the number of effective nearest neighbours, while \Robject{max\_iter}
+that sets the number of effective nearest neighbors, while \Robject{max\_iter}
 is the maximum number of iterations to perform. The typical perplexity range
-between 5 and 50, but if the t-SNE plot shows a ‘ball’ with uniformly
+between 5 and 50, but if the t-SNE plot shows a 'ball' with uniformly
 distributed points, you may need to lower your perplexity
 \cite{van2008visualizing}.
 <<Profiling: dimensionality reduction - t-SNE>>=
@@ -377,14 +377,14 @@ UMAP (Uniform Manifold Approximation and Projection) using a nonlinear
 dimensionality reduction method, Manifold learning, which effectively
 visualizing clusters or groups of data points and their relative proximities.
 Both tSNE and UMAP are intended to predominantly preserve the local structure
-that is to group neighbouring data points which certainly delivers a very
+that is to group neighboring data points which certainly delivers a very
 informative visualization of heterogeneity in the data. The significant
 difference with t-SNE is scalability, which allows UMAP eliminating the need for
-applying pre-processing step (such as PCA). Besides, UMAP applies Graph
+applying preprocessing step (such as PCA). Besides, UMAP applies Graph
 Laplacian for its initialization as tSNE by default implements random
 initialization. Thus, some people suggest that the key problem of tSNE
 is the Kullback-Leibler (KL) divergence, which makes UMAP superior over t-SNE.
-Nevertheless, UMAP’s cluster may not good enough for multi-class pattern
+Nevertheless, UMAP's cluster may not good enough for multi-class pattern
 classification \cite{mcinnes2018umap}.
 
 The type of distance metric to find nearest neighbors the size of the local
@@ -528,7 +528,7 @@ expressed analysis.
   \item \textbf{Lipid species analysis}: The lipid species analysis explores the
   significant lipid species based on differentially expressed analysis. Data are
   analyzed based on each lipid species. Further analysis and visualization
-  ethods, include
+  methods, include
      \begin{enumerate}
         \item dimensionality reduction,
         \item hierarchical clustering,
@@ -755,10 +755,10 @@ DEspec_PCA[[6]]
 DEspec_PCA[[7]]
 @
 
-  \item \textbf{t-SNE (t-Distributed Stochastic Neighbour Embedding)}\\
-    t-Distributed Stochastic Neighbour Embedding (t-SNE) is an unsupervised
+  \item \textbf{t-SNE (t-Distributed Stochastic Neighbor Embedding)}\\
+    t-Distributed Stochastic Neighbor Embedding (t-SNE) is an unsupervised
     non-linear dimensionality reduction technique that tries to retain the local
-    structure(cluster) of data when visualising the high-dimensional datasets.
+    structure(cluster) of data when visualizing the high-dimensional datasets.
     For detailed information of t-SNE, please refer to Section \ref{t-SNE}.
 
 <<DE_lipid species: dimensionality reduction - t-SNE>>=
@@ -1552,10 +1552,10 @@ DEchar_PCA[[6]]
 @
 
 
-  \item \textbf{t-SNE (t-distributed stochastic neighbour embedding)}\\
-    t-Distributed Stochastic Neighbour Embedding (t-SNE) is an unsupervised
+  \item \textbf{t-SNE (t-distributed stochastic neighbor embedding)}\\
+    t-Distributed Stochastic Neighbor Embedding (t-SNE) is an unsupervised
     non-linear dimensionality reduction technique that tries to retain the local
-    structure(cluster) of data when visualising the high-dimensional datasets.
+    structure(cluster) of data when visualizing the high-dimensional datasets.
     For detailed information of t-SNE, please refer to Section \ref{t-SNE}.
 <<DE_lipid characteristics: dimensionality reduction - t-SNE>>=
 # get lipid characteristics
@@ -2292,7 +2292,7 @@ SHAP_output <- SHAP(ML_data[[2]], best_model=ML_output[[8]],
                     best_model_feature=ML_output[[9]],
                     ML_method='Random_forest', feature_n=10, nsim=5,
                     plotly=FALSE)
-# visualize each predictor’s attributions
+# visualize each predictor's attributions
 SHAP_force_result <- SHAP_forceplot(SHAP_output[[1]], topN_feature=10,
                                     cluster_method="ward.D", group_num=10,
                                     plotly=FALSE)
@@ -2359,7 +2359,7 @@ coefficients between each other.
 
 To build a network, nodes (features) are filled based on feature importance
 whereas line width represents the value of the correlation coefficient. Two
-methods, ‘Algorithm-based’ and ‘SHAP analysis’, can be selected to evaluate
+methods, 'Algorithm-based' and 'SHAP analysis', can be selected to evaluate
 feature importance. The detailed information about them can be found in the
 Feature importance section (Section \ref{subsec:feature_im}). A plus or minus
 are assigned to feature importance in SHAP analysis based on the direction of
@@ -2688,7 +2688,7 @@ variables to predict the outcome of a continuous response variable, allowing
 us to estimate the associations between lipid levels and clinical features.
 Lipids are classified and summed by the user-selected lipid characteristics
 (e.g., class), then implementing univariate or multivariate linear regression
-analysis with whether ‘adjusted table’ is provided. Each component in the
+analysis with whether 'adjusted table' is provided. Each component in the
 selected characteristics will be assigned a beta coefficient and t statistic
 (p-value), which can be chosen for clustering.
 
