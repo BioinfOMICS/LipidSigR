@@ -86,7 +86,7 @@ test_that("Feature importance function computed successfullly.", {
   expect_s3_class(feature_result[[3]], "data.frame")
   expect_s3_class(feature_result[[2]], "plotly")
   expect_s3_class(feature_result[[4]], "plotly")
-
+  
   ## SHAP
   SHAP_output <- SHAP(ML_data[[2]], best_model=ML_output[[8]],
                       best_model_feature=ML_output[[9]],
@@ -96,7 +96,7 @@ test_that("Feature importance function computed successfullly.", {
   expect_s3_class(SHAP_output[[2]], "data.frame")
   expect_s3_class(SHAP_output[[3]], "plotly")
   expect_s3_class(SHAP_output[[4]], "plotly")
-
+  
   ## SHAP feature importance of 10 samples
   SHAP_sample_result <- SHAP_sample(SHAP_output[[2]], n_sample=10,
                                     plotly=TRUE)
