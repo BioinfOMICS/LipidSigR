@@ -91,7 +91,7 @@ elements to be shown.}
 Return a list with 1 model, 2 data frame, and 4 plots.
 \enumerate{
 \item pca: prcomp (lists of the standard deviations, the matrix of variable
-loadings, the value of the rotated data, the centering and scaling )
+loading, the value of the rotated data, the centering and scaling )
 \item pca_rotated_data: a data frame of PCA rotated data
 \item pca_contrib_table: data frame, PCA contribution table
 \item pca_biplot: PCA plot

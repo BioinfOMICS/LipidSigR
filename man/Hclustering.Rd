@@ -66,8 +66,8 @@ control group and the experimental group.
 \item sig.lipid: a heatmap provides significant, user-selected
 lipid characteristics that illustrate the differences between the
 control group and the experimental group.
-\item all.lipid.data: the matrix of the heamap-\bold{all.lipid}
-\item sig.lipid.data: the matrix of the heamap-\bold{sig.lipid}
+\item all.lipid.data: the matrix of the heatmap-\bold{all.lipid}
+\item sig.lipid.data: the matrix of the heatmap-\bold{sig.lipid}
 }
 }
 \description{

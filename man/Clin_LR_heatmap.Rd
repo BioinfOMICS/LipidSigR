@@ -34,7 +34,7 @@ into the algorithm and used to adjust the confounding effect.}
 \bold{"BH"}, \bold{"BY"}, \bold{"fdr"}, \bold{"none"},
 can be abbreviated. (default: "BH")}
 
-\item{sig_stat}{A character string indicating which pvalue is to be used for
+\item{sig_stat}{A character string indicating which p-value is to be used for
 the statistically significant. One of \bold{"p.adj"} or \bold{"p"}.
 (default: "p.adj")}
 

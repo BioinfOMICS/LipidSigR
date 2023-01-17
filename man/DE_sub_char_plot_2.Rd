@@ -17,35 +17,35 @@ DE_sub_char_plot_2(
 )
 }
 \arguments{
-\item{DE_split_char_table_all}{A data frame. The output of 
+\item{DE_split_char_table_all}{A data frame. The output of
 \code{\link{DE_sub_char_2}}.}
 
-\item{DE_split_char_index}{A data frame. The output of 
+\item{DE_split_char_index}{A data frame. The output of
 \code{\link{DE_sub_char_2}}.}
 
-\item{group_info}{A data frame comprises the name of the sample, the label 
-of the sample, the group name of the sample, and the pair number represents 
-‘the pair’ for the t-test/Wilcoxon test. NAs are allowed. NAs are allowed.}
+\item{group_info}{A data frame comprises the name of the sample, the label
+of the sample, the group name of the sample, and the pair number represents
+'the pair' for the t-test/Wilcoxon test. NAs are allowed. NAs are allowed.}
 
-\item{char_var}{A character string of the first lipid characteristic 
-selected by users from the column name of \bold{lipid_char_table}, 
+\item{char_var}{A character string of the first lipid characteristic
+selected by users from the column name of \bold{lipid_char_table},
 such as total length.}
 
-\item{split_var}{A character string of the second lipid characteristic 
-selected by users from \bold{lipid_char_table} for the subgroup analysis, 
-such as class. \emph{NOTE: This parameter will be used to split data before 
+\item{split_var}{A character string of the second lipid characteristic
+selected by users from \bold{lipid_char_table} for the subgroup analysis,
+such as class. \emph{NOTE: This parameter will be used to split data before
 entering main lipid characteristic 'char_var'.}}
 
-\item{split_class}{A character string selected by users from the second 
-user-selected lipid characteristic (\bold{split_var}) to visualise the 
-specific plot for the selected category of that characteristic. For 
-example, when user set split_var= 'class', and split_class='PC', this 
+\item{split_class}{A character string selected by users from the second
+user-selected lipid characteristic (\bold{split_var}) to visualize the
+specific plot for the selected category of that characteristic. For
+example, when user set split_var= 'class', and split_class='PC', this
 indicates the results will be plots of PC.}
 
-\item{insert_ref_group}{A character string. The name of 'ctrl' 
+\item{insert_ref_group}{A character string. The name of 'ctrl'
 after name conversion.}
 
-\item{ref_group}{A character string. The name of 'exp' 
+\item{ref_group}{A character string. The name of 'exp'
 after name conversion.}
 
 \item{plotly}{Logical value. If TRUE, return the resulting plots dynamically.}
@@ -61,11 +61,11 @@ Return a list with 5 figures.
 }
 }
 \description{
-This \code{\link{DE_sub_char_plot_2}} is to visualise the 
+This \code{\link{DE_sub_char_plot_2}} is to visualize the
 result of \code{\link{DE_sub_char_2}}.
 \enumerate{
 \item The subgroup analysis of the first user-selected characteristics.
-\item Print a box plot, line plots (raw & sqrt scale), 
+\item Print a box plot, line plots (raw & sqrt scale),
 and bar plots (raw & sqrt scale).
 }
 }

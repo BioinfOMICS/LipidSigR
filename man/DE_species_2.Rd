@@ -41,7 +41,7 @@ comparing means. Allowed method include \bold{"t.test"} and
 \bold{"BH"}, \bold{"BY"}, \bold{"fdr"}, \bold{"none"}, can be
 abbreviated. (default: "BH")}
 
-\item{sig_stat}{A character string indicating which pvalue is to be used
+\item{sig_stat}{A character string indicating which p-value is to be used
 for the statistically significant. One of \bold{"p.adj"} or
 \bold{"p"}. (default: "p.adj")}
 

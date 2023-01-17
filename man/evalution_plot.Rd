@@ -27,7 +27,7 @@ Return a list of 1 tibble and 1plot.
 }
 \description{
 This function provides useful indicators for users to evaluate
-model performance, such as the average value and 95% confidence interval
+model performance, such as the average value and 95\% confidence interval
 of accuracy, sensitivity (recall), specificity,
 positive predictive value (precision), negative predictive value, F1 score,
  prevalence, detection rate, detection prevalence, balanced accuracy.

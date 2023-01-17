@@ -57,7 +57,7 @@ transform exp_data by log10.}
 \item{trans_type}{A character string of transformation type.}
 
 \item{centering}{A logical value indicating whether the variables should be
-shifted to be zero centered. AAlternately, a vector of length equal to
+shifted to be zero centered. Alternately, a vector of length equal to
 the number of columns of x can be supplied. The value is passed to scale.
 (default: FALSE)}
 

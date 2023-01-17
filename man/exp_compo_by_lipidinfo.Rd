@@ -28,7 +28,7 @@ Return 2 plots.
 \item A bar plot depicts the expression level of each sample within each
 group (e.g., PE, PC) of selected characteristics (e.g., class).
 \item A stacked horizontal bar chart of lipid class composition by the
-user-inputed parameter, \bold{'char_var'} (such as class) .
+user-input parameter, \bold{'char_var'} (such as class) .
 }
 }
 \description{

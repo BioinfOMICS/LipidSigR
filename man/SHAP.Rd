@@ -18,10 +18,10 @@ SHAP(
 \item{data}{The output data frame(list[[2]]) of
 \code{\link{ML_data_process}}.}
 
-\item{best_model}{The ouput list of
+\item{best_model}{The output list of
 \code{\link{ML_data_process}} (list[[8]]).}
 
-\item{best_model_feature}{The ouput list of
+\item{best_model_feature}{The output list of
 \code{\link{ML_data_process}} (list[[9]]).}
 
 \item{ML_method}{A character string for the machine learning method to be
@@ -45,7 +45,7 @@ Return a list of 1 table, 1 data frame, and 2 plots.
 }
 }
 \description{
-This function uses the Shapley Additive exPlanations (SHAP)
+This function uses the SHapley Additive exPlanations (SHAP)
 approach to rank and visualize the feature importance based on a
 user-defined feature number.
 }
