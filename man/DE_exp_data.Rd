@@ -70,7 +70,7 @@ systolic heart failure (HFrEF) were analyzed by MS-based shotgun lipidomics.
 \source{
 Salatzki J, Foryst-Ludwig A, Bentele K, Blumrich A, Smeir E, Ban Z, et al.
 Adipose tissue ATGL modifies the cardiac lipidome in pressure-overload-induced
-left ventricular failure. PLoS genetics. 2018;14(1):e1007171
+left ventricular failure. PLoS genetics. 2018;14(1):e1007171.
 }
 \examples{
 data(DE_exp_data)

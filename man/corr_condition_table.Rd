@@ -25,7 +25,7 @@ obstructive pulmonary disease).
 \source{
 Bowler, Russell P., et al. "Plasma sphingolipids associated with chronic
 obstructive pulmonary disease phenotypes." American journal of respiratory and
-critical care medicine 191.3 (2015): 275-284.
+critical care medicine 191.3(2015):275-284.
 }
 \examples{
 data(corr_condition_table)

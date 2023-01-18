@@ -27,7 +27,7 @@ regression analysis.
 \source{
 Bowler, Russell P., et al. "Plasma sphingolipids associated with chronic
 obstructive pulmonary disease phenotypes." American journal of respiratory
-and critical care medicine 191.3 (2015): 275-284.
+and critical care medicine 191.3(2015):275-284.
 }
 \examples{
 data(corr_adjusted_table)

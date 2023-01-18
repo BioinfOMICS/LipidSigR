@@ -32,7 +32,7 @@ left Ventricular failure.
 \source{
 Salatzki J, Foryst-Ludwig A, Bentele K, Blumrich A, Smeir E, Ban Z, et al.
 Adipose tissue ATGL modifies the cardiac lipidome in pressure-overload-induced
-left ventricular failure. PLoS genetics. 2018;14(1):e1007171
+left ventricular failure. PLoS genetics. 2018;14(1):e1007171.
 }
 \examples{
 data(DE_lipid_char_table)
