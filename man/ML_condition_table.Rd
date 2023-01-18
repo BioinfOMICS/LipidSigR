@@ -6,7 +6,8 @@ ML_condition_table
 }
 \description{
 A data frame of sample names and clinical conditions for machine learning
-analysis workflow.
+analysis workflow. A selected clinical term (or one set of clinical terms) from
+demographic data with an assigned group number 0 or 1 to each sample.
 }
 \usage{data("ML_condition_table")}
 \format{
@@ -15,10 +16,6 @@ analysis workflow.
     \item{\code{sample_name}}{a character vector}
     \item{\code{group}}{a numeric vector}
   }
-}
-\details{
-A selected clinical term (or one set of clinical terms) from demographic data
-with an assigned group number 0 or 1 to each sample.
 }
 \source{
 Li H, Ning S, Ghandi M, Kryukov GV, Gopal S, Deik A, et al. The landscape of
