@@ -1,7 +1,7 @@
 Package: LipidSigR
 Type: Package
 Title: A comprehensive analysis for streamlined data mining of lipidomic data
-Version: 0.99.18
+Version: 0.99.19
 Authors@R: c(
     person("Wei-Chung", "Cheng", email="chenglabomics@gmail.com", role = c("aut","cre","cph"), comment = c(ORCID = "0000-0002-1229-4857")),
     person("Wen-Jen", "Lin", role = c("aut","ctb")),
@@ -13,6 +13,7 @@ Description:
     "Profiling" provides an overview of comprehensive analyses to efficiently examine data quality, the clustering of samples, the correlation between lipid species, and the composition of lipid characteristics. "Differential expression" integrates many useful lipid-focused analyses for identifying significant lipid species or lipid characteristics. "Machine learning" provides a broad variety of feature selection methods and classifiers to build binary classification models. Furthermore, the subsequent analyses can help users to evaluate the learning algorithm's performance and to explore important lipid-related variables. "Correlation" illustrates and compares the relationships between different clinical phenotypes and lipid features.
 License: MIT + file LICENSE
 URL: https://github.com/TMSWCChenglab/LipidSigR
+BugReports: https://github.com/TMSWCChenglab/LipidSigR/issues
 Encoding: UTF-8
 LazyData: FALSE
 RoxygenNote: 7.1.2
