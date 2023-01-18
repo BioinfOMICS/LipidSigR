@@ -6,7 +6,10 @@ DE_group_info
 }
 \description{
 A data frame of one clinical term (or one set of clinical terms) from
-demographic data for differential expression analysis workflow.
+demographic data for differential expression analysis workflow. The grouping
+information of samples. 10 healthy controls are considered as the control group
+while 13 patients with systolic heart failure (HFrEF) are considered as
+the experiment group.
 }
 \usage{data("DE_group_info")}
 \format{
@@ -18,15 +21,10 @@ demographic data for differential expression analysis workflow.
     \item{\code{pair}}{a logical vector, paired sample or not.}
   }
 }
-\details{
-The grouping information of samples. 10 healthy controls are considered as
-the control group while 13 patients with systolic heart failure (HFrEF)
-are considered as the experiment group.
-}
 \source{
 Salatzki J, Foryst-Ludwig A, Bentele K, Blumrich A, Smeir E, Ban Z, et al.
 Adipose tissue ATGL modifies the cardiac lipidome in pressure-overload-induced
-left ventricular failure. PLoS genetics. 2018;14(1):e1007171
+left ventricular failure. PLoS genetics. 2018;14(1):e1007171.
 }
 \examples{
 data(DE_group_info)
