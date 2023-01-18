@@ -5,8 +5,7 @@
 ML_condition_table
 }
 \description{
-A data frame of sample names and clinical conditions for machine learning
-analysis workflow.
+A data frame of sample names and clinical conditions for machine learning analysis workflow.
 }
 \usage{data("ML_condition_table")}
 \format{
@@ -16,15 +15,8 @@ analysis workflow.
     \item{\code{group}}{a numeric vector}
   }
 }
-\details{
-A selected clinical term (or one set of clinical terms) from demographic data
-with an assigned group number 0 or 1 to each sample.
-}
-\source{
-Li H, Ning S, Ghandi M, Kryukov GV, Gopal S, Deik A, et al. The landscape of
-cancer cell line metabolism. Nature medicine. 2019;25(5):850.
-}
 \examples{
 data(ML_condition_table)
+## maybe str(ML_condition_table) ; plot(ML_condition_table) ...
 }
 \keyword{datasets}

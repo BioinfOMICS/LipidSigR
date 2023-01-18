@@ -242,17 +242,6 @@ A data frame of lipid expression data for machine learning analysis workflow.
     \item{\code{ACH_000570}}{a numeric vector}
   }
 }
-\details{
-The data was modified from the paper "The landscape of cancer cell line
-metabolism" and divided cancer cell lines into sensitive or resistant to
-SCD gene knockout evenly based on gene dependency scores (CERES). 89 lipid
-species were used to predict 228 cancer cell lines with a label of 0 (sensitive)
-or 1 (resistant) by a binary classifier.
-}
-\source{
-Li H, Ning S, Ghandi M, Kryukov GV, Gopal S, Deik A, et al. The landscape of
-cancer cell line metabolism. Nature medicine. 2019;25(5):850.
-}
 \examples{
 data(ML_exp_data)
 }
