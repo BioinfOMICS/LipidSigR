@@ -23,10 +23,6 @@ dependency scores (CERES).
     \item{\code{totaldb}}{a numeric vector}
   }
 }
-\source{
-Li H, Ning S, Ghandi M, Kryukov GV, Gopal S, Deik A, et al. The landscape of
-cancer cell line metabolism. Nature medicine. 2019;25(5):850.
-}
 \examples{
 data(ML_lipid_char_table)
 }
