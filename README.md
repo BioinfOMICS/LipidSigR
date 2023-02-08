@@ -8,7 +8,7 @@ Before the installation you should first install the following packages from Bio
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
 
-BiocManager::install("LipidSigR")
+BiocManager::install("LipidSigR", version = "devel")
 ``` 
 
 Install the latest development version (on GitHub) via `{remotes}`:
