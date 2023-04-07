@@ -50,7 +50,7 @@
 #'                            varimp_method='Algorithm-based', ML_output[[8]],
 #'                            ML_output[[9]], feature_num=10, nsim=5)
 #' cor_network(ML_data[[1]], lipid_char_table, model_net[[2]], model_net[[3]],
-#'             cor_method='pearson', edge_cutoff=0)
+#'             cor_method='pearson', edge_cutoff=0, plotly=TRUE)
 cor_network <- function(exp_transform_table, lipid_char_table,
                         sig_feature, node_col,
                         cor_method, edge_cutoff, plotly=TRUE){
@@ -264,8 +264,9 @@ cor_network <- function(exp_transform_table, lipid_char_table,
                              colour="gray10") +
       ggraph::theme_graph(background="white") +
       ggplot2::guides(edge_width="none",
-                      edge_alpha="none")
+                      edge_alpha="none") +
+      ggraph::theme_graph(base_family="sans")
   }
 
-  return(visNetwork_plot=visNet)
+  return(list(visNetwork_plot=visNet))
 }

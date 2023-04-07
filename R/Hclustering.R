@@ -1,6 +1,6 @@
 #' @title Hclustering
-#' @description Hierarchical clustering of lipid species derived from
-#' two groups and  print two heatmaps.
+#' @description Hierarchical clustering of lipid species or characteristics
+#' derived from two groups and print a heatmap.
 #' @param exp_data A data frame includes the expression of lipid features
 #' in each sample. NAs are allowed. First column should be gene/lipid name and
 #' first column name must be 'feature'.
@@ -30,16 +30,15 @@
 #' name conversion.
 #' @param ref_group A character string. The name of 'exp' after name conversion.
 #' @param plotly Logical value. If TRUE, return the resulting plots dynamically.
-#' @return Return a list with 2 figures and 2 matrices.
+#' @param type It should be 'all' or 'sig.' 'all' for output the results of all
+#' lipid species or characteristics, and 'sig' for output the results of
+#' significant lipid species or characteristics.
+#' @return Return a list with a figures and a matrix.
 #' \enumerate{
-#' \item all.lipid: a heatmap provides an overview of user-selected
-#' lipid characteristics that illustrates the differences between the
-#' control group and the experimental group.
-#' \item sig.lipid: a heatmap provides significant, user-selected
-#' lipid characteristics that illustrate the differences between the
-#' control group and the experimental group.
-#' \item all.lipid.data: the matrix of the heatmap-\bold{all.lipid}
-#' \item sig.lipid.data: the matrix of the heatmap-\bold{sig.lipid}
+#' \item heatmap: a heatmap provides an overview of all/significant lipid
+#' species or characteristics that illustrates the differences
+#' between the control group and the experimental group.
+#' \item data: the matrix of the heatmap.
 #' }
 #' @export
 #' @examples
@@ -79,12 +78,12 @@
 #' Hclustering(exp_transform, DE_result_table=DE_species_table_sig,
 #'             group_info=group_info, lipid_char_table=lipid_char_filter,
 #'             char_var=char_var[1], distfun='pearson',
-#'             hclustfun='complete', plotly=TRUE)
+#'             hclustfun='complete', plotly=TRUE, type='all')
 Hclustering <- function(exp_data, DE_result_table, group_info,
                         lipid_char_table=NULL, char_var=NULL,
                         distfun='pearson', hclustfun='complete',
                         insert_ref_group=NULL, ref_group=NULL,
-                        plotly=TRUE){
+                        plotly=TRUE, type='all'){
 
   exp_data <- as.data.frame(exp_data)
   DE_result_table <- as.data.frame(DE_result_table)
@@ -104,7 +103,7 @@ Hclustering <- function(exp_data, DE_result_table, group_info,
            others must be 'numeric'")
     }
   }
-  if(tibble::is.tibble(exp_data)){
+  if(tibble::is_tibble(exp_data)){
     if(nrow(exp_data) != nrow(unique(exp_data[, 1]))){
       stop("The lipids name (features) must be unique")
     }
@@ -329,6 +328,13 @@ Hclustering <- function(exp_data, DE_result_table, group_info,
                                   unique(rowGroup.sig$class)[j])] <-
         row_sig_color[j]
     }
+    if(type=='all'){
+      row_color_label <- row_all_color_label
+    }else if(type=='sig'){
+      row_color_label <- row_sig_color_label
+    }
+  }else{
+    row_color_label <- NULL
   }
   if(distfun %in% c("pearson", "kendall", "spearman")){
     dist_fun <- function(x) stats::as.dist(1-stats::cor(t(x), method=distfun))
@@ -364,113 +370,120 @@ Hclustering <- function(exp_data, DE_result_table, group_info,
     }
     return(color)
   }
-  #### all exp ####
-  if(nrow(exp.mat.all) >= 2 & ncol(exp.mat.all) >= 2 &
-     sum(is.na(exp.mat.all)) == 0){
 
-    if(max(nchar(rownames(exp.mat.all))) < 10){
+  if(type=='all'){
+    data <- exp.mat.all
+  }else if(type=='sig'){
+    data <- exp.mat.sig
+  }
+
+  if(nrow(data) >= 2 & ncol(data) >= 2 &
+     sum(is.na(data)) == 0){
+
+    if(max(nchar(rownames(data))) < 10){
       all_row_text_size <- 0.1
-    }else if(max(nchar(rownames(exp.mat.all))) >= 10 &
-             max(nchar(rownames(exp.mat.all))) < 20){
+    }else if(max(nchar(rownames(data))) >= 10 &
+             max(nchar(rownames(data))) < 20){
       all_row_text_size <- 0.2
-    }else if(max(nchar(rownames(exp.mat.all))) >= 20 &
-             max(nchar(rownames(exp.mat.all))) <30){
+    }else if(max(nchar(rownames(data))) >= 20 &
+             max(nchar(rownames(data))) <30){
       all_row_text_size <- 0.3
-    }else if(max(nchar(rownames(exp.mat.all))) >= 30 &
-             max(nchar(rownames(exp.mat.all))) < 40){
+    }else if(max(nchar(rownames(data))) >= 30 &
+             max(nchar(rownames(data))) < 40){
       all_row_text_size <- 0.4
     }else {
       all_row_text_size <- 0.5
     }
-    if(max(nchar(colnames(exp.mat.all))) < 10){
+    if(max(nchar(colnames(data))) < 10){
       all_col_text_size <- 0.1
-    }else if(max(nchar(colnames(exp.mat.all))) >= 10 &
-             max(nchar(colnames(exp.mat.all))) < 20){
+    }else if(max(nchar(colnames(data))) >= 10 &
+             max(nchar(colnames(data))) < 20){
       all_col_text_size <- 0.2
-    }else if(max(nchar(colnames(exp.mat.all))) >= 20 &
-             max(nchar(colnames(exp.mat.all))) < 30){
+    }else if(max(nchar(colnames(data))) >= 20 &
+             max(nchar(colnames(data))) < 30){
       all_col_text_size <- 0.3
-    }else if(max(nchar(colnames(exp.mat.all))) >= 30 &
-             max(nchar(colnames(exp.mat.all))) < 40){
+    }else if(max(nchar(colnames(data))) >= 30 &
+             max(nchar(colnames(data))) < 40){
       all_col_text_size <- 0.4
     }else {
       all_col_text_size <- 0.5
     }
-    exp.mat.all <- sweep(exp.mat.all, 1, rowMeans(exp.mat.all, na.rm=TRUE))
-    exp.mat.all <- sweep(exp.mat.all, 1, apply(exp.mat.all, 1,
-                                               sd, na.rm=TRUE), "/")
-    if(sum(is.na(exp.mat.all)) > 0){
-      exp.mat.all <- exp.mat.all[-which(is.na(exp.mat.all[, 2])), ]
+    data <- sweep(data, 1, rowMeans(data, na.rm=TRUE))
+    data <- sweep(data, 1, apply(data, 1,
+                                 sd, na.rm=TRUE), "/")
+    if(sum(is.na(data)) > 0){
+      data <- data[-which(is.na(data[, 2])), ]
     }
     cb_grid <- iheatmapr::setup_colorbar_grid(y_length =0.6,
                                               x_start=1, y_start=0.4)
     if(distfun %in% c("pearson", "kendall", "spearman")){
       col_dend <- stats::hclust(
-        stats::as.dist(1-stats::cor(exp.mat.all, method=distfun)),
+        stats::as.dist(1-stats::cor(data, method=distfun)),
         method=hclustfun)
       row_dend <- stats::hclust(
-        stats::as.dist(1-stats::cor(t(exp.mat.all), method=distfun)),
+        stats::as.dist(1-stats::cor(t(data), method=distfun)),
         method=hclustfun)
     }else{
       col_dend <- stats::hclust(
-        stats::dist(t(exp.mat.all), method=distfun),method=hclustfun)
+        stats::dist(t(data), method=distfun),method=hclustfun)
       row_dend <- stats::hclust(
-        stats::dist(exp.mat.all, method=distfun), method=hclustfun)
+        stats::dist(data, method=distfun), method=hclustfun)
     }
     if(plotly == TRUE){
-      if(min(exp.mat.all) >= 0 || max(exp.mat.all) <= 0){
-        heatmap.all <- iheatmapr::iheatmap(
-          exp.mat.all, colors=heatmap_color_scale(exp.mat.all),
+      if(min(data) >= 0 || max(data) <= 0){
+        heatmap <- iheatmapr::iheatmap(
+          data, colors=heatmap_color_scale(data),
           colorbar_grid=cb_grid, scale="rows")
       }else{
-        heatmap.all <- iheatmapr::iheatmap(
-          exp.mat.all, colorbar_grid=cb_grid, scale="rows")
+        heatmap <- iheatmapr::iheatmap(
+          data, colorbar_grid=cb_grid, scale="rows")
       }
-      heatmap.all <- heatmap.all %>%
+      heatmap <- heatmap %>%
         iheatmapr::add_col_annotation(annotation=colGroup,
                                       side="top",
-                                      show_colorbar=FALSE) %>%
-        iheatmapr::add_col_dendro(col_dend, side="top", reorder =TRUE) %>%
-        iheatmapr::add_row_dendro(row_dend, side="right", reorder =TRUE)
-      if(ncol(exp.mat.all) <= 50){
-        heatmap.all <- heatmap.all %>%
-          iheatmapr::add_col_labels(side="bottom",
-                                    size=all_col_text_size)
-      }
-      if(nrow(exp.mat.all)<=50){
-        heatmap.all <- heatmap.all %>%
-          iheatmapr::add_row_labels(side="left", size=all_row_text_size)
-      }
+                                      show_colorbar=FALSE)
       if(!is.null(lipid_char_table) & !is.null(char_var)){
-        heatmap.all <- heatmap.all %>%
+        heatmap <- heatmap %>%
           iheatmapr::add_row_annotation(annotation=rowGroup.all,
                                         side="right",
                                         show_colorbar=FALSE)
       }
+      heatmap <- heatmap %>%
+        iheatmapr::add_col_dendro(col_dend, side="top", reorder =TRUE) %>%
+        iheatmapr::add_row_dendro(row_dend, side="right", reorder =TRUE)
+      if(ncol(data) <= 50){
+        heatmap <- heatmap %>%
+          iheatmapr::add_col_labels(side="bottom",
+                                    size=all_col_text_size)
+      }
+      if(nrow(data)<=50){
+        heatmap <- heatmap %>%
+          iheatmapr::add_row_labels(side="left", size=all_row_text_size)
+      }
     }else{
-      if(min(exp.mat.all) >= 0 || max(exp.mat.all) <= 0){
-        all_color_scale <- heatmap_color_scale(exp.mat.all)
+      if(min(data) >= 0 || max(data) <= 0){
+        all_color_scale <- heatmap_color_scale(data)
       }else{
         all_color_scale <- grDevices::colorRampPalette(c("#92c5de",
-                                      "white",
-                                      "#f4a582"))(n=2500)
+                                                         "white",
+                                                         "#f4a582"))(n=2500)
       }
       if(!is.null(lipid_char_table) & !is.null(char_var)){
         stats::heatmap(
-          exp.mat.all, Rowv=TRUE, Colv=FALSE,
+          data, Rowv=TRUE, Colv=FALSE,
           dendrogram='both', trace="none",
           col=all_color_scale,
           distfun=dist_fun,
           hclustfun=hclust_fun,
           ColSideColors=col_color_label,
-          RowSideColors=row_all_color_label,
+          RowSideColors=row_color_label,
           main=NULL,
           margins=c(8,8),
           lwid=c(1, 9),
           scale='none')
       }else{
         stats::heatmap(
-          exp.mat.all, Rowv=TRUE, Colv=FALSE,
+          data, Rowv=TRUE, Colv=FALSE,
           dendrogram='both', trace="none",
           col=all_color_scale,
           distfun=dist_fun,
@@ -482,141 +495,19 @@ Hclustering <- function(exp_data, DE_result_table, group_info,
           scale='none')
       }
 
-      heatmap.all <- grDevices::recordPlot()
+      heatmap <- grDevices::recordPlot()
       grDevices::dev.off()
     }
-    reorder.data.all <- exp.mat.all[rev(row_dend$order), col_dend$order]
+    reorder.data <- data[rev(row_dend$order), col_dend$order]
 
   }else{
 
-    heatmap.all <- NULL
-    reorder.data.all <- NULL
+    heatmap <- NULL
+    reorder.data <- NULL
   }
 
 
-  #### sig exp ####
-  if(nrow(exp.mat.sig) >= 2 & ncol(exp.mat.sig) >= 2 &
-     sum(is.na(exp.mat.all))==0){
 
-    if(max(nchar(rownames(exp.mat.sig))) < 10){
-      sig_row_text_size <- 0.1
-    }else if(max(nchar(rownames(exp.mat.sig))) >= 10 &
-             max(nchar(rownames(exp.mat.sig))) < 20){
-      sig_row_text_size <- 0.2
-    }else if(max(nchar(rownames(exp.mat.sig))) >= 20 &
-             max(nchar(rownames(exp.mat.sig))) < 30){
-      sig_row_text_size <- 0.3
-    }else if(max(nchar(rownames(exp.mat.sig))) >= 30 &
-             max(nchar(rownames(exp.mat.sig))) < 40){
-      sig_row_text_size <- 0.4
-    }else {
-      sig_row_text_size <- 0.5
-    }
-    if(max(nchar(colnames(exp.mat.sig))) < 10){
-      sig_col_text_size <- 0.1
-    }else if(max(nchar(colnames(exp.mat.sig))) >= 10 &
-             max(nchar(colnames(exp.mat.sig))) < 20){
-      sig_col_text_size <- 0.2
-    }else if(max(nchar(colnames(exp.mat.sig))) >= 20 &
-             max(nchar(colnames(exp.mat.sig))) < 30){
-      sig_col_text_size <- 0.3
-    }else if(max(nchar(colnames(exp.mat.sig))) >= 30 &
-             max(nchar(colnames(exp.mat.sig))) < 40){
-      sig_col_text_size <- 0.4
-    }else {
-      sig_col_text_size <- 0.5
-    }
-    exp.mat.sig <- sweep(exp.mat.sig, 1, rowMeans(exp.mat.sig, na.rm=TRUE))
-    exp.mat.sig <- sweep(exp.mat.sig, 1,
-                         apply(exp.mat.sig, 1, sd, na.rm=TRUE), "/")
-    cb_grid <- iheatmapr::setup_colorbar_grid(y_length =0.6,
-                                              x_start=1, y_start=0.4)
-    if(distfun %in% c("pearson", "kendall", "spearman")){
-      col_dend <- stats::hclust(
-        stats::as.dist(1-stats::cor(exp.mat.sig, method=distfun)),
-        method=hclustfun)
-      row_dend <- stats::hclust(
-        stats::as.dist(1-stats::cor(t(exp.mat.sig), method=distfun)),
-        method=hclustfun)
-    }else{
-      col_dend <- stats::hclust(stats::dist(t(exp.mat.sig), method=distfun),
-                                method=hclustfun)
-      row_dend <- stats::hclust(stats::dist(exp.mat.sig, method=distfun),
-                                method=hclustfun)
-    }
-    if(plotly == TRUE){
-      if(min(exp.mat.sig) > 0 || max(exp.mat.sig) < 0){
-        heatmap.sig <- iheatmapr::iheatmap(
-          exp.mat.sig, colors=heatmap_color_scale(exp.mat.sig),
-          colorbar_grid=cb_grid, scale="rows")
-      }else{
-        heatmap.sig <- iheatmapr::iheatmap(
-          exp.mat.sig, colorbar_grid=cb_grid, scale="rows")
-      }
-      heatmap.sig <- heatmap.sig %>%
-        iheatmapr::add_col_annotation(annotation=colGroup,
-                                      show_colorbar=FALSE) %>%
-        iheatmapr::add_col_dendro(col_dend, reorder=TRUE) %>%
-        iheatmapr::add_row_dendro(row_dend, side="right", reorder=TRUE)
-      if(!is.null(lipid_char_table) & !is.null(char_var)){
-        heatmap.sig <- heatmap.sig %>%
-          iheatmapr::add_row_annotation(annotation=rowGroup.sig,
-                                        show_colorbar=FALSE)
-      }
-      if(ncol(exp.mat.sig) <= 50){
-        heatmap.sig <- heatmap.sig %>%
-          iheatmapr::add_col_labels(size=sig_col_text_size)
-      }
-      if(nrow(exp.mat.sig) <= 50){
-        heatmap.sig <- heatmap.sig %>%
-          iheatmapr::add_row_labels(side="left", size=sig_row_text_size)
-      }
-    }else{
-      if(min(exp.mat.sig) > 0 || max(exp.mat.sig) < 0){
-        sig_color_scale <- heatmap_color_scale(exp.mat.sig)
-      }else{
-        sig_color_scale <- grDevices::colorRampPalette(c("#92c5de",
-                                      "white",
-                                      "#f4a582"))(n=2500)
-      }
-      if(!is.null(lipid_char_table) & !is.null(char_var)){
-        stats::heatmap(
-          exp.mat.sig, Rowv=TRUE, Colv=FALSE,
-          dendrogram='both', trace="none",
-          col=sig_color_scale,
-          distfun=dist_fun,
-          hclustfun=hclust_fun,
-          ColSideColors=col_color_label,
-          RowSideColors=row_sig_color_label,
-          main=NULL,
-          margins=c(8,8),
-          lwid=c(1, 9),
-          scale='none')
-      }else{
-        stats::heatmap(
-          exp.mat.sig, Rowv=TRUE, Colv=FALSE,
-          dendrogram='both', trace="none",
-          col=sig_color_scale,
-          distfun=dist_fun,
-          hclustfun=hclust_fun,
-          ColSideColors=col_color_label,
-          main=NULL,
-          margins=c(8,8),
-          lwid=c(1, 9),
-          scale='none')
-      }
-      heatmap.sig <- grDevices::recordPlot()
-      grDevices::dev.off()
-    }
-    reorder.data.sig<-exp.mat.sig[rev(row_dend$order), col_dend$order]
 
-  }else{
-
-    heatmap.sig <- NULL
-    reorder.data.sig <- NULL
-  }
-
-  return(list(all.lipid=heatmap.all, sig.lipid=heatmap.sig,
-              all.lipid.data=reorder.data.all, sig.lipid.data=reorder.data.sig))
-
+  return(list(heatmap=heatmap, data=reorder.data))
 } #function

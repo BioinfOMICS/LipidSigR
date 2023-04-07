@@ -130,10 +130,12 @@ tsne <- function(exp_transform_table, group_info=NULL, sig_feature=NULL,
         stop("group_info each pair must have a specific number, staring from
              1 to N. Cannot have NA, blank, or skip numbers.")
       }
-      if(sum(group_info[, 1] %in% colnames(exp_data)) != nrow(group_info) |
-         sum(group_info[, 1] %in% colnames(exp_data)) != ncol(exp_data[, -1])){
+      if(sum(group_info[, 1] %in%
+             colnames(exp_transform_table)) != nrow(group_info) |
+         sum(group_info[, 1] %in%
+             colnames(exp_transform_table)) != ncol(exp_transform_table[, -1])){
         stop("group_info 'sample_name' must same as the name of samples of
-             exp_data")
+             exp_transform_table")
       }
       if(length(unique(group_info[, 3])) == 2){
         if(sum(table(group_info[, 3]) >= 1) != 2){
@@ -158,10 +160,12 @@ tsne <- function(exp_transform_table, group_info=NULL, sig_feature=NULL,
       if(sum(vapply(group_info,class,character(1)) != "character") != 0){
         stop("group_info first 3 columns must be characters.")
       }
-      if(sum(group_info[, 1] %in% colnames(exp_data)) != nrow(group_info) |
-         sum(group_info[, 1] %in% colnames(exp_data)) != ncol(exp_data[,-1])){
+      if(sum(group_info[, 1] %in%
+             colnames(exp_transform_table)) != nrow(group_info) |
+         sum(group_info[, 1] %in%
+             colnames(exp_transform_table)) != ncol(exp_transform_table[,-1])){
         stop("group_info 'sample_name' must same as the name of samples of
-             exp_data")
+             exp_transform_table")
       }
       if(length(unique(group_info[, 3])) == 2){
         if(sum(table(group_info[, 3]) >= 1) != 2){
