@@ -77,5 +77,5 @@ model_net <- model_for_net(ML_data[[2]], ML_method='Random_forest',
                            varimp_method='Algorithm-based', ML_output[[8]],
                            ML_output[[9]], feature_num=10, nsim=5)
 cor_network(ML_data[[1]], lipid_char_table, model_net[[2]], model_net[[3]],
-            cor_method='pearson', edge_cutoff=0)
+            cor_method='pearson', edge_cutoff=0, plotly=TRUE)
 }

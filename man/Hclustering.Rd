@@ -14,7 +14,8 @@ Hclustering(
   hclustfun = "complete",
   insert_ref_group = NULL,
   ref_group = NULL,
-  plotly = TRUE
+  plotly = TRUE,
+  type = "all"
 )
 }
 \arguments{
@@ -56,23 +57,23 @@ name conversion.}
 \item{ref_group}{A character string. The name of 'exp' after name conversion.}
 
 \item{plotly}{Logical value. If TRUE, return the resulting plots dynamically.}
+
+\item{type}{It should be 'all' or 'sig.' 'all' for output the results of all
+lipid species or characteristics, and 'sig' for output the results of
+significant lipid species or characteristics.}
 }
 \value{
-Return a list with 2 figures and 2 matrices.
+Return a list with a figures and a matrix.
 \enumerate{
-\item all.lipid: a heatmap provides an overview of user-selected
-lipid characteristics that illustrates the differences between the
-control group and the experimental group.
-\item sig.lipid: a heatmap provides significant, user-selected
-lipid characteristics that illustrate the differences between the
-control group and the experimental group.
-\item all.lipid.data: the matrix of the heatmap-\bold{all.lipid}
-\item sig.lipid.data: the matrix of the heatmap-\bold{sig.lipid}
+\item heatmap: a heatmap provides an overview of all/significant lipid
+species or characteristics that illustrates the differences
+between the control group and the experimental group.
+\item data: the matrix of the heatmap.
 }
 }
 \description{
-Hierarchical clustering of lipid species derived from
-two groups and  print two heatmaps.
+Hierarchical clustering of lipid species or characteristics
+derived from two groups and print a heatmap.
 }
 \examples{
 library(magrittr)
@@ -111,5 +112,5 @@ char_var <- colnames(lipid_char_filter)[-1]
 Hclustering(exp_transform, DE_result_table=DE_species_table_sig,
             group_info=group_info, lipid_char_table=lipid_char_filter,
             char_var=char_var[1], distfun='pearson',
-            hclustfun='complete', plotly=TRUE)
+            hclustfun='complete', plotly=TRUE, type='all')
 }

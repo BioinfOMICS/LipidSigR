@@ -9,7 +9,8 @@ corr_heatmap(
   corr_method = "pearson",
   distfun = "maximum",
   hclustfun = "average",
-  plotly = TRUE
+  plotly = TRUE,
+  type = "sample"
 )
 }
 \arguments{
@@ -32,21 +33,20 @@ This should be (an unambiguous abbreviation of) one of "ward.D", "ward.D2",
 "median" (= WPGMC) or "centroid" (= UPGMC). (default: "average")}
 
 \item{plotly}{Logical value. If TRUE, return the resulting plots dynamically.}
+
+\item{type}{It should be 'sample' or 'lipid.' 'sample' outputs the
+correlation results of samples, and 'lipid' outputs output the correlation
+results of lipid species.}
 }
 \value{
-Return 2 plots and a list of 6 matrices.
+Return 1 plot and a list of 3 matrices.
 \enumerate{
-\item sample_corr_coef: a matrix of correlation coefficients between samples
-\item sample_corr_p: a matrix of correlation p-value between samples
-\item reorder_sample_corr_coef: a matrix of reorder sample correlation.
-\item lipids_corr_coef: a matrix of correlation coefficients
-between features (lipids).
-\item lipids_corr_p: a matrix of correlation p-value
-between features (lipids).
-\item reorder_lipids_corr_coef: reorder features (lipids)
-correlation coefficients matrix
-\item heatmap plot by samples
-\item heatmap plot by lipid species
+\item corr_coef: a matrix of correlation coefficients between samples
+or lipids.
+\item corr_p: a matrix of correlation p-value between samples or lipids.
+\item heatmap: a heatmap plot by samples or lipid species.
+\item reorder_data: a reorder sample or lipids correlation coefficients
+matrix.
 }
 }
 \description{
@@ -71,5 +71,5 @@ exp_transform <- data_process(exp_data, exclude_var_missing=TRUE,
                               data_transform=TRUE, trans_type='log',
                               centering=FALSE, scaling=FALSE)
 corr_heatmap(exp_transform, corr_method="pearson", distfun="maximum",
-             hclustfun="average", plotly=TRUE)
+             hclustfun="average", plotly=TRUE, type='sample')
 }
