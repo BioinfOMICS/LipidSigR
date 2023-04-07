@@ -189,13 +189,9 @@ missing values imputation, percentage transformation, log10 transformation, etc.
 head(exp_data[, 1:5], 5)
 # data processing of exp_data
 exp_transform_table <- data_process(exp_data, exclude_var_missing=TRUE,
-                                    missing_pct_limit=50,
-                                    replace_zero=TRUE, zero2what='min',
-                                    xmin=0.5, replace_NA=TRUE,
-                                    NA2what='min', ymin=0.5,
-                                    pct_transform=TRUE,
-                                    data_transform=TRUE, trans_type='log',
-                                    centering=FALSE, scaling=FALSE)
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # exp_data after data processing
 head(exp_transform_table[, 1:5], 5)
 @
@@ -265,20 +261,14 @@ interference of misleading information given by the overall mean.
 <<Profiling: dimensionality reductionPCA>>=
 # data processing of exp_data
 exp_transform_table <- data_process(exp_data, exclude_var_missing=TRUE,
-                                    missing_pct_limit=50,
-                                    replace_zero=TRUE, zero2what='min',
-                                    xmin=0.5, replace_NA=TRUE,
-                                    NA2what='min', ymin=0.5,
-                                    pct_transform=TRUE,
-                                    data_transform=TRUE, trans_type='log',
-                                    centering=FALSE, scaling=FALSE)
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # conduct PCA
-PCA_result <- PCA(exp_transform_table,
-                  group_info = NULL, sig_feature = NULL,
-                  scaling=TRUE, centering=TRUE, cluster_method='kmeans',
-                  group_num=2, var1 = NULL, var2 = NULL,
-                  insert_ref_group=NULL, ref_group=NULL,
-                  n_PC=c(1,2), top_n_feature=10, plotly=FALSE)
+PCA_result <- PCA(exp_transform_table, group_info = NULL, sig_feature = NULL,
+    cluster_method='kmeans', group_num=2, var1 = NULL, var2 = NULL,
+    insert_ref_group=NULL, ref_group=NULL, scaling=TRUE, centering=TRUE,
+    n_PC=c(1,2), top_n_feature=10, plotly=FALSE)
 
 # view result: PCA prcomp
 head(PCA_result[[1]], 1)
@@ -345,19 +335,14 @@ distributed points, you may need to lower your perplexity
 <<Profiling: dimensionality reduction - t-SNE>>=
 # data processing of exp_data
 exp_transform_table <- data_process(exp_data, exclude_var_missing=TRUE,
-                                    missing_pct_limit=50,
-                                    replace_zero=TRUE, zero2what='min',
-                                    xmin=0.5, replace_NA=TRUE,
-                                    NA2what='min', ymin=0.5,
-                                    pct_transform=TRUE,
-                                    data_transform=TRUE, trans_type='log',
-                                    centering=FALSE, scaling=FALSE)
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # conduct t-SNE
-tsne_result <- tsne(exp_transform_table, group_info = NULL,
-                    sig_feature = NULL, pca=TRUE, perplexity=5,
-                    max_iter=500, cluster_method='kmeans',
-                    group_num=2, var1 = 'euclidean', var2 = NULL,
-                    insert_ref_group = NULL, ref_group = NULL, plotly=FALSE)
+tsne_result <- tsne(exp_transform_table, group_info = NULL, sig_feature = NULL,
+    pca=TRUE, perplexity=5, max_iter=500, cluster_method='kmeans',group_num=2,
+    var1 = 'euclidean', var2 = NULL, insert_ref_group = NULL, ref_group = NULL,
+    plotly=FALSE)
 @
 
 <<>>=
@@ -396,20 +381,15 @@ data being preserved. Generally,  values are set in the range of 2 to 100.
 
 <<Profiling: dimensionality reduction - UMAP>>=
 # data processing of exp_data
-exp_transform_table <- data_process(exp_data, trans_type='log',
-                                    exclude_var_missing=TRUE,
-                                    missing_pct_limit=50,
-                                    replace_zero=TRUE, replace_NA=TRUE,
-                                    zero2what='min', xmin=0.5,
-                                    NA2what='min', ymin=0.5,
-                                    pct_transform=TRUE, centering=FALSE,
-                                    data_transform=TRUE, scaling=FALSE )
+exp_transform_table <- data_process(exp_data, exclude_var_missing=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # conduct UMAP
-UMAP_result <- UMAP(exp_transform_table, group_info=NULL,
-                    sig_feature=NULL, n_neighbors=15,
-                    scale=TRUE, metric='euclidean', group_num=2,
-                    cluster_method='kmeans', var1=NULL, var2=NULL,
-                    insert_ref_group=NULL, ref_group=NULL, plotly=FALSE)
+UMAP_result <- UMAP(exp_transform_table, group_info=NULL, sig_feature=NULL,
+    n_neighbors=15, scale=TRUE, metric='euclidean', group_num=2,
+    cluster_method='kmeans', var1=NULL, var2=NULL, insert_ref_group=NULL,
+    ref_group=NULL, plotly=FALSE)
 @
 
 <<>>=
@@ -428,63 +408,51 @@ species and also depicts the patterns in each group. The correlation is
 calculated by the method defined by parameter \Robject{corr\_method}, and the
 correlation coefficient is then clustered depending on method defined by
 parameter \Robject{distfun} and the distance defined by parameter
-\Robject{hclustfun}. Two heatmaps will be shown by lipid species and by samples.
+\Robject{hclustfun}. Users can choose to output the sample correlation or lipid correlation results by the parameter \Robject{type}.
 Please note that if the number of lipids or samples is over 50, the names of
 lipids/samples will not be shown on the heatmap.
 <<Profiling: correlation heatmap>>=
 # data processing of exp_data
 exp_transform <- data_process(exp_data, exclude_var_missing=TRUE,
-                              missing_pct_limit=50, replace_zero=TRUE,
-                              zero2what='min', xmin=0.5, replace_NA=TRUE,
-                              NA2what='min', ymin=0.5, pct_transform=TRUE,
-                              data_transform=TRUE, trans_type='log',
-                              centering=FALSE, scaling=FALSE)
-# correlation calculation
-corr_result <- corr_heatmap(exp_transform, corr_method="pearson",
-                            distfun="maximum", hclustfun="average",
-                            plotly=FALSE)
-
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
+# sample correlation calculation
+corr_sample_result <- corr_heatmap(exp_transform, corr_method="pearson",
+    distfun="maximum", hclustfun="average", plotly=FALSE, type='sample')
 @
 
 <<>>=
-# view result: matrix of correlation coefficients
-head(corr_result$sample_corr_coef[, 1:5], 5)
-@
-
-<<>>=
-# view result: matrix of correlation p-value
-head(corr_result$sample_corr_p[, 1:4], 5)
-@
-
-<<>>=
+# view result: matrix of sample correlation coefficients
+head(corr_sample_result$corr_coef[, 1:5], 5)
+# view result: matrix of sample correlation p-value
+head(corr_sample_result$corr_p[, 1:4], 5)
 # view result: matrix of reorder sample correlation
-head(corr_result$reorder_sample_corr_coef[, 1:3], 5)
-@
-
-<<>>=
-# view result: matrix of correlation coefficients between lipids
-head(corr_result$lipids_corr_coef[, 1:5], 5)
-@
-
-<<>>=
-# view result: matrix of correlation p-value between lipids
-head(corr_result$lipid_corr_p[, 1:4], 5)
+head(corr_sample_result$reorder_data[, 1:3], 5)
 @
 
 <<fig.cap = "\\textbf{Heatmap of sample to sample correlations} The heatmap reveals sample to sample correlations. Correlations between lipid species are colored from strong positive correlations (red) to no correlation (white).", fig.small=TRUE>>=
 # view result: sample-sample heatmap
-corr_result$sample_hm
+corr_sample_result$heatmap
 @
 
 <<>>=
-# view result: lipid-lipid correlation heatmap
-corr_result$lipids_hm
+# lipid correlation calculation
+corr_lipid_result <- corr_heatmap(exp_transform, corr_method="pearson",
+    distfun="maximum", hclustfun="average", plotly=FALSE, type='lipid')
+
+# view result: matrix of correlation coefficients between lipids
+head(corr_lipid_result$corr_coef[, 1:5], 5)
+# view result: matrix of correlation p-value between lipids
+head(corr_lipid_result$corr_p[, 1:4], 5)
+# view result: matrix of reorder lipids correlation
+head(corr_lipid_result$reorder_data[, 1:3], 5)
 @
-\begin{figure}
-  \includegraphics[width=0.65\textwidth]{images/lipids_hm.png}
-  \caption{\textbf{Heatmap of lipid to lipid correlations}The heatmap illustrates the lipid to lipid correlations. Correlations between lipid species are colored from strong positive correlation (red) to no correlation (white), to negative correlation (blue).}
-  \label{fig:corr_heamtap_lipidshm}
-\end{figure}
+
+<<fig.cap = "\\textbf{Heatmap of lipid species correlations} The heatmap reveals correlations between lipids. Correlations between lipid species are colored from strong positive correlations (red) to negative correlation (blue).", fig.small=TRUE>>=
+# view result: lipid-lipid correlation heatmap
+corr_lipid_result$heatmap
+@
 
 
 \subsection{Lipid characteristics}
@@ -585,13 +553,9 @@ missing values imputation, percentage transformation, log10 transformation, etc.
 head(exp_data[, 1:5], 5)
 # data processing of exp_data
 exp_transform_table <- data_process(exp_data, exclude_var_missing=TRUE,
-                                    missing_pct_limit=50,
-                                    replace_zero=TRUE, zero2what='min',
-                                    xmin=0.5, replace_NA=TRUE,
-                                    NA2what='min', ymin=0.5,
-                                    pct_transform=TRUE,
-                                    data_transform=TRUE, trans_type='log',
-                                    centering=FALSE, scaling=FALSE)
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 head(exp_transform_table[, 1:5], 5)
 @
 
@@ -610,19 +574,13 @@ Information" table.
 <<DE_lipid species: differentially expressed analysis>>=
 # data processing of exp_data (without log10 transformation)
 exp_transform_non_log <- data_process(exp_data, exclude_var_missing=TRUE,
-                                      missing_pct_limit=50, replace_zero=TRUE,
-                                      zero2what='min', xmin=0.5,
-                                      replace_NA=TRUE, NA2what='min',
-                                      ymin=0.5, pct_transform=TRUE,
-                                      data_transform=FALSE, trans_type='log',
-                                      centering=FALSE, scaling=FALSE)
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=FALSE, trans_type='log', centering=FALSE, scaling=FALSE)
 # conduct differentially expressed analysis of lipid species
-DE_species_result <- DE_species_2(exp_transform_non_log,
-                                  data_transform=TRUE,
-                                  group_info = group_info,
-                                  paired=FALSE, test='t.test',
-                                  adjust_p_method='BH', sig_stat='p.adj',
-                                  sig_pvalue=0.05, sig_FC=2, plotly=FALSE)
+DE_species_result <- DE_species_2(exp_transform_non_log, data_transform=TRUE,
+    group_info = group_info, paired=FALSE, test='t.test', adjust_p_method='BH',
+    sig_stat='p.adj', sig_pvalue=0.05, sig_FC=2, plotly=FALSE)
 @
 
 <<>>=
@@ -655,6 +613,8 @@ DE_species_result$DE_species_maplot
 DE_species_result$DE_species_volcano
 @
 
+\newpage
+
 \subsubsection{Dimensionality reduction}
 \label{DEdimensionReduce}
 Dimensionality reduction is common when dealing with large numbers of
@@ -680,41 +640,25 @@ refer to Section \ref{DimensionReduce}.
 <<DE_lipid species: dimensionality reduction - PCA>>=
 # data processing of exp_data
 exp_transform_table <- data_process(exp_data, exclude_var_missing=TRUE,
-                                    missing_pct_limit=50,
-                                    replace_zero=TRUE, zero2what='min',
-                                    xmin=0.5, replace_NA=TRUE,
-                                    NA2what='min', ymin=0.5,
-                                    pct_transform=TRUE,
-                                    data_transform=TRUE,
-                                    trans_type='log',
-                                    centering=FALSE, scaling=FALSE)
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # data processing of exp_data (without log10 transformation)
-exp_transform_non_log <- data_process(exp_data,
-                                      exclude_var_missing=TRUE,
-                                      missing_pct_limit=50,
-                                      replace_zero=TRUE,
-                                      zero2what='min', xmin=0.5,
-                                      replace_NA=TRUE, NA2what='min',
-                                      ymin=0.5, pct_transform=TRUE,
-                                      data_transform=FALSE,
-                                      trans_type='log',
-                                      centering=FALSE, scaling=FALSE)
+exp_transform_non_log <- data_process(exp_data, exclude_var_missing=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=FALSE, trans_type='log', centering=FALSE, scaling=FALSE)
 # filter significant lipid
 DE_species_table_sig <- DE_species_2(exp_transform_non_log,
-                                     data_transform=TRUE,
-                                     group_info = group_info, paired=FALSE,
-                                     test='t.test', adjust_p_method='BH',
-                                     sig_stat='p.adj',
-                                     sig_pvalue=0.05, sig_FC=2,
-                                     plotly=FALSE)$DE_species_table_sig
+    data_transform=TRUE, group_info = group_info, paired=FALSE,
+    test='t.test', adjust_p_method='BH', sig_stat='p.adj', sig_pvalue=0.05,
+    sig_FC=2, plotly=FALSE)$DE_species_table_sig
 # conduct PCA
-DEspec_PCA <- PCA(exp_transform_table,
-                  group_info = group_info,
-                  sig_feature = DE_species_table_sig$feature,
-                  scaling=TRUE, centering=TRUE, group_num=2,
-                  cluster_method='kmeans', var1=NULL, var2=NULL,
-                  insert_ref_group=NULL, ref_group=NULL,
-                  n_PC=c(1,2), top_n_feature=10, plotly=FALSE)
+DEspec_PCA <- PCA(exp_transform_table, group_info = group_info,
+    sig_feature = DE_species_table_sig$feature, scaling=TRUE,
+    centering=TRUE, group_num=2, cluster_method='kmeans', var1=NULL,
+    var2=NULL, insert_ref_group=NULL, ref_group=NULL, n_PC=c(1,2),
+    top_n_feature=10, plotly=FALSE)
 @
 
 <<>>=
@@ -737,18 +681,19 @@ head(DEspec_PCA[[3]][,1:3], 5)
 DEspec_PCA[[4]]
 @
 
+\newpage
 
 <<fig.cap = "\\textbf{PCA Results - scree plot}", fig.small=TRUE>>=
 # view result: scree plot
 DEspec_PCA[[5]]
 @
 
-
-\newpage
 <<fig.cap = "\\textbf{PCA Results - bar plot}", fig.small=TRUE>>=
 # view result: bar plot of contribution of top 10 features
 DEspec_PCA[[6]]
 @
+
+\newpage
 
 <<fig.cap ="\\textbf{PCA Results - correlation circle plot}", fig.small=TRUE>>=
 # view result: correlation circle plot of variables
@@ -764,42 +709,24 @@ DEspec_PCA[[7]]
 <<DE_lipid species: dimensionality reduction - t-SNE>>=
 # data processing of exp_data
 exp_transform_table <- data_process(exp_data, exclude_var_missing=TRUE,
-                                    missing_pct_limit=50,
-                                    replace_zero=TRUE, xmin=0.5,
-                                    zero2what='min', replace_NA=TRUE,
-                                    ymin=0.5, NA2what='min',
-                                    pct_transform=TRUE,
-                                    data_transform=TRUE,
-                                    trans_type='log',
-                                    centering=FALSE, scaling=FALSE)
+    missing_pct_limit=50, replace_zero=TRUE, xmin=0.5, zero2what='min',
+    replace_NA=TRUE, ymin=0.5, NA2what='min', pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # data processing of exp_data (without log10 transformation)
-exp_transform_non_log <- data_process(exp_data,
-                                      exclude_var_missing=TRUE,
-                                      missing_pct_limit=50,
-                                      replace_zero=TRUE,
-                                      zero2what='min', xmin=0.5,
-                                      replace_NA=TRUE, NA2what='min',
-                                      ymin=0.5, pct_transform=TRUE,
-                                      data_transform=FALSE,
-                                      trans_type='log',
-                                      centering=FALSE, scaling=FALSE)
+exp_transform_non_log <- data_process(exp_data, exclude_var_missing=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=FALSE, trans_type='log', centering=FALSE, scaling=FALSE)
 # filter significant lipid
 DE_species_table_sig <- DE_species_2(exp_transform_non_log,
-                                     data_transform=TRUE,
-                                     group_info = group_info,
-                                     paired=FALSE, test='t.test',
-                                     adjust_p_method='BH',
-                                     sig_stat='p.adj', sig_pvalue=0.05,
-                                     sig_FC=2,
-                                     plotly=FALSE)$DE_species_table_sig
+    data_transform=TRUE, group_info = group_info, paired=FALSE,
+    test='t.test', adjust_p_method='BH', sig_stat='p.adj', sig_pvalue=0.05,
+    sig_FC=2, plotly=FALSE)$DE_species_table_sig
 # conduct t-SNE
-DEspec_tsne <- tsne(exp_transform_table,
-                    group_info = group_info,
-                    sig_feature=DE_species_table_sig$feature,
-                    pca=TRUE, perplexity=5, max_iter=500,
-                    cluster_method='kmeans', group_num=2,
-                    var1 = 'euclidean', var2 = NULL,
-                    insert_ref_group=NULL, ref_group=NULL, plotly=FALSE)
+DEspec_tsne <- tsne(exp_transform_table, group_info = group_info,
+    sig_feature=DE_species_table_sig$feature, pca=TRUE, perplexity=5,
+    max_iter=500, cluster_method='kmeans', group_num=2, var1 = 'euclidean',
+    var2 = NULL, insert_ref_group=NULL, ref_group=NULL, plotly=FALSE)
 @
 
 <<>>=
@@ -821,41 +748,24 @@ DEspec_tsne[[2]]
 <<DE_lipid species: dimensionality reduction - UMAP>>=
 # data processing of exp_data
 exp_transform_table <- data_process(exp_data, exclude_var_missing=TRUE,
-                                    missing_pct_limit=50,
-                                    replace_zero=TRUE, xmin=0.5,
-                                    zero2what='min', replace_NA=TRUE,
-                                    ymin=0.5, NA2what='min',
-                                    pct_transform=TRUE,
-                                    data_transform=TRUE,
-                                    trans_type='log',
-                                    centering=FALSE, scaling=FALSE)
+    missing_pct_limit=50, replace_zero=TRUE, xmin=0.5, zero2what='min',
+    replace_NA=TRUE, ymin=0.5, NA2what='min', pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # data processing of exp_data (without log10 transformation)
-exp_transform_non_log <- data_process(exp_data,
-                                      exclude_var_missing=TRUE,
-                                      missing_pct_limit=50,
-                                      replace_zero=TRUE,
-                                      zero2what='min', xmin=0.5,
-                                      replace_NA=TRUE, NA2what='min',
-                                      ymin=0.5, pct_transform=TRUE,
-                                      data_transform=FALSE,
-                                      trans_type='log',
-                                      centering=FALSE, scaling=FALSE)
+exp_transform_non_log <- data_process(exp_data, exclude_var_missing=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=FALSE, trans_type='log', centering=FALSE, scaling=FALSE)
 # filter significant lipid
 DE_species_table_sig <- DE_species_2(exp_transform_non_log,
-                                     data_transform=TRUE,
-                                     group_info = group_info,
-                                     paired=FALSE, test='t.test',
-                                     adjust_p_method='BH',
-                                     sig_stat='p.adj', sig_pvalue=0.05,
-                                     sig_FC=2,
-                                     plotly=FALSE)$DE_species_table_sig
+    data_transform=TRUE, group_info = group_info, paired=FALSE,
+    test='t.test', adjust_p_method='BH', sig_stat='p.adj', sig_pvalue=0.05,
+    sig_FC=2, plotly=FALSE)$DE_species_table_sig
 # conduct UMAP
-DEspec_UMAP <- UMAP(exp_transform_table, group_num=2,
-                    group_info=group_info, n_neighbors=15,
-                    sig_feature=DE_species_table_sig$feature,
-                    metric='euclidean', scale=TRUE, var1=NULL,
-                    cluster_method='kmeans', var2=NULL,
-                    insert_ref_group=NULL, ref_group=NULL, plotly=FALSE)
+DEspec_UMAP <- UMAP(exp_transform_table, group_num=2, group_info,
+    n_neighbors=15, sig_feature=DE_species_table_sig$feature,
+    metric='euclidean', scale=TRUE, var1=NULL, cluster_method='kmeans',
+    var2=NULL, insert_ref_group=NULL, ref_group=NULL, plotly=FALSE)
 @
 
 <<>>=
@@ -875,42 +785,24 @@ DEspec_UMAP[[2]]
 <<DE_lipid species: dimensionality reduction - PLS-DA>>=
 # data processing of exp_data
 exp_transform_table <- data_process(exp_data, replace_zero=TRUE,
-                                    exclude_var_missing=TRUE,
-                                    missing_pct_limit=50,
-                                    zero2what='min',
-                                    xmin=0.5, replace_NA=TRUE,
-                                    NA2what='min', ymin=0.5,
-                                    pct_transform=TRUE,
-                                    data_transform=TRUE,
-                                    trans_type='log', centering=FALSE,
-                                    scaling=FALSE)
+    exclude_var_missing=TRUE, missing_pct_limit=50, zero2what='min',
+    xmin=0.5, replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # data processing of exp_data (without log10 transformation)
-exp_transform_non_log <- data_process(exp_data,
-                                      exclude_var_missing=TRUE,
-                                      missing_pct_limit=50,
-                                      replace_zero=TRUE,
-                                      zero2what='min', xmin=0.5,
-                                      replace_NA=TRUE, NA2what='min',
-                                      ymin=0.5, pct_transform=TRUE,
-                                      data_transform=FALSE,
-                                      trans_type='log',
-                                      centering=FALSE, scaling=FALSE)
+exp_transform_non_log <- data_process(exp_data, exclude_var_missing=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=FALSE, trans_type='log', centering=FALSE, scaling=FALSE)
 # filter significant lipid
 DE_species_table_sig <- DE_species_2(exp_transform_non_log,
-                                     data_transform=TRUE,
-                                     group_info = group_info,
-                                     paired=FALSE, test='t.test',
-                                     adjust_p_method='BH',
-                                     sig_stat='p.adj', sig_pvalue=0.05,
-                                     sig_FC=2,
-                                     plotly=FALSE)$DE_species_table_sig
+    data_transform=TRUE, group_info=group_info, paired=FALSE,
+    test='t.test', adjust_p_method='BH', sig_stat='p.adj',
+    sig_pvalue=0.05, sig_FC=2, plotly=FALSE)$DE_species_table_sig
 # conduct PLSDA
-DEspec_PLSDA <- PLSDA(exp_transform_table, scaling=TRUE,
-                      group_info=group_info, ncomp=2,
-                      sig_feature=DE_species_table_sig$feature,
-                      cluster_method='group_info',
-                      group_num=NULL, var1=NULL, var2=NULL,
-                      insert_ref_group=NULL, ref_group=NULL, plotly=FALSE)
+DEspec_PLSDA <- PLSDA(exp_transform_table, scaling=TRUE, group_info,
+    ncomp=2, sig_feature=DE_species_table_sig$feature,
+    cluster_method='group_info', group_num=NULL, var1=NULL, var2=NULL,
+    insert_ref_group=NULL, ref_group=NULL, plotly=FALSE)
 @
 
 <<>>=
@@ -947,7 +839,9 @@ discloses the contribution of the variable to PLS-DA-2.
 Based on the results of differentially expressed analysis, we further take a
 look at differences of lipid species between the control group and the
 experimental group. Lipid species derived from two groups are clustered and
-visualized on heatmap by hierarchical clustering.
+visualized on heatmap by hierarchical clustering. Users can choose to output the
+results of all lipid species or only significant lipid species by the parameter
+\Robject{type}.
 
 The top of the heatmap is grouped by sample group (top annotation) while the
 side of the heatmap (row annotation) can be chosen from
@@ -958,70 +852,56 @@ acid(FA\_db), hydroxyl group number of fatty acid(FA\_oh).
 <<DE_lipid species: hierarchical clustering>>=
 # data processing of exp_data
 exp_transform <- data_process(exp_data, exclude_var_missing=TRUE,
-                              missing_pct_limit=50, replace_zero=TRUE,
-                              zero2what='min', xmin=0.5, replace_NA=TRUE,
-                              NA2what='min', ymin=0.5, pct_transform=TRUE,
-                              data_transform=TRUE, trans_type='log',
-                              centering=FALSE, scaling=FALSE)
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # data processing of exp_data (without log10 transformation)
-exp_transform_non_log <- data_process(exp_data,
-                                      exclude_var_missing=TRUE,
-                                      missing_pct_limit=50,
-                                      replace_zero=TRUE, zero2what='min',
-                                      xmin=0.5, replace_NA=TRUE,
-                                      NA2what='min', ymin=0.5,
-                                      pct_transform=TRUE,
-                                      data_transform=FALSE,
-                                      trans_type='log',
-                                      centering=FALSE, scaling=FALSE)
+exp_transform_non_log <- data_process(exp_data, exclude_var_missing=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=FALSE, trans_type='log', centering=FALSE, scaling=FALSE)
 # filter lipid_char_table according to exp_transform
 lipid_char_filter <-
   lipid_char_table[lipid_char_table$feature %in% exp_transform$feature, ]
 # filter significant lipid
-DE_species_table_sig <- DE_species_2(exp_transform_non_log,
-                                     data_transform=TRUE,
-                                     group_info = group_info,
-                                     paired=FALSE, test='t.test',
-                                     adjust_p_method='BH',
-                                     sig_stat='p.adj', sig_pvalue=0.05,
-                                     sig_FC=2,
-                                     plotly=FALSE)$DE_species_table_sig
+DE_species_table_sig <- DE_species_2(exp_transform_non_log, data_transform=TRUE,
+    group_info = group_info, paired=FALSE, test='t.test', adjust_p_method='BH',
+    sig_stat='p.adj', sig_pvalue=0.05, sig_FC=2,
+    plotly=FALSE)$DE_species_table_sig
 # get lipid characteristics
 char_var <- colnames(lipid_char_filter)[-1]
-# conduct hierarchical clustering
-DEspec_Hcluster<- Hclustering(exp_transform, DE_species_table_sig,
-                              group_info, lipid_char_filter,
-                              char_var = char_var[1],
-                              distfun='pearson', hclustfun='complete',
-                              plotly=FALSE)
+# conduct hierarchical clustering of all lipid species
+DEspec_Hcluster_all <- Hclustering(exp_transform, DE_species_table_sig,
+    group_info, lipid_char_filter, char_var = char_var[1], distfun='pearson',
+    hclustfun='complete', plotly=FALSE, type='all')
 @
 
 <<>>=
 # view result: matrix of all lipid species heatmap
-head(DEspec_Hcluster$all.lipid.data[, 1:4], 5)
-@
-
-<<>>=
-# view result: matrix of significant lipid species heatmap
-head(DEspec_Hcluster$sig.lipid.data[, 1:4], 5)
+head(DEspec_Hcluster_all$data[, 1:4], 5)
 @
 
 <<fig.cap = "\\textbf{Heatmap of all lipid species}", fig.small=TRUE>>=
 # view result: heatmap of all lipid species
-DEspec_Hcluster$all.lipid
+DEspec_Hcluster_all$heatmap
 @
 
 <<>>=
-# view result: heatmap of significant lipid species
-DEspec_Hcluster$sig.lipid
-@
-\begin{figure}
-  \includegraphics[width=0.65\textwidth]{images/DEspec_sig.lipid.png}
-  \caption{\textbf{Heatmap of significant lipid species}}
-  \label{fig:DEspec_sig.lipid}
-\end{figure}
+# conduct hierarchical clustering of significant lipid species
+DEspec_Hcluster_sig <- Hclustering(exp_transform, DE_species_table_sig,
+    group_info, lipid_char_filter, char_var = char_var[1], distfun='pearson',
+    hclustfun='complete', plotly=FALSE, type='sig')
 
-Through heatmap, we can discover the difference between the two groups by observing the distribution of lipid species.
+# view result: matrix of significant lipid species heatmap
+head(DEspec_Hcluster_sig$data[, 1:4], 5)
+@
+
+<<fig.cap = "\\textbf{Heatmap of significant lipid species}", fig.small=TRUE>>=
+# view result: heatmap of significant lipid species
+DEspec_Hcluster_sig$heatmap
+@
+Through heatmap, we can discover the difference between the two groups by
+observing the distribution of lipid species.
 
 \subsubsection{Characteristics analysis}
 \label{speciesChar}
@@ -1035,41 +915,27 @@ acid (FA\_oh).
 <<DE_lipid species: characteristics analysis>>=
 # data processing of exp_data
 exp_transform <- data_process(exp_data, exclude_var_missing=TRUE,
-                              missing_pct_limit=50,
-                              replace_zero=TRUE, zero2what='min',
-                              xmin=0.5, replace_NA=TRUE,
-                              NA2what='min', pct_transform=TRUE,
-                              data_transform=TRUE, trans_type='log',
-                              ymin=0.5, centering=FALSE, scaling=FALSE)
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', pct_transform=TRUE, data_transform=TRUE,
+    trans_type='log', ymin=0.5, centering=FALSE, scaling=FALSE)
 # data processing of exp_data (without log10 transformation)
 exp_transform_non_log <- data_process(exp_data, exclude_var_missing=TRUE,
-                                      missing_pct_limit=50,
-                                      replace_zero=TRUE,
-                                      zero2what='min', xmin=0.5,
-                                      replace_NA=TRUE, NA2what='min',
-                                      ymin=0.5, pct_transform=TRUE,
-                                      data_transform=FALSE,
-                                      trans_type='log',
-                                      centering=FALSE, scaling=FALSE)
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=FALSE, trans_type='log', centering=FALSE, scaling=FALSE)
 # filter lipid_char_table according to exp_transform
 lipid_char_filter <-
   lipid_char_table[lipid_char_table$feature %in% exp_transform$feature, ]
 # filter significant lipid
-DE_species_table_sig <- DE_species_2(exp_transform_non_log,
-                                     data_transform=TRUE,
-                                     group_info = group_info,
-                                     paired=FALSE, test='t.test',
-                                     adjust_p_method='BH',
-                                     sig_stat='p.adj', sig_pvalue=0.05,
-                                     sig_FC=2,
-                                     plotly=FALSE)$DE_species_table_sig
+DE_species_table_sig <- DE_species_2(exp_transform_non_log, data_transform=TRUE,
+    group_info = group_info, paired=FALSE, test='t.test', adjust_p_method='BH',
+    sig_stat='p.adj', sig_pvalue=0.05, sig_FC=2,
+    plotly=FALSE)$DE_species_table_sig
 # get lipid characteristics
 char_var <- colnames(lipid_char_filter)[-1]
 # conduct Sig_lipid_feature
-sig_feature_result <- Sig_lipid_feature(DE_species_table_sig,
-                                        lipid_char_filter,
-                                        char_var[1], sig_FC=2,
-                                        plotly=FALSE)
+sig_feature_result <- Sig_lipid_feature(DE_species_table_sig, lipid_char_filter,
+    char_var[1], sig_FC=2, plotly=FALSE)
 @
 
 <<fig.cap = "\\textbf{The bar chart of significant groups} The bar chart shows the significant groups (values) with mean fold change over 2 in the selected characteristics by colors (red for significant and black for insignificant).", fig.small=TRUE>>=
@@ -1098,40 +964,28 @@ enriched in the categories of the selected characteristics.
 <<DE_lipid species: enrichment>>=
 # data processing of exp_data
 exp_transform <- data_process(exp_data, exclude_var_missing=TRUE,
-                              missing_pct_limit=50, replace_zero=TRUE,
-                              zero2what='min', xmin=0.5, replace_NA=TRUE,
-                              NA2what='min', ymin=0.5, pct_transform=TRUE,
-                              data_transform=TRUE, trans_type='log',
-                              centering=FALSE, scaling=FALSE)
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # data processing of exp_data (without log10 transformation)
-exp_transform_non_log <- data_process(exp_data,
-                                      exclude_var_missing=TRUE,
-                                      missing_pct_limit=50,
-                                      replace_zero=TRUE, zero2what='min',
-                                      xmin=0.5, replace_NA=TRUE,
-                                      NA2what='min', ymin=0.5,
-                                      pct_transform=TRUE, data_transform=FALSE,
-                                      trans_type='log',
-                                      centering=FALSE, scaling=FALSE)
+exp_transform_non_log <- data_process(exp_data, exclude_var_missing=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=FALSE, trans_type='log', centering=FALSE, scaling=FALSE)
 # filter lipid_char_table according to exp_transform
 lipid_char_filter <-
   lipid_char_table[lipid_char_table$feature %in% exp_transform$feature, ]
 # filter significant lipid
 DE_species_table_sig <- DE_species_2(exp_transform_non_log,
-                                     data_transform = TRUE,
-                                     group_info = group_info,
-                                     paired=FALSE, test='t.test',
-                                     adjust_p_method='BH',
-                                     sig_stat='p.adj', sig_pvalue=0.05,
-                                     sig_FC=2,
-                                     plotly=FALSE)$DE_species_table_sig
+    data_transform = TRUE, group_info = group_info, paired=FALSE, test='t.test',
+    adjust_p_method='BH', sig_stat='p.adj', sig_pvalue=0.05, sig_FC=2,
+    plotly=FALSE)$DE_species_table_sig
 # get lipid characteristics
 char_var <- colnames(lipid_char_filter)[-1]
 # conduct enrichment analysis
 enrich_result <- Enrichment(DE_species_table_sig,
-                            lipid_char_table = lipid_char_filter,
-                            char_var=char_var[1], sig_pvalue=0.05,
-                            plotly=FALSE)
+    lipid_char_table = lipid_char_filter, char_var=char_var[1], sig_pvalue=0.05,
+    plotly=FALSE)
 @
 
 <<>>=
@@ -1184,40 +1038,28 @@ head(DE.pathway.gene.list, 2)
 <<DE_lipid species: enrichment_pathview, eval=FALSE>>=
 # data processing of exp_data
 exp_transform <- data_process(exp_data, exclude_var_missing=TRUE,
-                              missing_pct_limit=50, replace_zero=TRUE,
-                              zero2what='min', xmin=0.5, replace_NA=TRUE,
-                              ymin=0.5, NA2what='min', data_transform=TRUE,
-                              pct_transform=TRUE, trans_type='log',
-                              centering=FALSE, scaling=FALSE)
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, ymin=0.5, NA2what='min', data_transform=TRUE,
+    pct_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # data processing of exp_data (without log10 transformation)
 exp_transform_non_log <- data_process(exp_data, replace_zero=TRUE,
-                                      exclude_var_missing=TRUE,
-                                      missing_pct_limit=50,
-                                      zero2what='min', xmin=0.5,
-                                      replace_NA=TRUE, ymin=0.5,
-                                      NA2what='min', centering=FALSE,
-                                      pct_transform=TRUE, scaling=FALSE,
-                                      data_transform=FALSE, trans_type='log')
+    exclude_var_missing=TRUE, missing_pct_limit=50, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, ymin=0.5, NA2what='min', centering=FALSE,
+    pct_transform=TRUE, scaling=FALSE, data_transform=FALSE, trans_type='log')
 # filter lipid_char_table according to exp_transform
 lipid_char_filter <-
   lipid_char_table[lipid_char_table$feature %in% exp_transform$feature, ]
 # filter significant lipid
-DE_species_table_sig <- DE_species_2(exp_transform_non_log,
-                                     data_transform=TRUE,
-                                     group_info = group_info,
-                                     paired=FALSE, test = 't.test',
-                                     adjust_p_method = 'BH',
-                                     sig_stat = 'p.adj', sig_pvalue=0.05,
-                                     sig_FC=2,
-                                     plotly=FALSE)$DE_species_table_sig
+DE_species_table_sig <- DE_species_2(exp_transform_non_log, data_transform=TRUE,
+    group_info = group_info, paired=FALSE, test = 't.test',
+    adjust_p_method = 'BH', sig_stat = 'p.adj', sig_pvalue=0.05, sig_FC=2,
+    plotly=FALSE)$DE_species_table_sig
 # get lipid characteristics
 char_var <- colnames(lipid_char_filter)[-1]
 # get enrich characteristic table
 enrich_char_table <- Enrichment(DE_species_table_sig,
-                                lipid_char_table=lipid_char_filter,
-                                char_var = char_var[1],
-                                sig_pvalue=0.05,
-                                plotly=FALSE)$enrich_char_table
+    lipid_char_table=lipid_char_filter, char_var = char_var[1], sig_pvalue=0.05,
+    plotly=FALSE)$enrich_char_table
 # filter "class" of significant characteristics
 sig_enrich_class <- enrich_char_table %>% filter(significant == 'YES') %>%
   distinct(characteristic) %>% .$characteristic
@@ -1227,46 +1069,34 @@ dir.create(file.path(getwd(),"pathview_result"), recursive=TRUE,
 outPath <- file.path(getwd(), "pathview_result")
 # conduct pathview analysis
 path_result <- pathview_function(sig_enrich_class, path=outPath,
-                                 DE.lipid.gene.path, DE.pathway.gene.list)
+    DE.lipid.gene.path, DE.pathway.gene.list)
 @
 
 <<echo=FALSE, results='markup', include=FALSE>>=
 # data processing of exp_data
 exp_transform <- data_process(exp_data, exclude_var_missing=TRUE,
-                              missing_pct_limit=50, replace_zero=TRUE,
-                              zero2what='min', xmin=0.5, replace_NA=TRUE,
-                              ymin=0.5, NA2what='min', data_transform=TRUE,
-                              pct_transform=TRUE, trans_type='log',
-                              centering=FALSE, scaling=FALSE)
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, ymin=0.5, NA2what='min', data_transform=TRUE,
+    pct_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # data processing of exp_data (without log10 transformation)
 exp_transform_non_log <- data_process(exp_data, replace_zero=TRUE,
-                                      exclude_var_missing=TRUE,
-                                      missing_pct_limit=50,
-                                      zero2what='min', xmin=0.5,
-                                      replace_NA=TRUE, ymin=0.5,
-                                      NA2what='min', centering=FALSE,
-                                      pct_transform=TRUE, scaling=FALSE,
-                                      data_transform=FALSE, trans_type='log')
+    exclude_var_missing=TRUE, missing_pct_limit=50, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, ymin=0.5, NA2what='min', centering=FALSE,
+    pct_transform=TRUE, scaling=FALSE, data_transform=FALSE, trans_type='log')
 # filter lipid_char_table according to exp_transform
 lipid_char_filter <-
   lipid_char_table[lipid_char_table$feature %in% exp_transform$feature, ]
 # filter significant lipid
-DE_species_table_sig <- DE_species_2(exp_transform_non_log,
-                                     data_transform=TRUE,
-                                     group_info = group_info,
-                                     paired=FALSE, test = 't.test',
-                                     adjust_p_method = 'BH',
-                                     sig_stat = 'p.adj', sig_pvalue=0.05,
-                                     sig_FC=2,
-                                     plotly=FALSE)$DE_species_table_sig
+DE_species_table_sig <- DE_species_2(exp_transform_non_log, data_transform=TRUE,
+    group_info = group_info, paired=FALSE, test = 't.test',
+    adjust_p_method = 'BH', sig_stat = 'p.adj', sig_pvalue=0.05, sig_FC=2,
+    plotly=FALSE)$DE_species_table_sig
 # get lipid characteristics
 char_var <- colnames(lipid_char_filter)[-1]
 # get enrich characteristic table
 enrich_char_table <- Enrichment(DE_species_table_sig,
-                                lipid_char_table=lipid_char_filter,
-                                char_var = char_var[1],
-                                sig_pvalue=0.05,
-                                plotly=FALSE)$enrich_char_table
+    lipid_char_table=lipid_char_filter, char_var = char_var[1], sig_pvalue=0.05,
+    plotly=FALSE)$enrich_char_table
 # filter "class" of significant characteristics
 sig_enrich_class <- enrich_char_table %>%
   dplyr::filter(significant == 'YES') %>%
@@ -1275,7 +1105,7 @@ sig_enrich_class <- enrich_char_table %>%
 outPath <- file.path(getwd())
 # conduct pathview analysis
 path_result <- pathview_function(sig_enrich_class, path=outPath,
-                                 DE.lipid.gene.path, DE.pathway.gene.list)
+    DE.lipid.gene.path, DE.pathway.gene.list)
 @
 
 <<>>=
@@ -1316,21 +1146,14 @@ exp_data_Spe2Char <- Species2Char(exp_data, lipid_char_table,
                                   char_var = char_var[4])
 # data processing of exp_data (without log10 transformation)
 exp_transform_non_log <- data_process(exp_data_Spe2Char,
-                                      exclude_var_missing=TRUE,
-                                      missing_pct_limit=50,
-                                      replace_zero=TRUE,
-                                      zero2what='min', xmin=0.5,
-                                      replace_NA=TRUE, NA2what='min',
-                                      ymin=0.5, pct_transform=TRUE,
-                                      data_transform=FALSE,
-                                      trans_type='log',
-                                      centering=FALSE, scaling=FALSE)
+    exclude_var_missing=TRUE, missing_pct_limit=50, replace_zero=TRUE,
+    zero2what='min', xmin=0.5, replace_NA=TRUE, NA2what='min', ymin=0.5,
+    pct_transform=TRUE, data_transform=FALSE, trans_type='log',
+    centering=FALSE, scaling=FALSE)
 # conduct deferentially expressed of lipid characters
 DE_char_result <- DE_char_2(exp_transform_non_log, data_transform=TRUE,
-                            group_info = group_info, paired=FALSE,
-                            sig_pvalue=0.05, sig_FC=2,
-                            insert_ref_group=NULL, ref_group=NULL,
-                            plotly=FALSE)
+    group_info = group_info, paired=FALSE, sig_pvalue=0.05, sig_FC=2,
+    insert_ref_group=NULL, ref_group=NULL, plotly=FALSE)
 @
 
 <<>>=
@@ -1393,29 +1216,19 @@ categorized by one of the subgroups (e.g. PC) of the selected characteristic.
 char_var <- colnames(lipid_char_table)[-1]
 # subgroup deferentially expressed of lipid characters
 DE.sub.char.2 <- DE_sub_char_2(exp_data, data_transform=TRUE,
-                               lipid_char_table=lipid_char_table,
-                               split_var = char_var[1],
-                               char_var = char_var[4],
-                               group_info = group_info,
-                               paired=FALSE, sig_pvalue=0.05,
-                               sig_FC=2, exclude_var_missing=TRUE,
-                               missing_pct_limit=50,
-                               replace_zero=TRUE, zero2what='min',
-                               xmin=0.5, replace_NA=TRUE,
-                               NA2what='min', ymin=0.5,
-                               pct_transform=TRUE, trans_type='log',
-                               centering=FALSE, scaling=FALSE)
+    lipid_char_table=lipid_char_table, split_var = char_var[1],
+    char_var = char_var[4], group_info = group_info, paired=FALSE,
+    sig_pvalue=0.05, sig_FC=2, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5, pct_transform=TRUE, trans_type='log',
+    centering=FALSE, scaling=FALSE)
 # get class of characteristics
 char.class <- unique(DE.sub.char.2[[2]][1])
 # visualize subgroup deferentially expressed of lipid characters
-sub_char_result <- DE_sub_char_plot_2(DE.sub.char.2[[2]],
-                                      DE.sub.char.2[[3]],
-                                      group_info=group_info,
-                                      char_var=char_var[4],
-                                      split_var=char_var[1],
-                                      split_class=char.class[5,],
-                                      insert_ref_group=NULL, ref_group=NULL,
-                                      plotly=FALSE)
+sub_char_result <- DE_sub_char_plot_2(DE.sub.char.2[[2]], DE.sub.char.2[[3]],
+    group_info=group_info, char_var=char_var[4], split_var=char_var[1],
+    split_class=char.class[5,], insert_ref_group=NULL, ref_group=NULL,
+    plotly=FALSE)
 @
 \begin{itemize}
   \item \textit{Note: The star above the bar shows the significant difference of
@@ -1427,6 +1240,8 @@ sub_char_result <- DE_sub_char_plot_2(DE.sub.char.2[[2]],
 # view result: bar plot of split_class
 sub_char_result[[1]]
 @
+
+\newpage
 
 <<fig.cap = "\\textbf{The results of 'Subgroup of characteristics' analysis in the second section - sqrt-scaled bar plot}", fig.small=TRUE>>=
 # view result: sqrt-scaled bar plot of split_class
@@ -1476,42 +1291,26 @@ exp_data_Spe2Char <- Species2Char(exp_data, lipid_char_table,
                                   char_var = char_var[4])
 # data processing of exp_data_Spe2Char
 exp_transform_class <- data_process(exp_data_Spe2Char,
-                                    exclude_var_missing=TRUE,
-                                    missing_pct_limit=50,
-                                    replace_zero=TRUE,
-                                    zero2what='NA', xmin=0.5,
-                                    replace_NA=TRUE,
-                                    NA2what='min', ymin=0.5,
-                                    pct_transform=TRUE,
-                                    data_transform=TRUE,
-                                    trans_type='log',
-                                    centering=FALSE, scaling=FALSE)
+    exclude_var_missing=TRUE, missing_pct_limit=50, replace_zero=TRUE,
+    zero2what='NA', xmin=0.5, replace_NA=TRUE, NA2what='min', ymin=0.5,
+    pct_transform=TRUE, data_transform=TRUE, trans_type='log',
+    centering=FALSE, scaling=FALSE)
 # data processing of exp_data (without log10 transformation)
 exp_transform_non_log <- data_process(exp_data_Spe2Char,
-                                      exclude_var_missing=TRUE,
-                                      missing_pct_limit=50,
-                                      replace_zero=TRUE,
-                                      zero2what='min', xmin=0.5,
-                                      replace_NA=TRUE, NA2what='min',
-                                      ymin=0.5, pct_transform=TRUE,
-                                      data_transform=FALSE,
-                                      trans_type='log',
-                                      centering=FALSE, scaling=FALSE)
+    exclude_var_missing=TRUE, missing_pct_limit=50, replace_zero=TRUE,
+    zero2what='min', xmin=0.5, replace_NA=TRUE, NA2what='min', ymin=0.5,
+    pct_transform=TRUE, data_transform=FALSE, trans_type='log',
+    centering=FALSE, scaling=FALSE)
 # filter significant lipid characteristics
-DE_char_table_sig <- DE_char_2(exp_transform_non_log,
-                               data_transform=TRUE,
-                               group_info = group_info,
-                               paired=FALSE, sig_pvalue=0.05,
-                               sig_FC=2)$DE_char_table_all %>%
-                               dplyr::filter(sig=="yes")
+DE_char_table_sig <- DE_char_2(exp_transform_non_log, data_transform=TRUE,
+    group_info = group_info, paired=FALSE, sig_pvalue=0.05,
+    sig_FC=2)$DE_char_table_all %>% dplyr::filter(sig=="yes")
 # conduct PCA
 DEchar_PCA <- PCA(exp_transform_class, group_info = group_info,
-                  sig_feature = DE_char_table_sig[,1],
-                  scaling=TRUE, centering=TRUE,
-                  cluster_method='kmeans',
-                  group_num=2, var1 = NULL, var2 = NULL,
-                  insert_ref_group=NULL, ref_group=NULL,
-                  n_PC=c(1,2), top_n_feature=10, plotly=FALSE)
+    sig_feature = DE_char_table_sig[,1], scaling=TRUE, centering=TRUE,
+    cluster_method='kmeans', group_num=2, var1 = NULL, var2 = NULL,
+    insert_ref_group=NULL, ref_group=NULL, n_PC=c(1,2), top_n_feature=10,
+    plotly=FALSE)
 @
 
 <<>>=
@@ -1533,6 +1332,8 @@ head(DEchar_PCA[[3]])
 # view result: PCA plot
 DEchar_PCA[[4]]
 @
+
+\newpage
 
 <<fig.cap = "\\textbf{PCA results - scree plot}", fig.small=TRUE>>=
 # view result: scree plot
@@ -1565,42 +1366,25 @@ exp_data_Spe2Char <- Species2Char(exp_data, lipid_char_table,
                                   char_var = char_var[4])
 # data processing of exp_data_Spe2Char
 exp_transform_class <- data_process(exp_data_Spe2Char,
-                                    exclude_var_missing=TRUE,
-                                    missing_pct_limit=50,
-                                    replace_zero=TRUE,
-                                    zero2what='NA', xmin=0.5,
-                                    replace_NA=TRUE,
-                                    NA2what='min', ymin=0.5,
-                                    pct_transform=TRUE,
-                                    data_transform=TRUE,
-                                    trans_type='log',
-                                    centering=FALSE, scaling=FALSE)
+    exclude_var_missing=TRUE, missing_pct_limit=50, replace_zero=TRUE,
+    zero2what='NA', xmin=0.5, replace_NA=TRUE, NA2what='min', ymin=0.5,
+    pct_transform=TRUE, data_transform=TRUE, trans_type='log',
+    centering=FALSE, scaling=FALSE)
 # data processing of exp_data (without log10 transformation)
 exp_transform_non_log <- data_process(exp_data_Spe2Char,
-                                      exclude_var_missing=TRUE,
-                                      missing_pct_limit=50,
-                                      replace_zero=TRUE,
-                                      zero2what='min', xmin=0.5,
-                                      replace_NA=TRUE, NA2what='min',
-                                      ymin=0.5, pct_transform=TRUE,
-                                      data_transform=FALSE,
-                                      trans_type='log',
-                                      centering=FALSE, scaling=FALSE)
+    exclude_var_missing=TRUE, missing_pct_limit=50, replace_zero=TRUE,
+    zero2what='min', xmin=0.5, replace_NA=TRUE, NA2what='min', ymin=0.5,
+    pct_transform=TRUE, data_transform=FALSE, trans_type='log',
+    centering=FALSE, scaling=FALSE)
 # filter significant lipid characteristics
-DE_char_table_sig <- DE_char_2(exp_transform_non_log,
-                               data_transform=TRUE,
-                               group_info = group_info,
-                               paired=FALSE, sig_pvalue=0.05,
-                               sig_FC=2)$DE_char_table_all %>%
-                               dplyr::filter(sig=="yes")
+DE_char_table_sig <- DE_char_2(exp_transform_non_log, data_transform=TRUE,
+    group_info = group_info, paired=FALSE, sig_pvalue=0.05,
+    sig_FC=2)$DE_char_table_all %>% dplyr::filter(sig=="yes")
 # conduct t-SNE
 DEchar_tsne <- tsne(exp_transform_class, group_info = group_info,
-                    sig_feature=DE_char_table_sig[,1],
-                    pca=TRUE, perplexity=5, max_iter=500,
-                    cluster_method='kmeans', group_num=2,
-                    var1 = 'euclidean', var2=NULL,
-                    insert_ref_group=NULL, ref_group=NULL,
-                    plotly=FALSE)
+    sig_feature=DE_char_table_sig[,1], pca=TRUE, perplexity=5,
+    max_iter=500, cluster_method='kmeans', group_num=2, var1='euclidean',
+    var2=NULL, insert_ref_group=NULL, ref_group=NULL, plotly=FALSE)
 @
 
 <<>>=
@@ -1627,43 +1411,25 @@ exp_data_Spe2Char <- Species2Char(exp_data, lipid_char_table,
                                   char_var = char_var[4])
 # data processing of exp_data_Spe2Char
 exp_transform_class <- data_process(exp_data_Spe2Char,
-                                    exclude_var_missing=TRUE,
-                                    missing_pct_limit=50,
-                                    replace_zero=TRUE,
-                                    zero2what='NA', xmin=0.5,
-                                    replace_NA=TRUE,
-                                    NA2what='min', ymin=0.5,
-                                    pct_transform=TRUE,
-                                    data_transform=TRUE,
-                                    trans_type='log',
-                                    centering=FALSE, scaling=FALSE)
+    exclude_var_missing=TRUE, missing_pct_limit=50, replace_zero=TRUE,
+    zero2what='NA', xmin=0.5, replace_NA=TRUE, NA2what='min', ymin=0.5,
+    pct_transform=TRUE, data_transform=TRUE, trans_type='log',
+    centering=FALSE, scaling=FALSE)
 # data processing of exp_data (without log10 transformation)
 exp_transform_non_log <- data_process(exp_data_Spe2Char,
-                                      exclude_var_missing=TRUE,
-                                      missing_pct_limit=50,
-                                      replace_zero=TRUE,
-                                      zero2what='min', xmin=0.5,
-                                      replace_NA=TRUE, NA2what='min',
-                                      ymin=0.5, pct_transform=TRUE,
-                                      data_transform=FALSE,
-                                      trans_type='log',
-                                      centering=FALSE, scaling=FALSE)
+    exclude_var_missing=TRUE, missing_pct_limit=50, replace_zero=TRUE,
+    zero2what='min', xmin=0.5, replace_NA=TRUE, NA2what='min', ymin=0.5,
+    pct_transform=TRUE, data_transform=FALSE, trans_type='log',
+    centering=FALSE, scaling=FALSE)
 # filter significant lipid characteristics
-DE_char_table_sig <- DE_char_2(exp_transform_non_log,
-                               data_transform=TRUE,
-                               group_info = group_info,
-                               paired=FALSE, sig_pvalue=0.05,
-                               sig_FC=2)$DE_char_table_all %>%
-                               dplyr::filter(sig=="yes")
+DE_char_table_sig <- DE_char_2(exp_transform_non_log, data_transform=TRUE,
+    group_info = group_info, paired=FALSE, sig_pvalue=0.05,
+    sig_FC=2)$DE_char_table_all %>% dplyr::filter(sig=="yes")
 # conduct UMAP
 DEchar_UMAP <- UMAP(exp_transform_class, group_info = group_info,
-                    sig_feature = DE_char_table_sig[,1],
-                    n_neighbors=15, scale=TRUE, group_num=2,
-                    metric = 'euclidean',
-                    cluster_method = 'kmeans',
-                    var1=NULL, var2=NULL,
-                    insert_ref_group=NULL, ref_group=NULL,
-                    plotly=FALSE)
+    sig_feature = DE_char_table_sig[,1], n_neighbors=15, scale=TRUE,
+    group_num=2, metric='euclidean', cluster_method='kmeans', var1=NULL,
+    var2=NULL, insert_ref_group=NULL, ref_group=NULL, plotly=FALSE)
 @
 
 <<>>=
@@ -1676,8 +1442,6 @@ head(DEchar_UMAP[[1]], 5)
 DEchar_UMAP[[2]]
 @
 
-\newpage
-
   \item \textbf{PLS-DA}\\
 <<DE_lipid characteristics: dimensionality reduction - PLS-DA>>=
 # get lipid characteristics
@@ -1687,41 +1451,25 @@ exp_data_Spe2Char <- Species2Char(exp_data, lipid_char_table,
                                   char_var = char_var[4])
 # data processing of exp_data_Spe2Char
 exp_transform_class <- data_process(exp_data_Spe2Char,
-                                    exclude_var_missing=TRUE,
-                                    missing_pct_limit=50,
-                                    replace_zero=TRUE,
-                                    zero2what='NA', xmin=0.5,
-                                    replace_NA=TRUE,
-                                    NA2what='min', ymin=0.5,
-                                    pct_transform=TRUE,
-                                    data_transform=TRUE,
-                                    trans_type='log',
-                                    centering=FALSE, scaling=FALSE)
+    exclude_var_missing=TRUE, missing_pct_limit=50, replace_zero=TRUE,
+    zero2what='NA', xmin=0.5, replace_NA=TRUE, NA2what='min', ymin=0.5,
+    pct_transform=TRUE, data_transform=TRUE, trans_type='log',
+    centering=FALSE, scaling=FALSE)
 # data processing of exp_data (without log10 transformation)
 exp_transform_non_log <- data_process(exp_data_Spe2Char,
-                                      exclude_var_missing=TRUE,
-                                      missing_pct_limit=50,
-                                      replace_zero=TRUE,
-                                      zero2what='min', xmin=0.5,
-                                      replace_NA=TRUE, NA2what='min',
-                                      ymin=0.5, pct_transform=TRUE,
-                                      data_transform=FALSE,
-                                      trans_type='log',
-                                      centering=FALSE, scaling=FALSE)
+    exclude_var_missing=TRUE, missing_pct_limit=50, replace_zero=TRUE,
+    zero2what='min', xmin=0.5, replace_NA=TRUE, NA2what='min', ymin=0.5,
+    pct_transform=TRUE, data_transform=FALSE, trans_type='log',
+    centering=FALSE, scaling=FALSE)
 # filter significant lipid characteristics
-DE_char_table_sig <- DE_char_2(exp_transform_non_log,
-                               data_transform=TRUE,
-                               group_info = group_info,
-                               paired=FALSE, sig_pvalue=0.05,
-                               sig_FC=2)$DE_char_table_all %>%
-                               filter(sig=="yes")
+DE_char_table_sig <- DE_char_2(exp_transform_non_log, data_transform=TRUE,
+    group_info = group_info, paired=FALSE, sig_pvalue=0.05,
+    sig_FC=2)$DE_char_table_all %>% filter(sig=="yes")
 # conduct PLSDA
 DEchar_PLSDA <- PLSDA(exp_transform_class, group_info = group_info,
-                      sig_feature=DE_char_table_sig[,1],
-                      ncomp=2, scaling=TRUE, cluster_method='group_info',
-                      group_num = NULL, var1=NULL, var2=NULL,
-                      insert_ref_group=NULL, ref_group=NULL,
-                      plotly=FALSE)
+    sig_feature=DE_char_table_sig[,1], ncomp=2, scaling=TRUE,
+    cluster_method='group_info', group_num = NULL, var1=NULL, var2=NULL,
+    insert_ref_group=NULL, ref_group=NULL, plotly=FALSE)
 @
 
 <<>>=
@@ -1749,7 +1497,9 @@ DEchar_PLSDA[[4]]
 
 \subsubsection{Hierarchical clustering}
 A new lipid expression table summed up from species is clustered and shown
-on the heatmap using hierarchical clustering.
+on the heatmap using hierarchical clustering. Users can choose to output the
+results of all lipid characteristics or only significant lipid characteristics
+by the parameter \Robject{type}.
 
 <<DE_lipid characteristics: hierarchical clustering>>=
 # get lipid characteristics
@@ -1758,70 +1508,56 @@ char_var <- colnames(lipid_char_table)[-1]
 exp_data_Spe2Char <- Species2Char(exp_data, lipid_char_table,
                                   char_var = char_var[4])
 # data processing of exp_data_Spe2Char
-exp_transform_class <- data_process(exp_data_Spe2Char,
-                                    exclude_var_missing=TRUE,
-                                    missing_pct_limit=50, replace_zero=TRUE,
-                                    replace_NA=TRUE,zero2what='NA',
-                                    NA2what='min', pct_transform=TRUE,
-                                    xmin=0.5, data_transform=TRUE,
-                                    ymin=0.5, trans_type='log',
-                                    centering=FALSE, scaling=FALSE)
+exp_transform_class <- data_process(exp_data_Spe2Char, exclude_var_missing=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, replace_NA=TRUE,zero2what='NA',
+    NA2what='min', pct_transform=TRUE, xmin=0.5, data_transform=TRUE, ymin=0.5,
+    trans_type='log', centering=FALSE, scaling=FALSE)
 # data processing of exp_data (without log10 transformation)
 exp_transform_non_log <- data_process(exp_data_Spe2Char,
-                                      exclude_var_missing=TRUE,
-                                      missing_pct_limit=50,
-                                      replace_zero=TRUE, zero2what='min',
-                                      xmin=0.5, replace_NA=TRUE, NA2what='min',
-                                      ymin=0.5, pct_transform=TRUE,
-                                      data_transform=FALSE, trans_type='log',
-                                      centering=FALSE, scaling=FALSE)
+    exclude_var_missing=TRUE, missing_pct_limit=50, replace_zero=TRUE,
+    zero2what='min', xmin=0.5, replace_NA=TRUE, NA2what='min', ymin=0.5,
+    pct_transform=TRUE, data_transform=FALSE, trans_type='log',
+    centering=FALSE, scaling=FALSE)
 # filter significant lipid characteristics
-DE_char_table_sig <- DE_char_2(exp_transform_non_log,
-                               data_transform=TRUE, group_info = group_info,
-                               paired=FALSE, sig_pvalue=0.05, sig_FC=2
-                              )$DE_char_table_all %>%
-  dplyr::filter(sig=="yes")
-# conduct hierarchical clustering
-DEchar_Hcluster <- Hclustering(exp_transform_class, DE_char_table_sig,
-                               group_info, lipid_char_table=NULL,
-                               char_var=NULL, distfun='pearson',
-                               hclustfun='complete', plotly=FALSE)
+DE_char_table_sig <- DE_char_2(exp_transform_non_log, data_transform=TRUE,
+    group_info = group_info, paired=FALSE, sig_pvalue=0.05,
+    sig_FC=2)$DE_char_table_all %>% dplyr::filter(sig=="yes")
+# conduct hierarchical clustering of all lipid characteristics
+DEchar_Hcluster_all <- Hclustering(exp_transform_class, DE_char_table_sig,
+    group_info, lipid_char_table=NULL, char_var=NULL, distfun='pearson',
+    hclustfun='complete', plotly=FALSE, type='all')
 @
 
 <<>>=
-# view result: matrix of all lipid species heatmap
-head(DEchar_Hcluster$all.lipid.data[, 1:5], 5)
+# view result: matrix of all lipid characteristics heatmap
+head(DEchar_Hcluster_all$data[, 1:5], 5)
 @
-
-<<>>=
-# view result: matrix of significant lipid species heatmap
-head(DEchar_Hcluster$sig.lipid.data[, 1:5])
-@
-
 
 <<fig.cap = "\\textbf{Heatmap of all lipid species}", fig.small=TRUE>>=
-# view result: heatmap of all lipid species
-DEchar_Hcluster$all.lipid
+# view result: heatmap of all lipid characteristics
+DEchar_Hcluster_all$heatmap
 @
 
 <<>>=
-# view result: heatmap of significant lipid species
-DEchar_Hcluster$sig.lipid
-@
-\begin{figure}
-  \includegraphics[width=0.65\textwidth]{images/DEchar_sig.lipid.png}
-  \caption{\textbf{Heatmap of significant lipid species}}
-  \label{fig:DEchar_sig.lipid}
-\end{figure}
+# conduct hierarchical clustering of significant lipid characteristics
+DEchar_Hcluster_sig <- Hclustering(exp_transform_class, DE_char_table_sig,
+    group_info, lipid_char_table=NULL, char_var=NULL, distfun='pearson',
+    hclustfun='complete', plotly=FALSE, type='sig')
 
+# view result: matrix of significant lipid characteristics heatmap
+head(DEchar_Hcluster_sig$data[, 1:5])
+@
+
+<<>>=
+# view result: heatmap of significant lipid characteristics
+DEchar_Hcluster_sig$heatmap
+@
 Through heatmap of lipid characteristic expression differences between the
 control group and the experimental group, we may discover the difference between
 the two groups by observing the distribution of lipid characteristic expression.
 Columns are all samples and rows are the significant characteristic group
 (value) selected from the first 'Characteristics' section (Section
 \ref{sec:DE-char}).\\
-
-
 
 \newpage
 
@@ -1909,12 +1645,9 @@ missing values imputation, percentage transformation, log10 transformation, etc.
 head(exp_data[, 1:5], 5)
 # data processing of exp_data
 exp_transform_table <- data_process(exp_data, exclude_var_missing=TRUE,
-                                    missing_pct_limit=50, replace_zero=TRUE,
-                                    zero2what='min', xmin=0.5, replace_NA=TRUE,
-                                    NA2what='min', ymin=0.5,
-                                    pct_transform=TRUE,
-                                    data_transform=TRUE, trans_type='log',
-                                    centering=FALSE, scaling=FALSE)
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # exp_data after data processing
 head(exp_transform_table[, 1:5], 5)
 @
@@ -1953,18 +1686,16 @@ the PR curves.
 char_var <- colnames(lipid_char_table)[-1]
 # data processing of machine learning
 ML_data <- ML_data_process(exp_data, group_info = condition_table,
-                           lipid_char_table, char_var[1],
-                           exclude_var_missing=TRUE, missing_pct_limit=50,
-                           replace_zero=TRUE, zero2what='min', xmin=0.5,
-                           replace_NA=TRUE, NA2what='min', ymin=0.5,
-                           pct_transform=TRUE, data_transform=TRUE,
-                           trans_type='log', centering=FALSE, scaling=FALSE)
+    lipid_char_table, char_var[1], exclude_var_missing=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # conduct machine learning
 ML_output <- ML_final(ML_data[[2]],ranking_method='Random_forest',
-                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+    ML_method='Random_forest', split_prop=0.3, nfold=10)
 # ROC curves
-ROC_result <- ROC_plot_all(ML_output[[3]], ML_output[[5]],
-                           feature_n=10, plotly=FALSE)
+ROC_result <- ROC_plot_all(ML_output[[3]], ML_output[[5]], feature_n=10,
+                           plotly=FALSE)
 @
 
 <<>>=
@@ -1994,18 +1725,16 @@ ROC_result[[4]]
 char_var <- colnames(lipid_char_table)[-1]
 ## data processing of machine learning
 ML_data <- ML_data_process(exp_data, group_info = condition_table,
-                           lipid_char_table, char_var[1],
-                           exclude_var_missing=TRUE, missing_pct_limit=50,
-                           replace_zero=TRUE, zero2what='min', xmin=0.5,
-                           replace_NA=TRUE, NA2what='min', ymin=0.5,
-                           pct_transform=TRUE, data_transform=TRUE,
-                           trans_type='log', centering=FALSE, scaling=FALSE)
+    lipid_char_table, char_var[1], exclude_var_missing=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # conduct machine learning
 ML_output <- ML_final(ML_data[[2]],ranking_method='Random_forest',
-                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+    ML_method='Random_forest', split_prop=0.3, nfold=10)
 # PR curves
-PR_result <- PR_plot_all(ML_output[[4]], ML_output[[5]],
-                         feature_n=10, plotly=FALSE)
+PR_result <- PR_plot_all(ML_output[[4]], ML_output[[5]], feature_n=10,
+    plotly=FALSE)
 @
 
 <<>>=
@@ -2062,15 +1791,13 @@ evaluation method by the parameter \Robject{method}.
 char_var <- colnames(lipid_char_table)[-1]
 # data processing of machine learning
 ML_data <- ML_data_process(exp_data, group_info = condition_table,
-                           lipid_char_table, char_var[1],
-                           exclude_var_missing=TRUE, missing_pct_limit=50,
-                           replace_zero=TRUE, zero2what='min', xmin=0.5,
-                           replace_NA=TRUE, NA2what='min', ymin=0.5,
-                           pct_transform=TRUE, data_transform=TRUE,
-                           trans_type='log', centering=FALSE, scaling=FALSE)
+    lipid_char_table, char_var[1], exclude_var_missing=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # conduct machine learning
 ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
-                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+    ML_method='Random_forest', split_prop=0.3, nfold=10)
 # conduct model evaluation
 evaluate_result <- evalution_plot(ML_output[[2]], method='Accuracy',
                                   plotly=FALSE)
@@ -2086,6 +1813,7 @@ head(evaluate_result[[1]][, 1:5], 5)
 evaluate_result[[2]]
 @
 
+\newpage
 
 \subsection{Predicted probability}
 The average predicted probabilities of each sample in testing data from all CV
@@ -2095,18 +1823,15 @@ runs assist us to explore those incorrect or uncertain labels.
 char_var <- colnames(lipid_char_table)[-1]
 # data processing of machine learning
 ML_data <- ML_data_process(exp_data, group_info = condition_table,
-                           lipid_char_table, char_var[1],
-                           exclude_var_missing=TRUE, missing_pct_limit=50,
-                           replace_zero=TRUE, zero2what='min', xmin=0.5,
-                           replace_NA=TRUE, NA2what='min', ymin=0.5,
-                           pct_transform=TRUE, data_transform=TRUE,
-                           trans_type='log', centering=FALSE, scaling=FALSE)
+    lipid_char_table, char_var[1], exclude_var_missing=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # conduct machine learning
 ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
-                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+    ML_method='Random_forest', split_prop=0.3, nfold=10)
 # compute and visualize the average predicted probabilities
-prob_result <- probability_plot(ML_output[[1]], feature_n=10,
-                                plotly=FALSE)
+prob_result <- probability_plot(ML_output[[1]], feature_n=10, plotly=FALSE)
 @
 
 
@@ -2151,19 +1876,16 @@ Random Forest and XGBoost use built-in feature importance results.
 char_var <- colnames(lipid_char_table)[-1]
 # data processing of machine learning
 ML_data <- ML_data_process(exp_data, group_info = condition_table,
-                           lipid_char_table, char_var[1],
-                           exclude_var_missing=TRUE, missing_pct_limit=50,
-                           replace_zero=TRUE, zero2what='min', xmin=0.5,
-                           replace_NA=TRUE, NA2what='min', ymin=0.5,
-                           pct_transform=TRUE, data_transform=TRUE,
-                           trans_type='log', centering=FALSE, scaling=FALSE)
+    lipid_char_table, char_var[1], exclude_var_missing=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # conduct machine learning
 ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
-                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+    ML_method='Random_forest', split_prop=0.3, nfold=10)
 # compute and rank the contribution of each feature
 feature_result <- feature_plot(ML_output[[6]], ML_output[[7]],
-                               feature_n=10, nfold=10,
-                               plotly=FALSE)
+    feature_n=10, nfold=10, plotly=FALSE)
 @
 
 <<>>=
@@ -2181,12 +1903,13 @@ head(feature_result[[3]][, 1:5], 5)
 feature_result[[2]]
 @
 
+\newpage
+
 <<fig.cap = "\\textbf{Feature importance (Algorithm-based)-feature importance}", fig.small=TRUE>>=
 # view result: feature importance plot
 feature_result[[4]]
 @
 
-\newpage
 
 \subsubsection{SHAP analysis}
 Shapley Additive exPlanations (SHAP) approach on the basis of Shapley values in
@@ -2206,20 +1929,17 @@ approximate Shapley values of each feature for all samples with
 char_var <- colnames(lipid_char_table)[-1]
 # data processing of machine learning
 ML_data <- ML_data_process(exp_data, group_info = condition_table,
-                           lipid_char_table, char_var[1],
-                           exclude_var_missing=TRUE, missing_pct_limit=50,
-                           replace_zero=TRUE, zero2what='min', xmin=0.5,
-                           replace_NA=TRUE, NA2what='min', ymin=0.5,
-                           pct_transform=TRUE, data_transform=TRUE,
-                           trans_type='log', centering=FALSE, scaling=FALSE)
+    lipid_char_table, char_var[1], exclude_var_missing=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # conduct machine learning
 ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
-                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+    ML_method='Random_forest', split_prop=0.3, nfold=10)
 # conduct SHAP
 SHAP_output <- SHAP(ML_data[[2]], best_model=ML_output[[8]],
-                    best_model_feature=ML_output[[9]],
-                    ML_method='Random_forest', feature_n=10, nsim=5,
-                    plotly=FALSE)
+    best_model_feature=ML_output[[9]], ML_method='Random_forest', feature_n=10,
+    nsim=5,plotly=FALSE)
 @
 
 <<fig.cap = "\\textbf{SHAP feature importance plot} The top 10 features are ranked and demonstrated according to the average absolute value of shapely values from all samples.", fig.small=TRUE>>=
@@ -2240,24 +1960,19 @@ Next, we are going to visualize the SHAP feature importance of N samples.
 char_var <- colnames(lipid_char_table)[-1]
 # data processing of machine learning
 ML_data <- ML_data_process(exp_data, group_info = condition_table,
-                           lipid_char_table, char_var[1],
-                           exclude_var_missing=TRUE, pct_transform=TRUE,
-                           missing_pct_limit=50, replace_zero=TRUE,
-                           zero2what='min', NA2what='min',
-                           xmin=0.5, replace_NA=TRUE, ymin=0.5,
-                           data_transform=TRUE, centering=FALSE,
-                           trans_type='log', scaling=FALSE)
+    lipid_char_table, char_var[1], exclude_var_missing=TRUE, pct_transform=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', NA2what='min',
+    xmin=0.5, replace_NA=TRUE, ymin=0.5, data_transform=TRUE, centering=FALSE,
+    trans_type='log', scaling=FALSE)
 # conduct machine learning
 ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
-                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+    ML_method='Random_forest', split_prop=0.3, nfold=10)
 # conduct SHAP
 SHAP_output <- SHAP(ML_data[[2]], best_model=ML_output[[8]],
-                    best_model_feature=ML_output[[9]], nsim=5,
-                    ML_method='Random_forest', feature_n=10,
-                    plotly=FALSE)
+    best_model_feature=ML_output[[9]], nsim=5, ML_method='Random_forest',
+    feature_n=10, plotly=FALSE)
 # visualize SHAP feature importance of 10 samples
-SHAP_sample_result <- SHAP_sample(SHAP_output[[2]], n_sample=10,
-                                  plotly=FALSE)
+SHAP_sample_result <- SHAP_sample(SHAP_output[[2]], n_sample=10, plotly=FALSE)
 @
 
 <<fig.cap = "\\textbf{SHAP feature importance of 10 samples}", fig.small=TRUE>>=
@@ -2278,24 +1993,20 @@ of groups the samples to be clustered into by parameter \Robject{group\_num}.
 char_var <- colnames(lipid_char_table)[-1]
 # data processing of machine learning
 ML_data <- ML_data_process(exp_data, group_info = condition_table,
-                           lipid_char_table, char_var[1],
-                           exclude_var_missing=TRUE, missing_pct_limit=50,
-                           replace_zero=TRUE, zero2what='min', xmin=0.5,
-                           replace_NA=TRUE, NA2what='min', ymin=0.5,
-                           pct_transform=TRUE, data_transform=TRUE,
-                           trans_type='log', centering=FALSE, scaling=FALSE)
+    lipid_char_table, char_var[1], exclude_var_missing=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # conduct machine learning
 ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
-                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+    ML_method='Random_forest', split_prop=0.3, nfold=10)
 # conduct SHAP
 SHAP_output <- SHAP(ML_data[[2]], best_model=ML_output[[8]],
-                    best_model_feature=ML_output[[9]],
-                    ML_method='Random_forest', feature_n=10, nsim=5,
-                    plotly=FALSE)
+    best_model_feature=ML_output[[9]], ML_method='Random_forest', feature_n=10,
+    nsim=5, plotly=FALSE)
 # visualize each predictor's attributions
 SHAP_force_result <- SHAP_forceplot(SHAP_output[[1]], topN_feature=10,
-                                    cluster_method="ward.D", group_num=10,
-                                    plotly=FALSE)
+    cluster_method="ward.D", group_num=10, plotly=FALSE)
 @
 
 <<>>=
@@ -2333,13 +2044,11 @@ ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
                       ML_method='Random_forest', split_prop=0.3, nfold=10)
 # conduct SHAP
 SHAP_output <- SHAP(ML_data[[2]], best_model=ML_output[[8]],
-                    best_model_feature=ML_output[[9]], nsim=5,
-                    ML_method='Random_forest', feature_n=10,
-                    plotly=FALSE)
+    best_model_feature=ML_output[[9]], nsim=5, ML_method='Random_forest',
+    feature_n=10, plotly=FALSE)
 # visualize SHAP values against feature values for each variable
 SHAP_depend_result <- SHAP_dependence_plot(SHAP_output[[2]], x="C38.6.PC",
-                                           y="C38.6.PC", color_var="C38.6.PC",
-                                           plotly=FALSE)
+    y="C38.6.PC", color_var="C38.6.PC", plotly=FALSE)
 
 @
 
@@ -2365,39 +2074,35 @@ Feature importance section (Section \ref{subsec:feature_im}). A plus or minus
 are assigned to feature importance in SHAP analysis based on the direction of
 feature values and Shapley values of samples.
 
-<<ML: network, eval=FALSE>>=
+<<ML: network>>=
 # get lipid characteristics
 char_var <- colnames(lipid_char_table)[-1]
 # data processing of machine learning
 ML_data <- ML_data_process(exp_data, group_info = condition_table,
-                           lipid_char_table, char_var[1],
-                           exclude_var_missing=TRUE, missing_pct_limit=50,
-                           replace_zero=TRUE, zero2what='min', xmin=0.5,
-                           replace_NA=TRUE, NA2what='min', ymin=0.5,
-                           pct_transform=TRUE, data_transform=TRUE,
-                           trans_type='log', centering=FALSE, scaling=FALSE)
+    lipid_char_table, char_var[1], exclude_var_missing=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # conduct machine learning
 ML_output <- ML_final(ML_data[[2]], ranking_method='Random_forest',
-                      ML_method='Random_forest', split_prop=0.3, nfold=10)
+    ML_method='Random_forest', split_prop=0.3, nfold=10)
 # select feature importance from model of ML_output
 model_net <- model_for_net(ML_data[[2]], ML_method='Random_forest',
-                           varimp_method='Algorithm-based', ML_output[[8]],
-                           ML_output[[9]], feature_num=10, nsim=5)
+    varimp_method='Algorithm-based', ML_output[[8]], ML_output[[9]],
+    feature_num=10, nsim=5)
 # compute correlation coefficients and visualize correlation network
 cor_net_result <- cor_network(ML_data[[1]], lipid_char_table,
-                              model_net[[2]], model_net[[3]],
-                              cor_method='pearson', edge_cutoff=0)
+    model_net[[2]], model_net[[3]], cor_method='pearson', edge_cutoff=0,
+    plotly = FALSE)
 @
 
-<<eval=FALSE>>=
+\newpage
+
+<<fig.cap = "\\textbf{The network of feature importance}", fig.small=TRUE>>=
 # view result: the network of feature importance
-cor_net_result
+cor_net_result$visNetwork_plot
 @
-\begin{figure}
-  \includegraphics[width=0.8\textwidth]{images/corr_network.jpeg}
-  \caption{\textbf{The network of feature importance}}
-  \label{fig:visNetwork_plot}
-\end{figure}
+
 
 \newpage
 
@@ -2471,12 +2176,9 @@ missing values imputation, percentage transformation, log10 transformation, etc.
 head(exp_data[, 1:5], 5)
 # data processing of exp_data
 exp_transform_table <- data_process(exp_data, exclude_var_missing=TRUE,
-                                    missing_pct_limit=50, replace_zero=TRUE,
-                                    zero2what='min', xmin=0.5,
-                                    replace_NA=TRUE, NA2what='min',
-                                    ymin=0.5, pct_transform=TRUE,
-                                    data_transform=TRUE, trans_type='log',
-                                    centering=FALSE, scaling=FALSE)
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # exp_data after data processing
 head(exp_transform_table[, 1:5], 5)
 @
@@ -2518,19 +2220,14 @@ coefficient is provided below \cite{mukaka2012guide}.
 <<Correlation_lipid species: correlation>>=
 # data processing of exp_data
 exp_transform <- data_process(exp_data, exclude_var_missing=TRUE,
-                              missing_pct_limit=50,
-                              replace_zero=TRUE, zero2what='min',
-                              xmin=0.5, replace_NA=TRUE,
-                              NA2what='min', ymin=0.5,
-                              pct_transform=TRUE, data_transform=TRUE,
-                              trans_type='log', centering=FALSE, scaling=FALSE)
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # compute correlation coefficient and visualize by heatmap
 COspec_clinCor <- Clin_Cor_heatmap(exp_transform, condition_table,
-                                   test = 'pearson', adjust_p_method = 'BH',
-                                   sig_stat = 'p.adj', sig_pvalue=1,
-                                   sig_cor_coef=0, heatmap_col='statistic',
-                                   distfun='spearman', hclustfun='average',
-                                   plotly=FALSE)
+    test = 'pearson', adjust_p_method = 'BH', sig_stat = 'p.adj', sig_pvalue=1,
+    sig_cor_coef=0, heatmap_col='statistic', distfun='spearman',
+    hclustfun='average', plotly=FALSE)
 @
 
 <<>>=
@@ -2567,17 +2264,14 @@ assigned to each lipid species, which can be chosen for clustering.
 <<Correlation_lipid species: linear regression>>=
 # data processing of exp_data
 exp_transform <- data_process(exp_data, exclude_var_missing=TRUE,
-                              missing_pct_limit=50, replace_zero=TRUE,
-                              zero2what='min', xmin=0.5, replace_NA=TRUE,
-                              NA2what='min', ymin=0.5, pct_transform=TRUE,
-                              data_transform=TRUE, trans_type='log',
-                              centering=FALSE, scaling=FALSE)
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=TRUE, trans_type='log', centering=FALSE, scaling=FALSE)
 # compute linear regression and visualize by heatmap
 COspec_clin_LR <- Clin_LR_heatmap(exp_transform, condition_table,
-                                  adjusted_table, adjust_p_method = 'BH',
-                                  sig_stat = 'p.adj', sig_pvalue = 1,
-                                  distfun='spearman', hclustfun='centroid',
-                                  heatmap_col='beta_coef', plotly=FALSE)
+    adjusted_table, adjust_p_method = 'BH', sig_stat = 'p.adj', sig_pvalue = 1,
+    distfun='spearman', hclustfun='centroid', heatmap_col='beta_coef',
+    plotly=FALSE)
 @
 
 <<>>=
@@ -2643,20 +2337,15 @@ exp_data_Spe2Char <- Species2Char(exp_data, lipid_char_table,
                                   char_var = char_var[1])
 # data processing of exp_data_Spe2Char
 exp_transform_class <- data_process(exp_data_Spe2Char,
-                                    exclude_var_missing=TRUE,
-                                    missing_pct_limit=50, replace_zero=TRUE,
-                                    zero2what='NA', xmin=0.5, replace_NA=TRUE,
-                                    NA2what='min', ymin=0.5,
-                                    pct_transform=TRUE,
-                                    data_transform=FALSE, trans_type='log',
-                                    centering=FALSE, scaling=FALSE)
+    exclude_var_missing=TRUE, missing_pct_limit=50, replace_zero=TRUE,
+    zero2what='NA', xmin=0.5, replace_NA=TRUE, NA2what='min', ymin=0.5,
+    pct_transform=TRUE, data_transform=FALSE, trans_type='log',
+    centering=FALSE, scaling=FALSE)
 # compute correlation coefficient and visualize by heatmap
 COchar_clinCor <- Clin_Cor_heatmap(exp_transform_class, condition_table,
-                                   test = 'pearson', adjust_p_method = 'BH',
-                                   sig_stat = 'p.adj', sig_pvalue=1,
-                                   sig_cor_coef=0, heatmap_col='statistic',
-                                   distfun='spearman', hclustfun='average',
-                                   plotly=FALSE)
+    test = 'pearson', adjust_p_method = 'BH', sig_stat = 'p.adj', sig_pvalue=1,
+    sig_cor_coef=0, heatmap_col='statistic', distfun='spearman',
+    hclustfun='average', plotly=FALSE)
 @
 
 <<>>=
@@ -2699,20 +2388,15 @@ char_var <- colnames(lipid_char_table)[-1]
 exp_data_Spe2Char <- Species2Char(exp_data, lipid_char_table,
                                   char_var = char_var[1])
 # data processing of exp_data_Spe2Char
-exp_transform_class <- data_process(exp_data_Spe2Char,
-                                    exclude_var_missing=TRUE,
-                                    missing_pct_limit=50, replace_zero=TRUE,
-                                    zero2what='NA', xmin=0.5, replace_NA=TRUE,
-                                    NA2what='min', ymin=0.5,
-                                    pct_transform=TRUE,
-                                    data_transform=FALSE, trans_type='log',
-                                    centering=FALSE, scaling=FALSE)
+exp_transform_class <- data_process(exp_data_Spe2Char, exclude_var_missing=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='NA', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    data_transform=FALSE, trans_type='log', centering=FALSE, scaling=FALSE)
 # compute linear regression and visualize by heatmap
 COchar_clin_LR <- Clin_LR_heatmap(exp_transform_class, condition_table,
-                                  adjusted_table, adjust_p_method = 'BH',
-                                  sig_stat = 'p.adj', sig_pvalue = 1,
-                                  distfun='spearman', hclustfun='centroid',
-                                  heatmap_col='beta_coef', plotly=FALSE)
+    adjusted_table, adjust_p_method = 'BH', sig_stat = 'p.adj', sig_pvalue = 1,
+    distfun='spearman', hclustfun='centroid', heatmap_col='beta_coef',
+    plotly=FALSE)
 @
 
 <<>>=
