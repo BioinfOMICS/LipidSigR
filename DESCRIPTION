@@ -82,3 +82,4 @@ Enhances:
     rlang (>= 0.4.11),
 VignetteBuilder: knitr
 Config/testthat/edition: 3
+
