@@ -1,0 +1,34 @@
+\name{DE_exp_data}
+\alias{DE_exp_data}
+\docType{data}
+\title{
+DE_exp_data
+}
+\description{
+A data frame of lipid expression data for differential expression
+analysis workflow. The lipid expression data were obtained from the research of
+adipose tissue ATGL modifies the cardiac lipidome in pressure-overload-induced
+left Ventricular failure. Human plasma lipidome from 10 healthy controls and
+13 patients with systolic heart failure (HFrEF) were analyzed by MS-based
+shotgun lipidomics.
+}
+\usage{data("DE_exp_data")}
+\format{
+  A data frame with 208 observations on the following 24 variables.
+  \describe{
+    \item{\code{feature}}{a character vector}
+    \item{\code{control_01} - \code{control_10}}{a numeric vector,
+    expression value of one of the 10 healthy controls}
+    \item{\code{hfref_patient_01} - \code{hfref_patient_13}}{a numeric vector,
+    expression value of one of the 13 patients}
+  }
+}
+\source{
+Salatzki J, Foryst-Ludwig A, Bentele K, Blumrich A, Smeir E, Ban Z, et al.
+Adipose tissue ATGL modifies the cardiac lipidome in pressure-overload-induced
+left ventricular failure. PLoS genetics. 2018;14(1):e1007171.
+}
+\examples{
+data(DE_exp_data)
+}
+\keyword{datasets}
