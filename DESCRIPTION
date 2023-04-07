@@ -1,7 +1,7 @@
 Package: LipidSigR
 Type: Package
 Title: A comprehensive analysis for streamlined data mining of lipidomic data
-Version: 0.99.22
+Version: 0.99.23
 Authors@R: c(
     person("Wei-Chung", "Cheng", email="chenglabomics@gmail.com", role = c("aut","cre","cph"), comment = c(ORCID = "0000-0002-1229-4857")),
     person("Wen-Jen", "Lin", role = c("aut","ctb")),
@@ -61,7 +61,8 @@ Imports:
     tidygraph,
     igraph,
     SHAPforxgboost,
-    fastshap
+    fastshap,
+    ranger
 Suggests:
     devtools,
     roxygen2,
@@ -75,7 +76,6 @@ Enhances:
     ggforce,
     parsnip,
     ggpubr,
-    ranger,
     ggrepel,
     ggbeeswarm,
     showimage,
