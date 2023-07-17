@@ -11,10 +11,10 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 BiocManager::install("LipidSigR", version = "devel")
 ``` 
 
-Or install the latest development version (on GitHub) via {remotes}:
+Or install the latest development version (on GitHub) :
 
 ``` r
-remotes::install_github("BioinfOMICS/LipidSigR")
+devtools::install_github("BioinfOMICS/LipidSigR")
 ``` 
 
 ## Description 
