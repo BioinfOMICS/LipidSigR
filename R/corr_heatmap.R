@@ -82,7 +82,7 @@ corr_heatmap <- function(exp_data,corr_method="pearson",
   if(sum(is.na(exp_data[, -1])) > 0){
     stop("Variables can not be NA")
   }
-
+  
   cor.test.p <- function(x,method){
     FUN <- function(x, y,method) stats::cor.test(x=x,
                                                  y=y,
@@ -97,40 +97,7 @@ corr_heatmap <- function(exp_data,corr_method="pearson",
     dimnames(z) <- list(colnames(x), colnames(x))
     z
   }
-
-  heatmap_color_scale <- function(data){
-    data <- round(data,3)
-    if(max(data) <= 0 & min(data) < 0){
-      over_median <- min(data)/2
-      if(max(data) < over_median){
-        color <-  grDevices::colorRampPalette(c("#157AB5", "#92c5de"))(n=1000)
-      }else{
-        color_rank <- round(max(data)/(min(data))*1000)
-        color_scale <- grDevices::colorRampPalette(c("#0571b0",
-                                                     "#92c5de",
-                                                     "white"))(n=1000)
-        color <- color_scale[color_rank:1000]
-      }
-    }else if(min(data) >= 0 & max(data) > 0){
-      over_median <- max(data)/2
-      if(min(data)>over_median){
-        color <-  grDevices::colorRampPalette(c("#f4a582", "#ca0020"))(n=1000)
-      }else{
-        color_rank <- round(min(data)/(max(data))*1000)
-        color_scale <- grDevices::colorRampPalette(c("white",
-                                                     "#f4a582",
-                                                     "#ca0020"))(n=1000)
-        color <- color_scale[color_rank:1000]
-      }
-    }
-    return(color)
-  }
-
-  ## Sample Correlation heatmap ##
-  cb_grid <- iheatmapr::setup_colorbar_grid(y_length=0.6,
-                                            x_start=1,
-                                            y_start=0.5)
-
+  
   if(type == 'sample'){
     exp_data <- subset(exp_data, select=-feature)
     corr_coef <- stats::cor(exp_data, method=corr_method,
@@ -147,45 +114,102 @@ corr_heatmap <- function(exp_data,corr_method="pearson",
     corr_p <- cor.test.p(x=exp_data, method=corr_method)
     data <- corr_coef
   }
-
-
-  if(sum(is.na(data)) == 0 &
-     nrow(data) >= 2 &
-     ncol(data) >= 2){
-    if(distfun %in% c("pearson", "kendall", "spearman")){
-      col_dend <- stats::hclust(
-        stats::as.dist(1-stats::cor(data, method=distfun)),
-        method=hclustfun)
-    }else{
-      col_dend <- stats::hclust(
-        stats::dist(t(data), method=distfun), method=hclustfun)
-    }
-    sample_col_dend <- function(x) col_dend
+  
+  
+  if(sum(is.na(data)) == 0 & nrow(data) >= 2 & ncol(data) >= 2){
     if(plotly == TRUE){
-      if(min(data) >= 0 || max(data) <= 0){
-        heatmap <- iheatmapr::iheatmap(
-          data, colors=heatmap_color_scale(data),
-          colorbar_grid=cb_grid)
+      if(distfun %in% c('pearson','spearman','kendall')){
+        dist_fun <- function(x){
+          x <- t(x)
+          cor.mat <- stats::cor(x, method=distfun, use='complete.obs')
+          cor.mat <- (1-cor.mat)
+          cor.dist <- stats::as.dist(cor.mat)
+          return(cor.dist)
+        }
       }else{
-        heatmap <- iheatmapr::iheatmap(data,
-                                         colorbar_grid=cb_grid)
+        dist_fun <- function(x) stats::dist(x, method=distfun)
       }
-      heatmap <- heatmap %>%
-        iheatmapr::add_col_dendro(col_dend, side="top",
-                                  reorder=TRUE, size=0.1) %>%
-        iheatmapr::add_row_dendro(col_dend, side="right",
-                                  reorder=TRUE, size=0.1)
-      if(nrow(data) < 50){
-        heatmap <- heatmap %>%
-          iheatmapr::add_row_labels(font=list(size=10))
+      hclust_fun <- function(x) stats::hclust(x, method=hclustfun) 
+      if(min(data) >= 0 || max(data) <= 0){
+        heatmap <- heatmaply::heatmaply(
+          data, distfun=dist_fun, hclustfun=hclust_fun,
+          scale_fill_gradient_fun=
+            ggplot2::scale_fill_gradient2(low="#0571b0", mid="white", 
+                                          high="#ca0020", midpoint=0, 
+                                          na.value="grey50"),
+          column_text_angle=90, grid_color="white", 
+          margins=c(l=0.2, r=0, t=0, b=80),
+          hide_colorbar=T)
+      }else{
+        heatmap <- heatmaply::heatmaply(
+          data, distfun=dist_fun, hclustfun=hclust_fun,
+          scale_fill_gradient_fun=
+            ggplot2::scale_fill_gradient2(low="#0571b0", mid="white", 
+                                          high="#ca0020", midpoint=0, 
+                                          na.value="grey50"),
+          column_text_angle=90, grid_color="white", 
+          margins=c(l=0.2, r=0, t=0, b=80))
       }
-      if(ncol(data) < 50){
-        heatmap <- heatmap %>%
-          iheatmapr::add_col_labels(side="bottom", font=list(size=10))
+      
+      ax <- list(title="", zeroline=FALSE, showline=FALSE, 
+                 showgrid=FALSE)
+      bx <- list(title="", zeroline=FALSE, showline=FALSE, 
+                 showticklabels=FALSE, showgrid=FALSE, ticks='')
+      
+      if(nrow(data) > 50){
+        heatmap <- heatmap  %>%
+          layout(xaxis=bx) 
+      }else{
+        heatmap <- heatmap  %>%
+          layout(xaxis=ax) 
+      }
+      if(ncol(data) > 50){
+        heatmap <- heatmap  %>%
+          layout(yaxis2=bx) 
+      }else{
+        heatmap <- heatmap  %>%
+          layout(yaxis2=ax) 
       }
       ## reorder Sample correlation matrix ##
-      reorder_data <- apply(data[, col_dend$order], 2, rev)
+      reorder_data <- data[rev(heatmap$x$layout$yaxis2$ticktext), 
+                           heatmap$x$layout$yaxis2$ticktext]
     }else{
+      if(distfun %in% c("pearson", "kendall", "spearman")){
+        col_dend <- stats::hclust(
+          stats::as.dist(1-stats::cor(data, method=distfun)),
+          method=hclustfun)
+      }else{
+        col_dend <- stats::hclust(
+          stats::dist(t(data), method=distfun), method=hclustfun)
+      }
+      sample_col_dend <- function(x) col_dend
+      heatmap_color_scale <- function(data){
+        data <- round(data, 3)
+        if(max(data) <= 0 & min(data) < 0){
+          over_median <- min(data)/2
+          if(max(data) < over_median){
+            color <- grDevices::colorRampPalette(
+              c("#157AB5","#92c5de"))(n=1000)
+          }else{
+            color_rank <- round(max(data)/(min(data))*1000)
+            color_scale <- grDevices::colorRampPalette(
+              c("#0571b0","#92c5de","white"))(n=1000)
+            color <- color_scale[color_rank:1000]
+          }
+        }else if(min(data) >= 0 & max(data) > 0){
+          over_median <- max(data)/2
+          if(min(data) > over_median){
+            color <- grDevices::colorRampPalette(
+              c("#f4a582", "#ca0020"))(n=1000)
+          }else{
+            color_rank <- round(min(data)/(max(data))*1000)
+            color_scale <- grDevices::colorRampPalette(
+              c("white","#f4a582", "#ca0020"))(n=1000)
+            color <- color_scale[color_rank:1000]
+          }
+        }
+        return(color)
+      }
       if(min(data) >= 0 || max(data) <= 0){
         stats::heatmap(data, Rowv=TRUE, Colv=TRUE,
                        dendrogram='both', trace="none",
@@ -218,9 +242,9 @@ corr_heatmap <- function(exp_data,corr_method="pearson",
     heatmap <- NULL
     reorder_data <- NULL
   }
-
+  
   return(list(corr_coef=corr_coef,
               corr_p=corr_p,
               heatmap=heatmap,
-              reorder_data=data))
+              reorder_data=reorder_data))
 }
