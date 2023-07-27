@@ -84,7 +84,7 @@ Hclustering <- function(exp_data, DE_result_table, group_info,
                         distfun='pearson', hclustfun='complete',
                         insert_ref_group=NULL, ref_group=NULL,
                         plotly=TRUE, type='all'){
-
+  
   exp_data <- as.data.frame(exp_data)
   DE_result_table <- as.data.frame(DE_result_table)
   group_info <- as.data.frame(group_info)
@@ -226,7 +226,7 @@ Hclustering <- function(exp_data, DE_result_table, group_info,
         stop("Thlipid_char_tablee content of column 'totaloh' must be numeric")
       }
     }
-
+    
     if(ncol(dplyr::select(lipid_char_table,
                           tidyselect::starts_with("FA_"))) != 0){
       FA_lipid_char_table <- lipid_char_table %>%
@@ -267,31 +267,31 @@ Hclustering <- function(exp_data, DE_result_table, group_info,
       }
     }
   }
-
+  
   colnames(exp_data)[1] <- 'feature'
   colnames(DE_result_table)[1] <- 'feature'
-
+  
   rownames(exp_data) <- NULL
   exp.mat.all <- exp_data %>%
     dplyr::select(feature, group_info$sample_name) %>%
     tibble::column_to_rownames(var='feature') %>%
     as.matrix()
   colnames(exp.mat.all) <- group_info$label_name
-
-
+  
+  
   exp.mat.sig <- exp_data %>%
     dplyr::select(feature, group_info$sample_name) %>%
     dplyr::filter(feature %in% DE_result_table$feature) %>%
     tibble::column_to_rownames(var='feature') %>%
     as.matrix()
   colnames(exp.mat.sig) <- group_info$label_name
-
+  
   if(!is.null(insert_ref_group) & !is.null(ref_group)){
     exp_raw_name <- ref_group[-which(insert_ref_group == ref_group)]
     group_info$group[which(group_info$group == 'ctrl')] <-  insert_ref_group
     group_info$group[which(group_info$group == 'exp')] <-  exp_raw_name
   }
-
+  
   colGroup <- data.frame(Sample=group_info$group, stringsAsFactors=FALSE)
   col_color <- grDevices::rainbow(length(unique(colGroup$Sample)))
   col_color_label <- colGroup$Sample
@@ -300,7 +300,7 @@ Hclustering <- function(exp_data, DE_result_table, group_info,
                             unique(colGroup$Sample)[j])] <- col_color[j]
   }
   if(!is.null(lipid_char_table) & !is.null(char_var)){
-
+    
     rowGroup.all <- exp.mat.all %>%
       as.data.frame() %>%
       tibble::rownames_to_column(var='feature') %>%
@@ -314,7 +314,7 @@ Hclustering <- function(exp_data, DE_result_table, group_info,
                                   unique(rowGroup.all$class)[j])] <-
         row_all_color[j]
     }
-
+    
     rowGroup.sig <- exp.mat.sig %>%
       as.data.frame() %>%
       tibble::rownames_to_column(var='feature') %>%
@@ -370,16 +370,16 @@ Hclustering <- function(exp_data, DE_result_table, group_info,
     }
     return(color)
   }
-
+  
   if(type=='all'){
     data <- exp.mat.all
   }else if(type=='sig'){
     data <- exp.mat.sig
   }
-
+  
   if(nrow(data) >= 2 & ncol(data) >= 2 &
      sum(is.na(data)) == 0){
-
+    
     if(max(nchar(rownames(data))) < 10){
       all_row_text_size <- 0.1
     }else if(max(nchar(rownames(data))) >= 10 &
@@ -494,20 +494,20 @@ Hclustering <- function(exp_data, DE_result_table, group_info,
           lwid=c(1, 9),
           scale='none')
       }
-
+      
       heatmap <- grDevices::recordPlot()
       grDevices::dev.off()
     }
     reorder.data <- data[rev(row_dend$order), col_dend$order]
-
+    
   }else{
-
+    
     heatmap <- NULL
     reorder.data <- NULL
   }
-
-
-
-
+  
+  
+  
+  
   return(list(heatmap=heatmap, data=reorder.data))
 } #function
