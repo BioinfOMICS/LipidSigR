@@ -19,7 +19,7 @@ LazyData: FALSE
 RoxygenNote: 7.1.2
 biocViews: Lipidomics, GeneExpression, Classification, Clustering
 Depends:
-    R (>= 4.2.3)
+    R (>= 4.0.0)
 Imports:
     plotly (>= 4.9.4.1),
     dplyr,
