@@ -1,0 +1,1803 @@
+%\VignetteIndexEntry{LipidSigR differential expression tutorial}
+%\VignettePackage{LipidSigR}
+%\VignetteEngine{knitr::knitr}
+
+\documentclass{article}
+
+<<style-knitr, eval=TRUE, echo=FALSE, results='asis'>>=
+BiocStyle::latex()
+@
+
+\usepackage{booktabs} % book-quality tables
+
+\newcommand\BiocStyle{\Rpackage{BiocStyle}}
+\newcommand\latex[1]{{\ttfamily #1}}
+\usepackage[utf8]{inputenc}
+
+<<echo=FALSE ,include=FALSE>>=
+knitr::opts_chunk$set(warning=FALSE)
+knitr::opts_chunk$set(fig.width = 6, fig.height = 5)
+knitr::opts_chunk$set(fig.align ="center")
+knitr::opts_chunk$set(concordance=TRUE)
+@
+
+\makeatletter
+\def\thefpsfigure{\fps@figure}
+\makeatother
+
+\newcommand{\exitem}[3]{%
+  \item \latex{\textbackslash#1\{#2\}} #3 \csname#1\endcsname{#2}.%
+}
+
+
+\title{LipidSigR tutorial - Differential expression}
+\author[1]{Wei-Chung Cheng}
+\affil[1]{China Medical University}
+\author[2]{Wen-Jen, Lin}
+\affil[2]{China Medical University}
+
+\begin{document}
+
+\setlength{\headheight}{46.27916pt}
+
+\maketitle
+
+\begin{abstract}
+"LipidSigR" is an R package developed based on LipidSig web-based tool
+\url{http://www.chenglab.cmu.edu.tw/lipidsig/}. This package integrates a
+comprehensive analysis for streamlined data mining of lipidomic datasets.
+We provide 2 main analysis workflows, which is "Profiling" and "Differential
+expression". Each section provides unique aspects to analyze the lipidome
+profiling data based on different characteristics including lipid class,
+chain length, unsaturation, hydroxyl group, and fatty acid composition.
+\end{abstract}
+
+\packageVersion{\Sexpr{BiocStyle::pkg_ver("LipidSigR")}}
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\renewcommand\abstractname{Introduction of LipidSigR}
+\phantomsection{}
+\addcontentsline{toc}{section}{\abstractname}
+\section*{Introduction of LipidSigR}
+\label{intro}
+Lipidomics technology provides a fast and high-throughput screening to identify
+thousands of lipid species in cells, tissues, or other biological samples and
+has been broadly used in several areas of studies.
+
+\textbf{"LipidSigR"} is an R package developed based on LipidSig web-based tool
+(\url{http://www.chenglab.cmu.edu.tw/lipidsig/}) \cite{lipidsig}. This package
+integrates a comprehensive analysis for streamlined data mining of lipidomic
+datasets. We provide 2 main analysis workflows, which is \textbf{"Profiling"}
+and \textbf{"Differential expression"}. Each section provides unique aspects to
+analyze the lipidome profiling data based on different characteristics including
+lipidclass, chain length, unsaturation, hydroxyl group, and fatty acid
+composition.\\
+
+The following sections of this documentation will describe the usage of
+\textbf{"Differential expression"} functions. The differential expression
+analysis integrates many useful lipid-focused analyses for identifying
+significant lipid species or lipid characteristics.
+
+\newpage
+
+\renewcommand\abstractname{Installation}
+\phantomsection{}
+\addcontentsline{toc}{section}{\abstractname}
+\section*{Installation}
+This section briefly describes the procedures of running the \textbf{LipidSigR}
+package on your system. We assume that you have already installed the R program
+(see the R project at \url{http://www.r-project.org})  and are familiar with it.
+You need to have R 4.0.0 or a later version installed for running LipidSigR.
+
+The \textbf{LipidSigR} package is available at the Bioconductor repository
+(\url{http://www.bioconductor.org}). To install our package, first, you need
+to install the core Bioconductor packages. If you have already installed the
+Bioconductor packages on your system, you can skip the following step below.
+
+<<install_Bioconductor, eval=FALSE>>=
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install()
+@
+Once the core Bioconductor packages have been installed, we can begin the
+installation of the LipidSigR package.
+
+<<install_package, eval=FALSE>>=
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("LipidSigR")
+@
+After conducting the above step, now you can load in our package and start
+using it!
+<<load_package, message = FALSE>>=
+library(LipidSigR)
+@
+
+<<message = FALSE, echo=FALSE>>=
+library(ggplot2)
+library(SummarizedExperiment)
+library(dplyr)
+@
+
+\newpage
+
+\section{Differential expression}
+\label{DE}
+After overviewing the lipid data, then we move on to differential expression to
+identify the significant lipid species and lipid characteristics. Differential
+Expression is divided into two main analyses, \textbf{'Lipid species analysis'}
+and \textbf{'Lipid characteristics analysis'}. Further analysis and
+visualization methods can also be conducted based on the results of differential
+expressed analysis.
+
+\begin{itemize}
+  \item \textbf{Lipid species analysis}: The lipid species analysis explores the
+  significant lipid species based on differentially expressed analysis. Data are
+  analyzed based on each lipid species. Further analysis and visualization
+  methods, include
+     \begin{enumerate}
+        \item dimensionality reduction,
+        \item hierarchical clustering,
+        \item characteristics association,
+        \item enrichment.
+      \end{enumerate}
+
+
+  \item \textbf{Lipid characteristics analysis}: The lipid characteristics
+  analysis explores the significant lipid characteristics. Lipid species are
+  categorized and summarized into a new lipid expression table according to a
+  selected lipid characteristic. The expression of all lipid species of the same
+  categories are summed up, then conduct differential expressed analysis.
+  Further analysis and visualization methods include
+    \begin{enumerate}
+        \item dimensionality reduction,
+        \item hierarchical clustering.
+     \end{enumerate}
+\end{itemize}
+
+\subsection{Input data}
+First, we have to read the input data needed for the differential expression
+section. We have to prepare lipid expression data (\Robject{exp\_data}), lipid
+characteristics table (\Robject{lipid\_char\_table}), and a table of one
+clinical term (or one set of clinical terms) from demographic data
+(\Robject{group\_info}) as input data.
+
+<<load_DE_data>>=
+## clears all objects from workspace
+rm(list = ls())
+
+## lipid expression data
+data("DE_exp_data")
+head(DE_exp_data[, 1:5], 5)
+
+## lipid characteristics table
+data("DE_lipid_char_table")
+head(DE_lipid_char_table[, 1:4], 5)
+
+## group information table
+data("DE_group_info")
+head(DE_group_info, 5)
+@
+
+Then, we must transform these three data frames into a SummarizedExperiment
+object, which will be input for each function. Follow the instructions below to
+construct the SummarizedExperiment object.
+
+<<transformToSE>>=
+library(SummarizedExperiment)
+DE_data <- SummarizedExperiment(
+    assays=list(exp_data=as.matrix(DE_exp_data[, -1])),
+    rowData=DE_lipid_char_table, colData=DE_group_info)
+@
+
+After constructing the input data, sometimes, we may need to conduct data
+processing before analysis. Here, we provide the \Rfunction{data\_process}
+function for data processing, including removing features with missing values,
+missing values imputation, percentage transformation, log10 transformation, etc.
+
+<<DE_data_process>>=
+## lipid expression data
+head(SummarizedExperiment::assay(DE_data)[, 1:5], 5)
+## data processing of exp_data
+exp_transform_SE <- data_process(
+    DE_data, exclude_var_missing=TRUE,missing_pct_limit=50, replace_zero=TRUE,
+    zero2what='min', xmin=0.5, replace_NA=TRUE, NA2what='min', ymin=0.5,
+    pct_transform=TRUE, data_transform=FALSE, trans_type='log',
+    centering=FALSE, scaling=FALSE)
+head(SummarizedExperiment::assay(exp_transform_SE)[, 1:5], 5)
+@
+
+\subsection{Lipid species analysis}
+Now, let's start with the analysis of lipid species.
+
+\subsubsection{Differentially expressed analysis}
+\label{DE_species}
+For lipid species analysis section, differentially expressed analysis is
+performed to figure out significant lipid species. In short, samples will be
+divided into two groups (independent) according to the input "Group
+Information" table.
+
+<<DE_lipid species: differentially expressed analysis>>=
+## data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(
+    DE_data, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5, pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## conduct differentially expressed analysis of lipid species
+DE_species_result <- DE_species(
+    exp_data_SE=exp_transform_non_log, data_transform=TRUE, paired=FALSE,
+    test='t.test', adjust_p_method='BH', sig_stat='p.adj', sig_pvalue=0.05,
+    sig_FC=2)
+
+## view result - exp_data_stat
+head(SummarizedExperiment::assay(DE_species_result$exp_data_stat)[, 1:5], 5)
+## view result - exp_data_stat_sig
+head(SummarizedExperiment::assay(DE_species_result$exp_data_stat_sig)[, 1:5], 5)
+@
+
+The output of \Rfunction{DE\_species} can be further applied for plotting.
+Below are examples of generating a lollipop chart, MA plot, and volcano plot
+from the results of the differentially expressed analysis.
+
+<<DE_lipid species: plotting lollipop chart>>=
+## extract the assay data from DE_species_result
+sig.diff.exp <- as.data.frame(
+    SummarizedExperiment::assay(DE_species_result$exp_data_stat_sig))
+## set the statistical test, cut-off and p-value for significance
+sig_stat <- 'p.adj'
+sig_FC <- 2
+sig_pvalue <- 0.05
+## remove duplicate rows based on the 'feature' column
+sig.diff.exp <- sig.diff.exp %>% dplyr::distinct(feature, .keep_all=TRUE)
+## check if there are no finite values for the log2 fold change column
+if (sum(is.finite(sig.diff.exp$log2FC)) == 0) {
+  sig.diff.exp$log2FC <- ifelse(sig.diff.exp$log2FC > 0, 5, -5)
+    ## Check if there are no infinite values for the log2 fold change column
+  } else if (sum(is.infinite(sig.diff.exp$log2FC)) == 0) {
+    sig.diff.exp <- sig.diff.exp
+    } else {
+      rm.inf <- sig.diff.exp %>% dplyr::filter(is.finite(log2FC))
+      INF <- ceiling(max(rm.inf$log2FC, na.rm=TRUE) * 1.5)
+      sig.diff.exp$log2FC <- ifelse(
+        is.infinite(sig.diff.exp$log2FC) & sig.diff.exp$log2FC > 0, INF,
+        ifelse(is.infinite(sig.diff.exp$log2FC) & sig.diff.exp$log2FC < 0,
+               -INF, sig.diff.exp$log2FC))
+    }
+## create a lollipop chart
+p.dotchart <- ggpubr::ggdotchart(
+    sig.diff.exp, x="feature", y="log2FC", rotate=TRUE, color="white",
+    sorting="descending", add="segments", dot.size=2.5, legend.title="log2(FC)",
+    xlab=" ", ylab="log2(Fold Change)", legend="right",
+    ggtheme=ggpubr::theme_pubr())
+if (sum(!is.na(sig.diff.exp[,'p_value'])) == 0) {
+    p.dotchart <- p.dotchart +
+        ggplot2::geom_point(ggplot2::aes(color=log2FC, size=2.5)) +
+        ggplot2::labs(colour="log2(FC)")
+} else if (sig_stat == "p") {
+    p.dotchart <- p.dotchart +
+        ggplot2::geom_point(ggplot2::aes(color=m_log10_p_value, size=2.5)) +
+        ggplot2::labs(colour="-log10(p-value)") +
+        ggplot2::scale_colour_gradient2(
+            low="steelblue", mid="white", high="red", midpoint=0)
+} else {
+    p.dotchart <- p.dotchart +
+        ggplot2::geom_point(ggplot2::aes(color=m_log10_p_adj, size=2.5)) +
+        ggplot2::labs(colour="-log10(padj)")
+}
+p.dotchart <- p.dotchart +
+    ggplot2::guides(size="none") +
+    ggplot2::scale_colour_gradient2(
+        low="steelblue", mid="white", high="red", midpoint=0)
+@
+
+\newpage
+
+<<fig.cap = "\\textbf{Lollipop chart of lipid species analysis} The lollipop chart reveals the lipid species that pass chosen cut-offs. The x-axis shows log2 fold change while the y-axis is a list of lipids species. The color of the point is determined by \\Robject{-log10(adjusted p-value/p-value)}.", fig.small=TRUE>>=
+## view lollipop chart
+p.dotchart
+@
+
+
+<<DE_lipid species: plotting MA plot>>=
+## extract the assay data from DE_species_result
+plot_table <- as.data.frame(
+    SummarizedExperiment::assay(DE_species_result$exp_data_stat))
+## data frame for plotting MA plot and volcano plot
+plot_MA_Vol <- plot_table %>%
+    dplyr::select(
+        feature, mean_exp, mean_ctrl, p_value, p_adj, 'M'='log2FC') %>%
+    dplyr::mutate(A=(log2(mean_exp) + log2(mean_ctrl))/2)
+if(sum(!is.na(plot_table[,'p_value'])) == 0){
+    plot_MA_Vol <- plot_MA_Vol %>%
+        dplyr::mutate(
+            m.log.p=NA,
+            sig_log2fc.pvalue_colors=ifelse(
+                M > log2(sig_FC) ,'up-regulated',
+                ifelse(-M > log2(sig_FC),'down-regulated','none')))
+}else{
+    plot_MA_Vol <- plot_MA_Vol %>%
+        dplyr::mutate(
+            m.log.p=-log10(p_value),
+            sig_log2fc.pvalue_colors=
+                if(sig_stat == "p"){
+                ifelse(M>log2(sig_FC) & -log10(p_value) > -log10(sig_pvalue),
+                       'up-regulated',
+                       ifelse(-M>log2(sig_FC) & -log10(p_value) >
+                                  -log10(sig_pvalue), 'down-regulated', 'none'))
+                }else{
+                    ifelse(
+                        M > log2(sig_FC) & -log10(p_adj) > -log10(sig_pvalue),
+                        'up-regulated', ifelse(-M > log2(sig_FC) & -log10(p_adj)
+                                               > -log10(sig_pvalue),
+                                               'down-regulated', 'none'))
+                    })
+}
+plot_MA_Vol$sig_log2fc.pvalue_colors <- factor(
+    plot_MA_Vol$sig_log2fc.pvalue_colors, levels=c(
+        "down-regulated", "none", "up-regulated"))
+## create a MA plot
+DE_species_maplot <- ggplot2::ggplot(
+    plot_MA_Vol,ggplot2::aes(
+        x=as.numeric(A), y=as.numeric(M), color=sig_log2fc.pvalue_colors)) +
+    ggplot2::geom_point() +
+    ggplot2::scale_color_manual(values=c("#4169E1", "#DDDDDD", "#FF4500")) +
+    ggplot2::labs(
+        color='log2FC Significant', y='M = log2(exp)-log2(ctrl)',
+        x="A = (log2(exp)+log2(ctrl))/2", title="MA Plot") +
+    ggthemes::theme_hc() +
+    ggplot2::geom_hline(yintercept=0) +
+    ggplot2::geom_vline(xintercept=0)
+@
+
+<<fig.cap = "\\textbf{MA plot} The MA plot indicates three groups of lipid species, up-regulated(red), down-regulated(blue), and non-significant(grey).", fig.small=TRUE>>=
+## view MA plot
+DE_species_maplot
+@
+
+<<DE_lipid species: plotting volcano plot>>=
+## data frame for plotting MA plot and volcano plot
+plot_MA_Vol <- plot_table %>%
+    dplyr::select(
+        feature, mean_exp, mean_ctrl, p_value, p_adj, 'M'='log2FC') %>%
+    dplyr::mutate(A=(log2(mean_exp) + log2(mean_ctrl))/2)
+if(sum(!is.na(plot_table[,'p_value'])) == 0){
+    plot_MA_Vol <- plot_MA_Vol %>%
+        dplyr::mutate(
+            m.log.p=NA,
+            sig_log2fc.pvalue_colors=ifelse(
+                M > log2(sig_FC) ,'up-regulated',
+                ifelse(-M > log2(sig_FC),'down-regulated','none')))
+}else{
+    plot_MA_Vol <- plot_MA_Vol %>%
+        dplyr::mutate(
+            m.log.p=-log10(p_value),
+            sig_log2fc.pvalue_colors=
+                if(sig_stat == "p"){
+                ifelse(M>log2(sig_FC) & -log10(p_value) > -log10(sig_pvalue),
+                       'up-regulated',
+                       ifelse(-M>log2(sig_FC) & -log10(p_value) >
+                                  -log10(sig_pvalue), 'down-regulated', 'none'))
+                }else{
+                    ifelse(
+                        M > log2(sig_FC) & -log10(p_adj) > -log10(sig_pvalue),
+                        'up-regulated', ifelse(-M > log2(sig_FC) & -log10(p_adj)
+                                               > -log10(sig_pvalue),
+                                               'down-regulated', 'none'))
+                    })
+}
+plot_MA_Vol$sig_log2fc.pvalue_colors <- factor(
+    plot_MA_Vol$sig_log2fc.pvalue_colors, levels=c(
+        "down-regulated", "none", "up-regulated"))
+## create a volcano plot
+if(sum(!is.na(plot_table[,'p_value'])) != 0){
+    volcano_plot <- if (sig_stat == "p"){
+        ggplot2::ggplot(
+            plot_MA_Vol, ggplot2::aes(x=as.numeric(M), y=as.numeric(m.log.p),
+                                      color=sig_log2fc.pvalue_colors))
+        }else{
+            ggplot2::ggplot(
+                plot_MA_Vol, ggplot2::aes(x=as.numeric(M),
+                                          y=as.numeric(-log10(p_adj)),
+                                          color=sig_log2fc.pvalue_colors)) +
+                ggplot2::geom_point() +
+                ggplot2::scale_color_manual(
+                    values=c("#4169E1", "#DDDDDD","#FF4500")) +
+                ggplot2::labs(
+                    color='Significant lipid',y='-log10(padj)',
+                    x="M = log2(exp)-log2(ctrl)", title="Volcano Plot") +
+                ggthemes::theme_hc() +
+                ggplot2::geom_hline(yintercept=0) +
+                ggplot2::geom_vline(xintercept=0)
+        }
+    volcano_plot <- volcano_plot +
+        ggplot2::geom_point() +
+        ggplot2::scale_color_manual(values=c("#4169E1", "#DDDDDD", "#FF4500"))
+    if (sig_stat == "p"){
+        volcano_plot <- volcano_plot +
+            ggplot2::labs(
+                color='Significant lipid', y='-log10(padj)',
+                x="M = log2(exp)-log2(ctrl)", title="Volcano Plot")
+        }else{
+            volcano_plot <- volcano_plot +
+                ggplot2::labs(
+                    color='Significant lipid', y='-log10(p-value)',
+                    x="M = log2(exp)-log2(ctrl)", title="Volcano Plot")
+        }
+    DE_species_volcano <- volcano_plot +
+        ggthemes::theme_hc() +
+        ggplot2::geom_hline(yintercept=0) +
+        ggplot2::geom_vline(xintercept=0)
+}
+@
+
+<<fig.cap = "\\textbf{Volcano plot} The volcano plot illustrates a similar concept to the MA plot. These points visually identify the most biologically significant lipid species (red for up-regulated, blue for down-regulated, and grey for non-significant).", fig.small=TRUE>>=
+## view volcano plot
+DE_species_volcano
+@
+
+\newpage
+
+\subsubsection{Dimensionality reduction}
+\label{DEdimensionReduce}
+Dimensionality reduction is common when dealing with large numbers of
+observations and/or large numbers of variables in lipids analysis. It transforms
+data from a high-dimensional space into a low-dimensional space to retain vital
+properties of the original data and close to its intrinsic dimension.
+
+Here, we provide the function \Rfunction{dim\_process} that can transform data
+as the input format for four dimensionality reduction methods: PCA, t-SNE,
+UMAP, and PLS-DA.
+
+\begin{itemize}
+  \item Note: The input data of this section should be by filtered by function
+  \Rfunction{DE\_species}.
+\end{itemize}
+
+\begin{enumerate}
+  \item \textbf{PCA (Principal component analysis)}\\
+    PCA is an unsupervised linear dimensionality reduction and data
+    visualization technique for high dimensional data, which tries to preserve
+    the global structure of the data.
+<<DE_lipid species: dimensionality reduction - PCA>>=
+## data processing of exp_data
+exp_transform_SE <- data_process(
+    DE_data, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5,  pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(
+    DE_data, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5, pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## filter significant lipid
+DE_species_result <- DE_species(
+    exp_transform_non_log, data_transform=TRUE, paired=FALSE,
+    test='t.test', adjust_p_method='BH', sig_stat='p.adj',
+    sig_pvalue=0.05, sig_FC=2)
+sig_feature <- as.data.frame(
+    SummarizedExperiment::assay(DE_species_result$exp_data_stat_sig))[[1]]
+## conduct dimension reduction data processing
+dim_process_SE <- dim_process(
+    exp_transform_SE, sig_feature=sig_feature, type='PCA',
+    insert_ref_group=NULL, ref_group=NULL)
+
+## view result
+head(SummarizedExperiment::assay(dim_process_SE)[, 1:3], 5)
+## you can use the output data to conduct PCA
+dim_process_table <- as.data.frame(
+    SummarizedExperiment::assay(dim_process_SE))
+pca <- stats::prcomp(dim_process_table, scale=TRUE, center=TRUE)
+@
+
+  \item \textbf{t-SNE (t-Distributed Stochastic Neighbor Embedding)}\\
+    t-Distributed Stochastic Neighbor Embedding (t-SNE) is an unsupervised
+    non-linear dimensionality reduction technique that tries to retain the local
+    structure(cluster) of data when visualizing the high-dimensional datasets.
+
+<<DE_lipid species: dimensionality reduction - t-SNE>>=
+## data processing of exp_data
+exp_transform_SE <- data_process(
+    DE_data, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5,  pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(
+    DE_data, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5, pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## filter significant lipid
+DE_species_result <- DE_species(
+    exp_transform_SE, data_transform=TRUE, paired=FALSE, test='t.test',
+    adjust_p_method='BH', sig_stat='p.adj', sig_pvalue=0.05, sig_FC=2)
+sig_feature <- as.data.frame(
+    SummarizedExperiment::assay(DE_species_result$exp_data_stat_sig))[[1]]
+## conduct dimension reduction data processing
+dim_process_SE <- dim_process(
+    exp_transform_SE, sig_feature=sig_feature, type='tsne',
+    insert_ref_group=NULL, ref_group=NULL)
+## view result
+head(SummarizedExperiment::assay(dim_process_SE)[, 1:3], 5)
+## you can use the output data to conduct t-SNE
+dim_process_table <- as.data.frame(
+    SummarizedExperiment::assay(dim_process_SE))
+tsne <- Rtsne::Rtsne(
+    dim_process_table, check_duplicates=FALSE, pca=TRUE, perplexity=5,
+    verbose=TRUE, max_iter=500, theta=0)
+@
+
+  \item \textbf{UMAP (Uniform Manifold Approximation and Projection)}\\
+    UMAP using a nonlinear dimensionality reduction method, Manifold learning,
+    which effectively visualizing clusters or groups of data points and their
+    relative proximities.
+
+<<DE_lipid species: dimensionality reduction - UMAP>>=
+## data processing of exp_data
+exp_transform_SE <- data_process(
+    DE_data, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5,  pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(
+    DE_data, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5, pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## filter significant lipid
+DE_species_result <- DE_species(
+    exp_transform_SE, data_transform=TRUE, paired=FALSE, test='t.test',
+    adjust_p_method='BH', sig_stat='p.adj', sig_pvalue=0.05, sig_FC=2)
+sig_feature <- as.data.frame(
+    SummarizedExperiment::assay(DE_species_result$exp_data_stat_sig))[[1]]
+## conduct dimension reduction data processing
+dim_process_SE <- dim_process(exp_transform_SE,
+    sig_feature=sig_feature, type='UMAP', insert_ref_group=NULL,
+    ref_group=NULL)
+
+## view result
+head(SummarizedExperiment::assay(dim_process_SE)[, 1:3], 5)
+## you can use the output data to conduct UMAP
+dim_process_table <- as.data.frame(
+    SummarizedExperiment::assay(dim_process_SE))
+umap <- uwot::umap(
+    dim_process_table, n_neighbors=15, scale=TRUE, metric='euclidean')
+@
+
+
+  \item \textbf{PLS-DA}\\
+<<DE_lipid species: dimensionality reduction - PLS-DA>>=
+## data processing of exp_data
+exp_transform_SE <- data_process(
+    DE_data, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5, pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(
+    DE_data, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5, pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## filter significant lipid
+DE_species_result <- DE_species(
+    exp_transform_SE, data_transform=TRUE, paired=FALSE, test='t.test',
+    adjust_p_method='BH', sig_stat='p.adj', sig_pvalue=0.05, sig_FC=2)
+sig_feature <- as.data.frame(
+    SummarizedExperiment::assay(DE_species_result$exp_data_stat_sig))[[1]]
+## conduct dimension reduction data processing
+dim_process_SE <- dim_process(
+    exp_transform_SE, sig_feature=sig_feature, type='PLSDA',
+    insert_ref_group=NULL, ref_group=NULL)
+
+## view result
+head(SummarizedExperiment::assay(dim_process_SE)[, 1:3], 5)
+## you can use the output data to conduct PLSDA
+dim_process_table <- as.data.frame(
+  SummarizedExperiment::assay(dim_process_SE))
+dim_group <- as.data.frame(
+  SummarizedExperiment::rowData(dim_process_SE))[[1]]
+PLSDA <- mixOmics::plsda(
+    dim_process_table, dim_group, ncomp=2, scale=TRUE)
+@
+
+\end{enumerate}
+
+\newpage
+
+\subsubsection{Hierarchical clustering}
+\label{hierarchicalCluster}
+Based on the results of differentially expressed analysis, we further take a
+look at differences of lipid species between the control group and the
+experimental group. Lipid species derived from two groups are clustered by
+hierarchical clustering. Users can choose to output the results of all lipid
+species or only significant lipid species by the parameter
+\Robject{type}.
+
+<<DE_lipid species: hierarchical clustering>>=
+## data processing of exp_data
+exp_transform_SE <- data_process(
+    DE_data, exclude_var_missing=TRUE, missing_pct_limit=50, replace_zero=TRUE,
+    zero2what='min', xmin=0.5, replace_NA=TRUE, NA2what='min', ymin=0.5,
+    pct_transform=TRUE, data_transform=TRUE, trans_type='log',
+    centering=FALSE, scaling=FALSE)
+## data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(
+    DE_data, exclude_var_missing=TRUE, missing_pct_limit=50, replace_zero=TRUE,
+    zero2what='min', xmin=0.5, replace_NA=TRUE, NA2what='min', ymin=0.5,
+    pct_transform=TRUE, data_transform=FALSE, trans_type='log',
+    centering=FALSE, scaling=FALSE)
+## filter significant lipid
+DE_species_result <- DE_species(
+    exp_transform_non_log, data_transform=TRUE, paired=FALSE, test='t.test',
+    adjust_p_method='BH', sig_stat='p.adj', sig_pvalue=0.05, sig_FC=2)
+## get lipid characteristics
+lipid_char_table <- as.data.frame(
+  SummarizedExperiment::rowData(exp_transform_SE))
+char_var <- colnames(lipid_char_table)[-1]
+## conduct hierarchical clustering of all lipid species
+DE_result_sig <- DE_species_result$exp_data_stat_sig
+Hclustering_all <- Hclustering(
+    exp_data_SE=exp_transform_SE, DE_result_sig=DE_result_sig, type='all')
+Hclustering_sig <- Hclustering(
+    exp_data_SE=exp_transform_SE, DE_result_sig=DE_result_sig, type='sig')
+
+## view result - all lipid species
+head(SummarizedExperiment::assay(Hclustering_all)[, 1:4], 5)
+
+## view result - significant lipid species
+head(SummarizedExperiment::assay(Hclustering_sig)[, 1:4], 5)
+@
+
+The results of hierarchical clustering can be further applied to plotting
+heatmap. The top of the heatmap is grouped by sample group (top annotation) while the
+side of the heatmap (row annotation) is chosen from
+\Robject{lipid\_char\_table}, such as class, structural category, functional
+category, total length, total double bond (totaldb), hydroxyl group number
+(totaloh), fatty acid length (FA\_length), the double bond of fatty
+acid(FA\_db), hydroxyl group number of fatty acid(FA\_oh). \\
+
+Below is an example of heatmap of all lipid species.
+
+<<fig.cap = "\\textbf{Heatmap of all lipid species}", fig.small=TRUE>>=
+## extract the assay data from Hclustering_result
+plot_table <- SummarizedExperiment::assay(Hclustering_all)
+## extract the group_info
+group_info <- as.data.frame(SummarizedExperiment::colData(DE_data))
+rownames(group_info) <- NULL
+## set char_var, distance measure, and agglomeration method
+char_var <- char_var[1]
+distfun <- 'pearson'
+hclustfun <- 'complete'
+## set insert_ref_group and ref_group
+insert_ref_group <- NULL
+ref_group <- NULL
+## set dist_fun and hclust_fun
+if(distfun %in% c("pearson", "kendall", "spearman")){
+    dist_fun <- function(x) stats::as.dist(1-stats::cor(t(x), method=distfun))
+    hclust_fun <- function(x) stats::hclust(x,  method=hclustfun)
+    }else{
+        dist_fun <- function(x) stats::dist(x, method=distfun)
+        hclust_fun <- function(x) stats::hclust(x,  method=hclustfun)
+    }
+## define the heatmap_color_scale function
+heatmap_color_scale <- function(data){
+    data <- round(data, 3)
+    if(max(data) <= 0 & min(data) < 0){
+        over_median <- min(data)/2
+        if(max(data) < over_median){
+            color <-  grDevices::colorRampPalette(
+                c("#157AB5", "#92c5de"))(n=1000)
+            }else{
+                color_rank <- round(max(data)/(min(data))*1000)
+                color_scale <- grDevices::colorRampPalette(
+                    c("#0571b0", "#92c5de", "white"))(n=1000)
+                color <- color_scale[color_rank:1000]
+            }
+        }else if(min(data) >= 0 & max(data) > 0){
+            over_median <- max(data)/2
+            if(min(data) > over_median){
+                color <-  grDevices::colorRampPalette(
+                    c("#f4a582", "#ca0020"))(n=1000)
+                }else{
+                    color_rank <- round(min(data)/(max(data))*1000)
+                    color_scale <- grDevices::colorRampPalette(
+                        c("white", "#f4a582", "#ca0020"))(n=1000)
+                    color <- color_scale[color_rank:1000]
+                }
+        }
+    return(color)
+}
+## check values in plot_table
+if(min(plot_table) >= 0 || max(plot_table) <= 0){
+  all_color_scale <- heatmap_color_scale(plot_table)
+  }else{
+      all_color_scale <- grDevices::colorRampPalette(
+          c("#92c5de", "white", "#f4a582"))(n=2500)
+  }
+## create colGroup data frame
+colGroup <- data.frame(Sample=group_info$group, stringsAsFactors=FALSE)
+## generate a rainbow color palette based on unique colGroup samples
+col_color <- grDevices::rainbow(length(unique(colGroup$Sample)))
+## assign color values to colGroup samples
+col_color_label <- colGroup$Sample
+for(j in seq(unique(colGroup$Sample))){
+    col_color_label[
+        which(colGroup$Sample == unique(colGroup$Sample)[j])] <- col_color[j]
+}
+## create heatmap plot of all lipid species
+if(!is.null(lipid_char_table) & !is.null(char_var)){
+    rowGroup <- plot_table %>% as.data.frame() %>%
+        tibble::rownames_to_column(var='feature') %>% dplyr::select(feature) %>%
+        dplyr::left_join(lipid_char_table, by='feature') %>%
+        dplyr::select(tidyselect::all_of(char_var))
+    row_color <- grDevices::rainbow(length(unique(rowGroup$class)))
+    row_color_label <- rowGroup$class
+    for(j in seq(unique(rowGroup$class))){
+        row_color_label[
+            which(rowGroup$class == unique(rowGroup$class)[j])] <- row_color[j]
+    }
+    stats::heatmap(
+    plot_table, Rowv=TRUE, Colv=FALSE, dendrogram='both', trace="none",
+    col=all_color_scale, distfun=dist_fun, hclustfun=hclust_fun,
+    ColSideColors=col_color_label, RowSideColors=row_color_label, main=NULL,
+    margins=c(8,8), lwid=c(1, 9), scale='none')
+    }else{
+        stats::heatmap(
+            plot_table, Rowv=TRUE, Colv=FALSE, dendrogram='both', trace="none",
+            col=all_color_scale, distfun=dist_fun, hclustfun=hclust_fun,
+            ColSideColors=col_color_label, main=NULL, margins=c(8,8),
+            lwid=c(1, 9), scale='none')
+    }
+@
+
+\newpage
+
+Here is the example of heatmap of significant lipid species .
+
+<<fig.cap = "\\textbf{Heatmap of significant lipid species}", fig.small=TRUE>>=
+## extract the assay data from Hclustering_result
+plot_table <- SummarizedExperiment::assay(Hclustering_sig)
+## extract the group_info
+group_info <- as.data.frame(SummarizedExperiment::colData(DE_data))
+rownames(group_info) <- NULL
+## set char_var, distance measure, and agglomeration method
+char_var <- char_var[1]
+distfun <- 'pearson'
+hclustfun <- 'complete'
+## set insert_ref_group and ref_group
+insert_ref_group <- NULL
+ref_group <- NULL
+## set dist_fun and hclust_fun
+if(distfun %in% c("pearson", "kendall", "spearman")){
+    dist_fun <- function(x) stats::as.dist(1-stats::cor(t(x), method=distfun))
+    hclust_fun <- function(x) stats::hclust(x,  method=hclustfun)
+    }else{
+        dist_fun <- function(x) stats::dist(x, method=distfun)
+        hclust_fun <- function(x) stats::hclust(x,  method=hclustfun)
+    }
+## define the heatmap_color_scale function
+heatmap_color_scale <- function(data){
+    data <- round(data, 3)
+    if(max(data) <= 0 & min(data) < 0){
+        over_median <- min(data)/2
+        if(max(data) < over_median){
+            color <-  grDevices::colorRampPalette(
+                c("#157AB5", "#92c5de"))(n=1000)
+            }else{
+                color_rank <- round(max(data)/(min(data))*1000)
+                color_scale <- grDevices::colorRampPalette(
+                    c("#0571b0", "#92c5de", "white"))(n=1000)
+                color <- color_scale[color_rank:1000]
+            }
+        }else if(min(data) >= 0 & max(data) > 0){
+            over_median <- max(data)/2
+            if(min(data) > over_median){
+                color <-  grDevices::colorRampPalette(
+                    c("#f4a582", "#ca0020"))(n=1000)
+                }else{
+                    color_rank <- round(min(data)/(max(data))*1000)
+                    color_scale <- grDevices::colorRampPalette(
+                        c("white", "#f4a582", "#ca0020"))(n=1000)
+                    color <- color_scale[color_rank:1000]
+                }
+        }
+    return(color)
+}
+## check values in plot_table
+if(min(plot_table) >= 0 || max(plot_table) <= 0){
+  all_color_scale <- heatmap_color_scale(plot_table)
+  }else{
+      all_color_scale <- grDevices::colorRampPalette(
+          c("#92c5de", "white", "#f4a582"))(n=2500)
+  }
+## create colGroup data frame
+colGroup <- data.frame(Sample=group_info$group, stringsAsFactors=FALSE)
+## generate a rainbow color palette based on unique colGroup samples
+col_color <- grDevices::rainbow(length(unique(colGroup$Sample)))
+## assign color values to colGroup samples
+col_color_label <- colGroup$Sample
+for(j in seq(unique(colGroup$Sample))){
+    col_color_label[
+        which(colGroup$Sample == unique(colGroup$Sample)[j])] <- col_color[j]
+}
+## create heatmap plot of all lipid species
+if(!is.null(lipid_char_table) & !is.null(char_var)){
+    rowGroup <- plot_table %>% as.data.frame() %>%
+        tibble::rownames_to_column(var='feature') %>% dplyr::select(feature) %>%
+        dplyr::left_join(lipid_char_table, by='feature') %>%
+        dplyr::select(tidyselect::all_of(char_var))
+    row_color <- grDevices::rainbow(length(unique(rowGroup$class)))
+    row_color_label <- rowGroup$class
+    for(j in seq(unique(rowGroup$class))){
+        row_color_label[
+            which(rowGroup$class == unique(rowGroup$class)[j])] <- row_color[j]
+    }
+    stats::heatmap(
+    plot_table, Rowv=TRUE, Colv=FALSE, dendrogram='both', trace="none",
+    col=all_color_scale, distfun=dist_fun, hclustfun=hclust_fun,
+    ColSideColors=col_color_label, RowSideColors=row_color_label, main=NULL,
+    margins=c(8,8), lwid=c(1, 9), scale='none')
+    }else{
+        stats::heatmap(
+            plot_table, Rowv=TRUE, Colv=FALSE, dendrogram='both', trace="none",
+            col=all_color_scale, distfun=dist_fun, hclustfun=hclust_fun,
+            ColSideColors=col_color_label, main=NULL, margins=c(8,8),
+            lwid=c(1, 9), scale='none')
+    }
+@
+
+
+\subsubsection{Characteristics analysis}
+\label{speciesChar}
+The characteristics analysis visualizes the difference between control and
+experimental groups of significant lipid species categorized based on different
+lipid characteristics from \Robject{lipid\_char\_table}, such as class,
+structural category, functional category, total length, total double bond
+(totaldb), hydroxyl group number (totaloh), fatty acid length (FA\_length),
+the double bond of fatty acid (FA\_db), hydroxyl group number of fatty
+acid (FA\_oh).
+<<DE_lipid species: characteristics analysis>>=
+## data processing of exp_data
+exp_transform_SE <- data_process(
+    DE_data, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5, pct_transform=TRUE, data_transform=TRUE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(
+    DE_data, exclude_var_missing=TRUE, missing_pct_limit=50, replace_zero=TRUE,
+    zero2what='min', xmin=0.5, replace_NA=TRUE, NA2what='min', ymin=0.5,
+    pct_transform=TRUE, data_transform=FALSE, trans_type='log',
+    centering=FALSE, scaling=FALSE)
+## filter significant lipid
+DE_species_result <- DE_species(
+    exp_transform_non_log, data_transform=TRUE, paired=FALSE, test='t.test',
+    adjust_p_method='BH', sig_stat='p.adj', sig_pvalue=0.05, sig_FC=2)
+## get lipid characteristics
+lipid_char_table <- as.data.frame(
+  SummarizedExperiment::rowData(exp_transform_SE))
+char_var <- colnames(lipid_char_table)[-1]
+## conduct Sig_lipid_feature
+DE_result_sig <- DE_species_result$exp_data_stat_sig
+Sig_feature_result <- Sig_lipid_feature(
+    DE_result_sig, exp_transform_SE, char_var[1], sig_FC=2)
+
+## view result - sig.class_SE
+head(SummarizedExperiment::assay(Sig_feature_result$sig.class_SE)[, 1:5], 5)
+
+## view result - sig.dotchart_SE
+head(SummarizedExperiment::assay(Sig_feature_result$sig.dotchart_SE)[, 1:5], 5)
+@
+
+The output data can further be applied for plotting a bar chart and lollipop
+chart of significant groups and a word cloud with the count of each group.
+Here are the examples.
+
+<<DE_lipid species: plotting characteristics bar chart>>=
+## extract the assay data from Sig_feature_result
+sig.class.log2FC <- SummarizedExperiment::assay(Sig_feature_result$sig.class_SE)
+## set fold change for significance
+sig_FC <- 2
+## create a bar chart of significant groups
+p.log2fc.sig <- ggplot2::ggplot(
+    sig.class.log2FC, ggplot2::aes(
+        x=stats::reorder(characteristic, -log2FC.mean),
+        y=log2FC.mean, fill=significant)) +
+    ggplot2::geom_col() +
+    ggplot2::geom_errorbar(ggplot2::aes(min=log2FC.mean, max=log2FC.meansd)) +
+    ggthemes::theme_hc() +
+    ggplot2::scale_fill_manual(
+        breaks=c('NO', 'YES'), values=c('#666666', '#FF6347'))+
+    ggplot2::labs(
+        fill=paste0('> ', sig_FC, ' FC'), y='log2(Fold Change)',
+        x=char_var, title='Significant lipids') +
+    ggplot2::theme(
+        plot.title=ggplot2::element_text(size=16, hjust=0.5),
+        axis.title=ggplot2::element_text(size=14),
+        axis.text.x=ggplot2::element_text(angle=90, vjust=0.5,hjust=1, size=12),
+        axis.text.y=ggplot2::element_text(size=12))
+@
+
+
+<<fig.cap = "\\textbf{The bar chart of significant groups} The bar chart shows the significant groups (values) with mean fold change over 2 in the selected characteristics by colors (red for significant and black for insignificant).", fig.small=TRUE>>=
+## view bar chart
+p.log2fc.sig
+@
+
+
+<<DE_lipid species: plotting characteristics lollipop chart>>=
+## extract the assay data from Sig_feature_result
+sig.dotchart <- SummarizedExperiment::assay(Sig_feature_result$sig.dotchart_SE)
+## create a lollipop chart of all significant groups
+lolipop <- ggpubr::ggdotchart(
+    sig.dotchart, combine=TRUE, x="characteristic", y="log2FC", rotate=TRUE,
+    color="white", sorting="none", add="segments", dot.size=3,
+    legend.title=char_var, xlab=" ", ylab="log2(Fold change)", legend="right",
+    ggtheme=ggpubr::theme_pubr()) +
+    ggplot2::geom_point(
+        ggplot2::aes(
+            text=paste("Characteristic :", characteristic, "<br>", "log2FC : ",
+                       round(log2FC,2)), color=characteristic,size=3)) +
+    ggplot2::guides(size="none")
+@
+
+\newpage
+
+<<fig.cap = "\\textbf{The lollipop chart of all significant groups} The lollipop chart compares multiple values simultaneously and it aligns the log2(fold change) of all significant groups (values) within the selected characteristics.", fig.small=TRUE>>=
+## view lollipop plot
+lolipop
+@
+
+
+<<fig.cap = "\\textbf{Word cloud with the count of each group} The word cloud shows the count of each group(value) of the selected characteristics.", fig.small=TRUE>>=
+## extract the assay data from Sig_feature_result
+sig.dotchart <- SummarizedExperiment::assay(Sig_feature_result$sig.dotchart_SE)
+## table for word cloud
+wc.tab <- sig.dotchart %>% dplyr::group_by(characteristic) %>%
+    dplyr::summarise(freqs=dplyr::n())
+## create a word cloud
+wordcloud::wordcloud(
+    wc.tab$characteristic, wc.tab$freqs, min.freq=1, random.order=FALSE,
+    ordered.colors=FALSE, colors = grDevices::rainbow(nrow(wc.tab)))
+@
+
+\subsubsection{Enrichment}
+\label{enrichment}
+Enrichment analysis assist us to determine whether significant lipid species are
+enriched in the categories of the selected characteristics.
+<<DE_lipid species: enrichment>>=
+## data processing of exp_data
+exp_transform_SE <- data_process(
+    DE_data, exclude_var_missing=TRUE, missing_pct_limit=50, replace_zero=TRUE,
+    zero2what='min', xmin=0.5, replace_NA=TRUE, NA2what='min', ymin=0.5,
+    pct_transform=TRUE, data_transform=TRUE, trans_type='log',
+    centering=FALSE, scaling=FALSE)
+## data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(
+    DE_data, exclude_var_missing=TRUE, missing_pct_limit=50, replace_zero=TRUE,
+    zero2what='min', xmin=0.5, replace_NA=TRUE, NA2what='min', ymin=0.5,
+    pct_transform=TRUE, data_transform=FALSE, trans_type='log',
+    centering=FALSE, scaling=FALSE)
+## filter significant lipid
+DE_species_result <- DE_species(
+    exp_transform_non_log, data_transform=TRUE, paired=FALSE, test='t.test',
+    adjust_p_method='BH', sig_stat='p.adj', sig_pvalue=0.05, sig_FC=2)
+## get lipid characteristics
+lipid_char_table <- as.data.frame(
+  SummarizedExperiment::rowData(exp_transform_SE))
+char_var <- colnames(lipid_char_table)[-1]
+## conduct enrichment analysis
+DE_result_sig <- DE_species_result$exp_data_stat_sig
+enrichment_result <- Enrichment(
+    DE_result_sig, exp_transform_SE, char_var=char_var[1], sig_pvalue=0.05)
+
+## view result
+head(SummarizedExperiment::assay(enrichment_result)[, 1:5], 5)
+@
+
+\begin{itemize}
+  \item Note: A lipid species may have more than one fatty acid attached; thus,
+  if the selected lipid characteristics are FA-related terms, we decompose lipid
+  species into FA and do the enrichment instead of counting species.
+\end{itemize}
+
+The output data can further be applied for plotting a enrichment plot for
+up/down/non-significant groups. Here is the example.
+
+<<DE_lipid species: plotting enrichment plot>>=
+## extract the assay data from enrichment_result
+## (only if the maximum value of "m.log.p" is not 0 can the plot be plotted.)
+plot_table <- SummarizedExperiment::assay(enrichment_result)
+if(length(unique(plot_table$condition)) == 2){
+    ## set the maximum x-axis value
+    x.max <- max(ceiling(plot_table$m.log.p))
+    ## create labels for the x-axis
+    x.label <- as.character(c(seq(x.max,1), 0, seq(1, x.max)))
+    ## group table for plotting
+    plot_table <- plot_table %>% dplyr::group_by(characteristic) %>%
+        dplyr::mutate(rank=mlogP[which(abs(mlogP) == max(abs(mlogP)))])
+    ## create a enrichment plot
+    p.sig.class <- ggplot2::ggplot(
+        plot_table, ggplot2::aes(
+            x=mlogP, y=stats::reorder(
+                characteristic, rank, max), fill=significance)) +
+        ggplot2::geom_col() +
+        ggplot2::geom_vline(xintercept=0, color='#444444') +
+        ggthemes::theme_hc() +
+        ggplot2::scale_fill_manual(
+            breaks=c('DOWN', 'UP', 'non-significant'),
+            values=c('#4169E1', '#FF6347', '#666666'))+
+        ggplot2::theme(
+            axis.title=ggplot2::element_text(size=14),
+            axis.text.y=ggplot2::element_text(size=12),
+            axis.text.x=ggplot2::element_text(size=12)) +
+        ggplot2::labs(x='-log10(p-value)', y=char_var) +
+        ggplot2::scale_x_continuous(breaks=-x.max:x.max, labels=x.label)
+    } else if(length(unique(plot_table$condition)) == 1){
+        ## set the maximum x-axis value
+        x.max <- max(ceiling(plot_table$m.log.p))
+        if(unique(plot_table$condition) == 'UP'){
+            ## create labels for the x-axis
+            x.label <- as.character(0:x.max)
+            }else{
+                x.label <- as.character(x.max:0)
+            }
+        ## create a enrichment plot
+        p.sig.class <- ggplot2::ggplot(
+            plot_table, ggplot2::aes(
+                x=mlogP, y=stats::reorder(characteristic, mlogP),
+                fill=significance)) +
+            ggplot2::geom_col() +
+            ggthemes::theme_hc() +
+            ggplot2::scale_fill_manual(
+                breaks=c('DOWN', 'UP', 'non-significant'),
+                values=c('#4169E1', '#FF6347', '#666666'))+
+            ggplot2::theme(
+                axis.title=ggplot2::element_text(size=14),
+                axis.text.y=ggplot2::element_text(size=12),
+                axis.text.x=ggplot2::element_text(size=12)) +
+            ggplot2::labs(x='-log10(p-value)', y=char_var) +
+            ggplot2::scale_x_continuous(breaks=0:x.max, labels=x.label)
+        if(unique(plot_table$condition) == 'UP'){
+            p.sig.class +
+                ggplot2::scale_x_continuous(breaks=0:x.max, labels=x.label)
+            }else{
+                p.sig.class +
+                    ggplot2::scale_x_continuous(breaks=-x.max:0, labels=x.label)
+            }
+    }
+@
+
+<<fig.cap = "\\textbf{Enrichment plot for up/down/non-significant groups} The enrichment summary table and plot are classified into up/down/non-significant groups by log2 fold change of significant lipid species. Each group (value) of the selected characteristics will have a value of significant count and p-value within a summary table.", fig.small=TRUE>>=
+## view enrichment plot
+p.sig.class
+@
+
+\subsection{Lipid characteristics analysis}
+After lipid species analysis, now let's move on to another main analysis of the
+Differential expression section -- \textbf{'Lipid Characteristics Analysis'}.
+The massive degree of structural diversity of lipids contributes to the
+functional variety of lipids. The characteristics can range from subtle
+variance (i.e. the number of a double bond in the fatty acid) to major change
+(i.e. diverse backbones). In this section, lipid species are categorized and
+summarized into a new lipid expression table according to two selected lipid
+characteristics, then conducted differential expressed analysis. Samples are
+divided into two groups based on the input 'Group Information' table.
+
+\subsubsection{Differentially expressed analysis}
+\label{sec:DE-char}
+In differentially expressed analysis, we are going to conduct two procedures of
+analysis - first is \textbf{'Characteristics'} and then
+\textbf{'Subgroup of characteristics'}. \textbf{'Characteristics'} is based on
+the first selected 'characteristics' while
+\textbf{'Subgroup of characteristics'} is the subgroup analysis of
+the previous section.
+
+<<DE_lipid characteristics: differentially expressed analysis>>=
+## get lipid characteristics
+lipid_char_table <- as.data.frame(SummarizedExperiment::rowData(DE_data))
+char_var <- colnames(lipid_char_table)[-1]
+## aggregated(sum) expression data by selected characteristics
+Spe2Char_result <- Species2Char(DE_data, char_var = char_var[4])
+## data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(
+    Spe2Char_result, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5, pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## conduct deferentially expressed of lipid characters
+DE_char_result <- DE_char(
+    exp_transform_non_log, data_transform=TRUE, paired=FALSE, sig_pvalue=0.05,
+    sig_FC=2, insert_ref_group=NULL, ref_group=NULL)
+
+## view result - char_exp_data
+head(SummarizedExperiment::assay(DE_char_result$char_exp_data)[, 1:5], 5)
+## view result - char_table_all
+head(SummarizedExperiment::assay(DE_char_result$char_table_all)[, 1:5], 5)
+## view result - combined_table
+head(SummarizedExperiment::assay(DE_char_result$combined_table)[, 1:5], 5)
+## view result - combine_result_table
+head(SummarizedExperiment::assay(DE_char_result$combine_result_table)[, 1:5], 5)
+## view result - bar_table
+head(SummarizedExperiment::assay(DE_char_result$bar_table)[, 1:5], 5)
+## view result - char_box
+head(SummarizedExperiment::assay(DE_char_result$char_box)[, 1:5], 5)
+## view result - char_table_all_sig
+head(SummarizedExperiment::assay(DE_char_result$char_table_all_sig)[, 1:5], 5)
+@
+
+The output data can further be applied for plotting the bar plot, line plot,
+and box plot. Below are the examples.
+
+<<DE_lipid characteristics: plotting bar plot>>=
+## extract the assay data from DE_char_result
+char_bar_table <- SummarizedExperiment::assay(DE_char_result$bar_table)
+## add "*" mark for significant value
+barTab_sig <- char_bar_table %>%
+    dplyr::filter(Significant == 'yes') %>%
+    dplyr::mutate(
+        pvalue_text=ifelse(post_hoc_pvalue <= 0.001, "***",
+                           ifelse(post_hoc_pvalue <= 0.01, "**",
+                                  ifelse(post_hoc_pvalue <= 0.05, "*", ""))))
+## create a bar plot
+DE_char_barplot <- ggplot2::ggplot(
+    char_bar_table, ggplot2::aes(x=Category, y=Mean, fill=Group)) +
+    ggplot2::geom_bar(stat="identity", position=ggplot2::position_dodge()) +
+    ggplot2::scale_fill_manual(values=c('lightslateblue', 'sienna2')) +
+    ggplot2::geom_errorbar(
+        ggplot2::aes(ymin=Mean, ymax=Mean+SD), color="gray39", width=.9,
+        position=ggplot2::position_dodge()) +
+    ggplot2::geom_text(
+        data=barTab_sig,ggplot2::aes(
+            x=Category, y=max_error_bar+5, label=pvalue_text), color="red") +
+    ggplot2::theme_minimal() +
+    ggplot2::labs(x=char_var)
+@
+
+<<fig.cap = "\\textbf{The results of 'Characteristics' analysis in the first section - bar plot}", fig.small=TRUE, results='asis'>>=
+## view bar plot of split_class
+DE_char_barplot
+@
+
+\newpage
+
+<<DE_lipid characteristics: plotting line plot>>=
+## extract the assay data from DE_char_result
+combined_table <- SummarizedExperiment::assay(DE_char_result$combined_table)
+combine_result_table <- SummarizedExperiment::assay(
+    DE_char_result$combine_result_table)
+## (only if both two tables have more than one row can the plot be plotted.)
+## create a line plot
+DE_char_trendplot <- ggplot2::ggplot(
+    char_bar_table, ggplot2::aes(
+        x=Category, y=Mean, group=Group, color=Group)) +
+    ggplot2::geom_line(
+        stat="identity", position=ggplot2::position_dodge(0.05))+
+    ggplot2::scale_color_manual(values=c('lightslateblue', 'sienna2')) +
+    ggplot2::geom_errorbar(
+        ggplot2::aes(ymin=Mean, ymax=Mean+SD), color="gray39",
+        position=ggplot2::position_dodge(0.05)) +
+    ggplot2::geom_text(
+        data=barTab_sig,ggplot2::aes(
+            x=Category, y=max_error_bar+5, label=pvalue_text), color="red") +
+    ggplot2::theme_minimal() +
+    ggplot2::labs(x = char_var)
+@
+
+
+<<fig.cap = "\\textbf{The results of 'Characteristics' analysis in the first section - line plot}", fig.small=TRUE, results='asis'>>=
+## view line plot of split_class
+DE_char_trendplot
+@
+
+\newpage
+
+<<DE_lipid characteristics: plotting box plot>>=
+## extract the assay data from DE_char_result
+box_table <- SummarizedExperiment::assay(DE_char_result$char_box)
+char_table_all <- SummarizedExperiment::assay(DE_char_result$char_table_all)
+## (only if box_table is not NULL can the plot be plotted.)
+## create a box plot
+DE_char_boxplot <- ggpubr::ggboxplot(
+    box_table, x = "group", y = "Category", color = "group", add = "jitter") +
+    ggplot2::scale_color_manual(values=c("lightslateblue","sienna2")) +
+    ggplot2::labs(y=paste0(colnames(char_table_all[1]), ' index'), x='Group') +
+    ggplot2::guides(color="none")
+@
+
+<<fig.cap = "\\textbf{The results of 'Characteristics' analysis in the first section - box plot}", fig.small=TRUE, results='asis'>>=
+# view box plot of split_class
+DE_char_boxplot
+@
+
+In the \textbf{'Subgroup of characteristics'}, besides the selected
+characteristic in first section defined by parameter \Robject{char\_var}, we can
+further choose another characteristic by parameter \Robject{split\_var}
+(e.g. class). And then, analyzed results from the previous section are
+categorized by one of the subgroups (e.g. PC) of the selected characteristic.
+
+<<DE_lipid characteristics: differentially expressed analysis_Subgroup>>=
+## get lipid characteristics
+lipid_char_table <- as.data.frame(SummarizedExperiment::rowData(DE_data))
+char_var <- colnames(lipid_char_table)[-1]
+## subgroup deferentially expressed of lipid characters
+DE.sub.char <- DE_sub_char(
+    DE_data, data_transform=TRUE, split_var=char_var[2], char_var=char_var[4],
+    paired = FALSE, sig_pvalue=0.05, sig_FC=2, exclude_var_missing=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5, pct_transform=TRUE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+
+## view result - result_table1
+head(SummarizedExperiment::assay(DE.sub.char$result_table1)[, 1:5], 5)
+## view result - result_table2
+head(SummarizedExperiment::assay(DE.sub.char$result_table2)[, 1:5], 5)
+## view result - result_table3
+head(SummarizedExperiment::assay(DE.sub.char$result_table3)[, 1:5], 5)
+## view result - result_table4
+head(SummarizedExperiment::assay(DE.sub.char$result_table4)[, 1:5], 5)
+@
+
+The output data can further be applied for plotting the bar plot, line plot,
+and box plot. Below are the examples.
+
+<<DE_lipid Subgroup characteristics: data processing for plotting>>=
+## get class of characteristics
+char.class <- unique(SummarizedExperiment::assay(DE.sub.char[[2]])[1])
+## extract the assay data from DE.sub.char
+DE_split_char_table_all <- SummarizedExperiment::assay(DE.sub.char[[2]])
+DE_split_char_index <- SummarizedExperiment::assay(DE.sub.char[[3]])
+rownames(DE_split_char_index) <- NULL
+## extract group info
+group_info <- as.data.frame(SummarizedExperiment::colData(DE_data))
+rownames(group_info) <- NULL
+## set char_var, split_var, and split_class
+char_var <- char_var[4]
+split_var = char_var[2]
+split_class = char.class[3,]
+## set insert_ref_group and ref_group
+insert_ref_group=NULL
+ref_group=NULL
+## control group table
+CTRL.RES <- DE_split_char_table_all %>%
+    dplyr::select(seq_len(2), sig, mean_ctrl, sd_ctrl) %>%
+    dplyr::mutate(Group='Ctrl')
+colnames(CTRL.RES) <- c(
+    'Split_category', 'Category', 'Significant', 'Mean', 'SD', 'Group')
+## experimental group table
+EXP.RES <- DE_split_char_table_all %>%
+    dplyr::select(seq_len(2), sig, mean_exp, sd_exp) %>%
+    dplyr::mutate(Group='Exp')
+colnames(EXP.RES) <- c(
+    'Split_category', 'Category', 'Significant', 'Mean', 'SD', 'Group')
+## combine CTRL.RES and EXP.RES
+barTab <- data.table::rbindlist(
+    l=list(CTRL.RES, EXP.RES), use.names=TRUE, fill=TRUE)
+if(sum(is.na(as.numeric(barTab$Category))) == 0){
+    barTab$Category <- as.factor(as.numeric(barTab$Category))
+}
+## table for plotting
+splitTab <- barTab %>% dplyr::filter(Split_category == split_class)
+splitTab <- splitTab %>% dplyr::group_by(Category) %>%
+    dplyr::mutate(max_error_bar=max(Mean+SD)) %>% dplyr::ungroup()
+splitTab$post_hoc_pvalue <- NA
+for(i in seq_len(nrow(splitTab))){
+    post_hoc_pvalue_data <- DE_split_char_table_all[which(
+        DE_split_char_table_all[, 1] == split_class), ]
+    splitTab$post_hoc_pvalue[i] <- post_hoc_pvalue_data$post_hoc_pvalue[which(
+        splitTab$Category[i] == post_hoc_pvalue_data[, 2])]
+}
+if(!is.null(insert_ref_group) & !is.null(ref_group)){
+    exp_raw_name <- ref_group[-which(insert_ref_group == ref_group)]
+    splitTab$Group[which(splitTab$Group == 'Ctrl')] <-  insert_ref_group
+    splitTab$Group[which(splitTab$Group == 'Exp')] <-  exp_raw_name
+    splitTab$Group <- factor(
+        splitTab$Group, levels=c(insert_ref_group, exp_raw_name))
+}
+## add "*" mark for significant value
+splitTab_sig <- splitTab %>% dplyr::filter(Significant == 'yes') %>%
+    dplyr::mutate(
+        pvalue_text=ifelse(
+            post_hoc_pvalue <= 0.001 , "***", ifelse(
+                post_hoc_pvalue <= 0.01 , "**", ifelse(
+                    post_hoc_pvalue <= 0.05 , "*", ""))))
+@
+
+<<DE_lipid Subgroup characteristics: plotting bar plot>>=
+## create a bar plot of split_class
+bar_plot <- ggplot2::ggplot(
+    data=splitTab, ggplot2::aes(x=Category, y=Mean, fill=Group)) +
+    ggplot2::geom_bar(stat="identity", position=ggplot2::position_dodge()) +
+    ggplot2::scale_fill_manual(values=c('lightslateblue', 'sienna2')) +
+    ggplot2::geom_errorbar(
+        ggplot2::aes(ymin=Mean, ymax=Mean+SD), color="gray39", width=.9,
+        position=ggplot2::position_dodge()) +
+  ggplot2::geom_text(
+      data=splitTab_sig, ggplot2::aes(
+          x=Category, y=max_error_bar+5 , label=pvalue_text), color="red") +
+    ggplot2::theme_minimal() +
+    ggplot2::labs(x=char_var)
+@
+
+<<fig.cap = "\\textbf{The results of 'Subgroup of characteristics' analysis in the second section - bar plot}", fig.small=TRUE>>=
+## view bar plot of split_class
+bar_plot
+@
+
+\begin{itemize}
+  \item \textit{Note: The star above the bar shows the significant difference of
+  the specific subgroup of the selected characteristic between control and
+  experimental groups.}
+\end{itemize}
+
+<<DE_lipid Subgroup characteristics: plotting line plot>>=
+## create a line plot of split_class
+line_plot <- ggplot2::ggplot(
+    data=splitTab, ggplot2::aes(x=Category, y=Mean, group=Group, color=Group)) +
+    ggplot2::geom_line(stat="identity", position=ggplot2::position_dodge(0.05))+
+    ggplot2::scale_color_manual(values=c('lightslateblue', 'sienna2')) +
+    ggplot2::geom_errorbar(
+        ggplot2::aes(ymin=Mean-SD, ymax=Mean+SD), color="gray39",
+        position=ggplot2::position_dodge(0.05)) +
+    ggplot2::geom_text(
+        data=splitTab_sig, ggplot2::aes(
+            x=Category, y=max_error_bar+5, label=pvalue_text), color="red") +
+    ggplot2::theme_minimal() +
+    ggplot2::labs(x=char_var)
+@
+
+<<fig.cap = "\\textbf{The results of 'Subgroup of characteristics' analysis in the second section - line plot}", fig.small=TRUE>>=
+## view line plot of split_class
+line_plot
+@
+
+<<DE_lipid Subgroup characteristics: plotting box plot>>=
+## assign the column name 'Split_category' to the first column
+colnames(DE_split_char_index)[1] <- 'Split_category'
+## create table for box plot
+boxTab <- DE_split_char_index %>%
+    dplyr::filter(Split_category == split_class) %>%
+    dplyr::select(-Split_category) %>%
+    tibble::column_to_rownames(var=char_var) %>% t() %>% as.data.frame() %>%
+    merge(group_info, by.x=0, by.y='sample_name')
+colnames(boxTab)[2] <- 'Category'
+if(!is.null(insert_ref_group) & !is.null(ref_group)){
+    exp_raw_name <- ref_group[-which(insert_ref_group == ref_group)]
+    boxTab$group[which(boxTab$group == 'ctrl')] <-  insert_ref_group
+    boxTab$group[which(boxTab$group == 'exp')] <-  exp_raw_nam
+    }
+t.test.pvalue <- tryCatch(
+    {stats::t.test(
+        Category~group, data=boxTab, var.equal=TRUE)["p.value"]},
+    warning=function(w) {NA},error=function(e){NA})
+## create a box plot of split_class
+box_plot <- ggpubr::ggboxplot(
+    boxTab, x = "group", y = "Category", color = "group", add = "jitter") +
+    ggplot2::scale_color_manual(values=c("lightslateblue", "sienna2")) +
+    ggpubr::stat_compare_means(method = "t.test") +
+    ggplot2::labs(
+        y=paste0(char_var, ' index'), x='Group', title=split_class) +
+    ggplot2::guides(color="none")
+@
+
+<<fig.cap = "The results of 'Subgroup of characteristics' analysis in the second section - box plot", fig.small=TRUE>>=
+## view box plot of split_class
+box_plot
+@
+
+\subsubsection{Dimensionality reduction}
+Dimensionality reduction is common when dealing with large numbers of
+observations and/or large numbers of variables in lipids analysis. It transforms
+data from a high-dimensional space into a low-dimensional space to retain vital
+properties of the original data and close to its intrinsic dimension.\\
+
+Here, we provide the function \Rfunction{dim\_process} that can transform data
+as the input format for four dimensionality reduction methods: PCA, t-SNE,
+UMAP, and PLS-DA.
+
+\begin{enumerate}
+  \item \textbf{PCA (Principal component analysis)}\\
+    PCA is an unsupervised linear dimensionality reduction and data
+    visualization technique for high dimensional data, which tries to preserve
+    the global structure of the data.
+<<DE_lipid characteristics: dimensionality reduction - PCA>>=
+## get lipid characteristics
+lipid_char_table <- as.data.frame(SummarizedExperiment::rowData(DE_data))
+char_var <- colnames(lipid_char_table)[-1]
+## aggregated(sum) expression data by selected characteristics
+Spe2Char_result <- Species2Char(DE_data, char_var = char_var[4])
+## data processing of exp_data_Spe2Char
+exp_transform_SE <- data_process(
+    Spe2Char_result, exclude_var_missing=TRUE,
+    missing_pct_limit=50, replace_zero=TRUE, zero2what='min', xmin=0.5,
+    replace_NA=TRUE, NA2what='min', ymin=0.5,  pct_transform=TRUE,
+    data_transform=FALSE, trans_type='log', centering=FALSE, scaling=FALSE)
+## data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(
+    Spe2Char_result, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5, pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## conduct deferentially expressed of lipid characters
+DE_char_result <- DE_char(
+    exp_transform_non_log, data_transform=TRUE, paired=FALSE,
+    sig_pvalue=0.05, sig_FC=2, insert_ref_group=NULL, ref_group=NULL)
+## filter significant lipid characteristics
+sig_feature <- as.data.frame(
+    SummarizedExperiment::assay(DE_char_result$char_table_all))[[1]]
+## conduct dimension reduction data processing
+dim_process_SE <- dim_process(
+    exp_transform_SE, sig_feature=sig_feature, type='PCA',
+    insert_ref_group=NULL, ref_group=NULL)
+
+## view result
+head(SummarizedExperiment::assay(dim_process_SE)[, 1:5], 5)
+## conduct PCA
+dim_process_table <- as.data.frame(
+    SummarizedExperiment::assay(dim_process_SE))
+pca <- stats::prcomp(dim_process_table, scale=TRUE, center=TRUE)
+@
+
+  \item \textbf{t-SNE (t-distributed stochastic neighbor embedding)}\\
+    t-Distributed Stochastic Neighbor Embedding (t-SNE) is an unsupervised
+    non-linear dimensionality reduction technique that tries to retain the local
+    structure(cluster) of data when visualizing the high-dimensional datasets.
+<<DE_lipid characteristics: dimensionality reduction - t-SNE>>=
+## get lipid characteristics
+lipid_char_table <- as.data.frame(SummarizedExperiment::rowData(DE_data))
+char_var <- colnames(lipid_char_table)[-1]
+## aggregated(sum) expression data by selected characteristics
+Spe2Char_result <- Species2Char(DE_data, char_var = char_var[4])
+## data processing of exp_data_Spe2Char
+exp_transform_SE <- data_process(
+    Spe2Char_result, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5,  pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(
+    Spe2Char_result, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5, pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## conduct deferentially expressed of lipid characters
+DE_char_result <- DE_char(
+    exp_transform_non_log, data_transform=TRUE, paired=FALSE,
+    sig_pvalue=0.05, sig_FC=2, insert_ref_group=NULL, ref_group=NULL)
+## filter significant lipid characteristics
+sig_feature <- as.data.frame(
+    SummarizedExperiment::assay(DE_char_result$char_table_all))[[1]]
+## conduct dimension reduction data processing
+dim_process_SE <- dim_process(
+    exp_transform_SE, sig_feature=sig_feature, type='tsne',
+    insert_ref_group=NULL, ref_group=NULL)
+
+## view result
+head(SummarizedExperiment::assay(dim_process_SE)[, 1:5], 5)
+## conduct t-SNE
+dim_process_table <- as.data.frame(
+    SummarizedExperiment::assay(dim_process_SE))
+tsne <- Rtsne::Rtsne(
+    dim_process_table, check_duplicates=FALSE , pca=TRUE, perplexity=5,
+    verbose=TRUE, max_iter=500, theta=0)
+@
+
+
+  \item \textbf{UMAP (Uniform Manifold Approximation and Projection)}\\
+    UMAP using a nonlinear dimensionality reduction method, Manifold learning,
+    which effectively visualizing clusters or groups of data points and their
+    relative proximities.
+<<DE_lipid characteristics: dimensionality reduction - UMAP>>=
+## get lipid characteristics
+lipid_char_table <- as.data.frame(SummarizedExperiment::rowData(DE_data))
+char_var <- colnames(lipid_char_table)[-1]
+## aggregated(sum) expression data by selected characteristics
+Spe2Char_result <- Species2Char(DE_data, char_var=char_var[4])
+## data processing of exp_data_Spe2Char
+exp_transform_SE <- data_process(
+    Spe2Char_result, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5,  pct_transform=TRUE,
+    data_transform=FALSE, trans_type='log', centering=FALSE, scaling=FALSE)
+## data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(
+    Spe2Char_result, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5, pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## conduct deferentially expressed of lipid characters
+DE_char_result <- DE_char(
+    exp_transform_non_log, data_transform=TRUE, paired=FALSE,
+    sig_pvalue=0.05, sig_FC=2, insert_ref_group=NULL, ref_group=NULL)
+## filter significant lipid characteristics
+sig_feature <- as.data.frame(
+    SummarizedExperiment::assay(DE_char_result$char_table_all))[[1]]
+## conduct dimension reduction data processing
+dim_process_SE <- dim_process(
+    exp_transform_SE, sig_feature=sig_feature, type='UMAP',
+    insert_ref_group=NULL, ref_group=NULL)
+
+## view result
+head(SummarizedExperiment::assay(dim_process_SE)[, 1:5], 5)
+## conduct UMAP
+dim_process_table <- as.data.frame(
+    SummarizedExperiment::assay(dim_process_SE))
+umap <- uwot::umap(
+    dim_process_table, n_neighbors=15, scale=TRUE, metric='euclidean')
+@
+
+  \item \textbf{PLS-DA}\\
+<<DE_lipid characteristics: dimensionality reduction - PLS-DA>>=
+## get lipid characteristics
+lipid_char_table <- as.data.frame(SummarizedExperiment::rowData(DE_data))
+char_var <- colnames(lipid_char_table)[-1]
+## aggregated(sum) expression data by selected characteristics
+Spe2Char_result <- Species2Char(DE_data, char_var=char_var[4])
+## data processing of exp_data_Spe2Char
+exp_transform_SE <- data_process(
+    Spe2Char_result, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5,  pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(
+    Spe2Char_result, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5, pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## conduct deferentially expressed of lipid characters
+DE_char_result <- DE_char(
+    exp_transform_non_log, data_transform=TRUE, paired=FALSE,
+    sig_pvalue=0.05, sig_FC=2, insert_ref_group=NULL, ref_group=NULL)
+## filter significant lipid characteristics
+sig_feature <- as.data.frame(
+    SummarizedExperiment::assay(DE_char_result$char_table_all))[[1]]
+## conduct dimension reduction data processing
+dim_process_SE <- dim_process(
+    exp_transform_SE, sig_feature=sig_feature, type='PLSDA',
+    insert_ref_group=NULL, ref_group=NULL)
+## view result
+head(SummarizedExperiment::assay(dim_process_SE)[, 1:5], 5)
+## conduct PLSDA
+dim_process_table <- as.data.frame(
+    SummarizedExperiment::assay(dim_process_SE))
+dim_group <- as.data.frame(
+    SummarizedExperiment::rowData(dim_process_SE))[[1]]
+PLSDA <- mixOmics::plsda(
+    dim_process_table, dim_group, ncomp=2, scale=TRUE)
+@
+\end{enumerate}
+
+
+\subsubsection{Hierarchical clustering}
+A new lipid expression table summed up from species is clustered using
+hierarchical clustering. Users can choose to output the
+results of all lipid characteristics or only significant lipid characteristics
+by the parameter \Robject{type}.
+
+<<DE_lipid characteristics: hierarchical clustering>>=
+## get lipid characteristics
+lipid_char_table <- as.data.frame(SummarizedExperiment::rowData(DE_data))
+char_var <- colnames(lipid_char_table)[-1]
+## aggregated(sum) expression data by selected characteristics
+Spe2Char_result <- Species2Char(DE_data, char_var=char_var[4])
+## data processing of exp_data_Spe2Char
+exp_transform_SE <- data_process(
+    Spe2Char_result, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5,  pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## data processing of exp_data (without log10 transformation)
+exp_transform_non_log <- data_process(
+    Spe2Char_result, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5, pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## conduct deferentially expressed of lipid characters
+DE_char_result <- DE_char(
+    exp_transform_non_log, data_transform=TRUE, paired=FALSE, sig_pvalue=0.05,
+    sig_FC=2, insert_ref_group=NULL, ref_group=NULL)
+## conduct hierarchical clustering of all lipid characteristics
+DE_result_sig <- DE_char_result$char_table_all_sig
+Hclustering_all <- Hclustering(
+    exp_data_SE=exp_transform_SE, DE_result_sig=DE_result_sig, type='all')
+Hclustering_sig <- Hclustering(
+    exp_data_SE=exp_transform_SE, DE_result_sig=DE_result_sig, type='sig')
+
+## view result - all lipid characteristics
+head(SummarizedExperiment::assay(Hclustering_all)[, 1:4], 5)
+
+## view result - significant lipid characteristics
+head(SummarizedExperiment::assay(Hclustering_sig)[, 1:4], 5)
+@
+
+\newpage
+
+The results of hierarchical clustering can be further applied to plotting
+heatmap. Below is an example of heatmap of all lipid characteristics.
+
+<<fig.cap = "\\textbf{Heatmap of all lipid characteristics}", fig.small=TRUE>>=
+## extract the assay data from Hclustering_result
+plot_table <- SummarizedExperiment::assay(Hclustering_all)
+## set char_var, distance measure, and agglomeration method
+char_var <- NULL
+distfun <- 'pearson'
+hclustfun <- 'complete'
+## set insert_ref_group and ref_group
+insert_ref_group <- NULL
+ref_group <- NULL
+## set dist_fun and hclust_fun
+if(distfun %in% c("pearson", "kendall", "spearman")){
+    dist_fun <- function(x) stats::as.dist(1-stats::cor(t(x), method=distfun))
+    hclust_fun <- function(x) stats::hclust(x,  method=hclustfun)
+    }else{
+        dist_fun <- function(x) stats::dist(x, method=distfun)
+        hclust_fun <- function(x) stats::hclust(x,  method=hclustfun)
+    }
+## define the heatmap_color_scale function
+heatmap_color_scale <- function(data){
+    data <- round(data, 3)
+    if(max(data) <= 0 & min(data) < 0){
+        over_median <- min(data)/2
+        if(max(data) < over_median){
+            color <-  grDevices::colorRampPalette(
+              c("#157AB5", "#92c5de"))(n=1000)
+            }else{
+                color_rank <- round(max(data)/(min(data))*1000)
+                color_scale <- grDevices::colorRampPalette(
+                    c("#0571b0", "#92c5de", "white"))(n=1000)
+                color <- color_scale[color_rank:1000]
+                }
+        }else if(min(data) >= 0 & max(data) > 0){
+            over_median <- max(data)/2
+            if(min(data) > over_median){
+                color <-  grDevices::colorRampPalette(
+                    c("#f4a582", "#ca0020"))(n=1000)
+                }else{
+                    color_rank <- round(min(data)/(max(data))*1000)
+                    color_scale <- grDevices::colorRampPalette(
+                        c("white", "#f4a582", "#ca0020"))(n=1000)
+
+                    color <- color_scale[color_rank:1000]
+                }
+        }
+    return(color)
+}
+## check values in plot_table
+if(min(plot_table) >= 0 || max(plot_table) <= 0){
+    all_color_scale <- heatmap_color_scale(plot_table)
+    }else{
+        all_color_scale <- grDevices::colorRampPalette(
+            c("#92c5de", "white", "#f4a582"))(n=2500)
+    }
+## create colGroup data frame
+colGroup <- data.frame(Sample=group_info$group, stringsAsFactors=FALSE)
+## generate a rainbow color palette based on unique colGroup samples
+col_color <- grDevices::rainbow(length(unique(colGroup$Sample)))
+## assign color values to colGroup samples
+col_color_label <- colGroup$Sample
+for(j in seq(unique(colGroup$Sample))){
+    col_color_label[which(
+        colGroup$Sample == unique(colGroup$Sample)[j])] <- col_color[j]
+}
+## create heatmap plot of all lipid characteristics
+stats::heatmap(
+    plot_table, Rowv=TRUE, Colv=FALSE, dendrogram='both', trace="none",
+    col=all_color_scale, distfun=dist_fun, hclustfun=hclust_fun,
+    ColSideColors=col_color_label, main=NULL, margins=c(8,8), lwid=c(1, 9),
+    scale='none')
+@
+
+\newpage
+
+Here is an example of heatmap of significant lipid characteristics.
+
+<<fig.cap = "\\textbf{Heatmap of significant lipid characteristics}", fig.small=TRUE>>=
+## extract the assay data from Hclustering_result
+plot_table <- SummarizedExperiment::assay(Hclustering_sig)
+## set char_var, distance measure, and agglomeration method
+char_var <- NULL
+distfun <- 'pearson'
+hclustfun <- 'complete'
+## set insert_ref_group and ref_group
+insert_ref_group <- NULL
+ref_group <- NULL
+## set dist_fun and hclust_fun
+if(distfun %in% c("pearson", "kendall", "spearman")){
+    dist_fun <- function(x) stats::as.dist(1-stats::cor(t(x), method=distfun))
+    hclust_fun <- function(x) stats::hclust(x,  method=hclustfun)
+    }else{
+        dist_fun <- function(x) stats::dist(x, method=distfun)
+        hclust_fun <- function(x) stats::hclust(x,  method=hclustfun)
+    }
+## define the heatmap_color_scale function
+heatmap_color_scale <- function(data){
+    data <- round(data, 3)
+    if(max(data) <= 0 & min(data) < 0){
+        over_median <- min(data)/2
+        if(max(data) < over_median){
+            color <-  grDevices::colorRampPalette(
+              c("#157AB5", "#92c5de"))(n=1000)
+            }else{
+                color_rank <- round(max(data)/(min(data))*1000)
+                color_scale <- grDevices::colorRampPalette(
+                    c("#0571b0", "#92c5de", "white"))(n=1000)
+                color <- color_scale[color_rank:1000]
+                }
+        }else if(min(data) >= 0 & max(data) > 0){
+            over_median <- max(data)/2
+            if(min(data) > over_median){
+                color <-  grDevices::colorRampPalette(
+                    c("#f4a582", "#ca0020"))(n=1000)
+                }else{
+                    color_rank <- round(min(data)/(max(data))*1000)
+                    color_scale <- grDevices::colorRampPalette(
+                        c("white", "#f4a582", "#ca0020"))(n=1000)
+
+                    color <- color_scale[color_rank:1000]
+                }
+        }
+    return(color)
+}
+## check values in plot_table
+if(min(plot_table) >= 0 || max(plot_table) <= 0){
+    all_color_scale <- heatmap_color_scale(plot_table)
+    }else{
+        all_color_scale <- grDevices::colorRampPalette(
+            c("#92c5de", "white", "#f4a582"))(n=2500)
+    }
+## create colGroup data frame
+colGroup <- data.frame(Sample=group_info$group, stringsAsFactors=FALSE)
+## generate a rainbow color palette based on unique colGroup samples
+col_color <- grDevices::rainbow(length(unique(colGroup$Sample)))
+## assign color values to colGroup samples
+col_color_label <- colGroup$Sample
+for(j in seq(unique(colGroup$Sample))){
+    col_color_label[which(
+        colGroup$Sample == unique(colGroup$Sample)[j])] <- col_color[j]
+}
+## create heatmap plot of significant lipid characteristics
+stats::heatmap(
+    plot_table, Rowv=TRUE, Colv=FALSE, dendrogram='both', trace="none",
+    col=all_color_scale, distfun=dist_fun, hclustfun=hclust_fun,
+    ColSideColors=col_color_label, main=NULL, margins=c(8,8), lwid=c(1, 9),
+    scale='none')
+@
+
+Through heatmap of lipid characteristic expression differences between the
+control group and the experimental group, we may discover the difference between
+the two groups by observing the distribution of lipid characteristic expression.
+Columns are all samples and rows are the significant characteristic group
+(value) selected from the first 'Characteristics' section (Section
+\ref{sec:DE-char}).\\
+
+\newpage
+
+%---------------------------------------------------------
+\renewcommand\abstractname{Session info}
+\phantomsection{}
+\addcontentsline{toc}{section}{\abstractname}
+\section*{Session info}
+%---------------------------------------------------------
+
+<<sessionInfo, results='asis', echo=FALSE>>=
+toLatex(sessionInfo())
+@
+
+\newpage
+%---------------------------------------------------------
+\addcontentsline{toc}{section}{Reference}
+\bibliography{ref}
+
+
+\end{document}

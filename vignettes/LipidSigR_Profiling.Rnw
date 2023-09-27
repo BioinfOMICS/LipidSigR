@@ -1,0 +1,571 @@
+%\VignetteIndexEntry{LipidSigR profiling tutorial}
+%\VignettePackage{LipidSigR}
+%\VignetteEngine{knitr::knitr}
+
+\documentclass{article}
+
+<<style-knitr, eval=TRUE, echo=FALSE, results='asis'>>=
+BiocStyle::latex()
+@
+
+\usepackage{booktabs} % book-quality tables
+
+\newcommand\BiocStyle{\Rpackage{BiocStyle}}
+\newcommand\latex[1]{{\ttfamily #1}}
+\usepackage[utf8]{inputenc}
+
+<<echo=FALSE ,include=FALSE>>=
+knitr::opts_chunk$set(warning=FALSE)
+knitr::opts_chunk$set(fig.width = 6, fig.height = 5)
+knitr::opts_chunk$set(fig.align ="center")
+knitr::opts_chunk$set(concordance=TRUE)
+@
+
+\makeatletter
+\def\thefpsfigure{\fps@figure}
+\makeatother
+
+\newcommand{\exitem}[3]{%
+  \item \latex{\textbackslash#1\{#2\}} #3 \csname#1\endcsname{#2}.%
+}
+
+
+\title{LipidSigR tutorial - Profiling}
+\author[1]{Wei-Chung Cheng}
+\affil[1]{China Medical University}
+\author[2]{Wen-Jen, Lin}
+\affil[2]{China Medical University}
+
+\begin{document}
+
+\setlength{\headheight}{46.27916pt}
+
+\maketitle
+
+\begin{abstract}
+"LipidSigR" is an R package developed based on LipidSig web-based tool
+\url{http://www.chenglab.cmu.edu.tw/lipidsig/}. This package integrates a
+comprehensive analysis for streamlined data mining of lipidomic datasets.
+We provide 4 main analysis workflows, which is "Profiling" and "Differential
+expression". Each section provides unique aspects to analyze the lipidome
+profiling data based on different characteristics including lipid class,
+chain length, unsaturation, hydroxyl group, and fatty acid composition.
+\end{abstract}
+
+\packageVersion{\Sexpr{BiocStyle::pkg_ver("LipidSigR")}}
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\renewcommand\abstractname{Introduction of LipidSigR}
+\phantomsection{}
+\addcontentsline{toc}{section}{\abstractname}
+\section*{Introduction of LipidSigR}
+\label{intro}
+Lipidomics technology provides a fast and high-throughput screening to identify
+thousands of lipid species in cells, tissues, or other biological samples and
+has been broadly used in several areas of studies.
+
+\textbf{"LipidSigR"} is an R package developed based on LipidSig web-based tool
+(\url{http://www.chenglab.cmu.edu.tw/lipidsig/}) \cite{lipidsig}. This package
+integrates a comprehensive analysis for streamlined data mining of lipidomic
+datasets. We provide 2 main analysis workflows, which is \textbf{"Profiling"}
+and \textbf{"Differential expression"}. Each section provides unique aspects to
+analyze the lipidome profiling data based on different characteristics including
+lipid class, chain length, unsaturation, hydroxyl group, and fatty acid
+composition.\\
+
+The following sections of this documentation will describe the usage of
+\textbf{Profiling} functions. The profiling section provides an overview of
+comprehensive analyses for you to efficiently examine data quality, the
+clustering of samples, the correlation between lipid species, and the
+composition of lipid characteristics.
+
+\newpage
+
+\renewcommand\abstractname{Installation}
+\phantomsection{}
+\addcontentsline{toc}{section}{\abstractname}
+\section*{Installation}
+This section briefly describes the procedures of running the \textbf{LipidSigR}
+package on your system. We assume that you have already installed the R program
+(see the R project at \url{http://www.r-project.org})  and are familiar with it.
+You need to have R 4.0.0 or a later version installed for running LipidSigR.
+
+The \textbf{LipidSigR} package is available at the Bioconductor repository
+(\url{http://www.bioconductor.org}). To install our package, first, you need
+to install the core Bioconductor packages. If you have already installed the
+Bioconductor packages on your system, you can skip the following step below.
+
+<<install_Bioconductor, eval=FALSE>>=
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install()
+@
+Once the core Bioconductor packages have been installed, we can begin the
+installation of the LipidSigR package.
+
+<<install_package, eval=FALSE>>=
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("LipidSigR")
+@
+After conducting the above step, now you can load in our package and start
+using it!
+<<load_package, message = FALSE>>=
+library(LipidSigR)
+@
+
+<<message = FALSE, echo=FALSE>>=
+library(ggplot2)
+library(SummarizedExperiment)
+library(dplyr)
+@
+
+\newpage
+
+\section{Profiling}
+\label{Profiling}
+
+On the first step of analyzing lipid data, we have to take an overview of the
+data. In this section, you can get comprehensive analyses to explore the quality
+and the clustering of samples, the correlation between lipids and samples, and
+the expression and composition of lipids.
+
+\subsection{Input data}
+
+First, we have to read the input data needed for the profiling section. We
+have to prepare lipid expression data and lipid characteristics as
+the input data of \Robject{exp\_data} and \Robject{lipid\_char\_table}.
+
+<<load_profiling_data>>=
+## clears all objects from workspace
+rm(list = ls())
+
+## lipid expression data
+data("profiling_exp_data")
+head(profiling_exp_data[, 1:5], 5)
+
+## lipid characteristics table
+data("profiling_lipid_char_table")
+head(profiling_lipid_char_table[, 1:4], 5)
+@
+
+Then, we must transform these three data frames into a SummarizedExperiment
+object, which will be input for each function. Follow the instructions below to
+construct the SummarizedExperiment object.
+
+<<transformToSE>>=
+library(SummarizedExperiment)
+profiling_data <- SummarizedExperiment(
+    assays=list(exp_data=as.matrix(profiling_exp_data[, -1])),
+    rowData=profiling_lipid_char_table,
+    colData=colnames(profiling_exp_data)[-1])
+@
+
+After constructing the input data, sometimes, we may need to conduct data
+processing before analysis. Here, we provide the \Rfunction{data\_process}
+function for data processing, including removing features with missing values,
+missing values imputation, percentage transformation, log10 transformation, etc.
+
+<<data_process>>=
+## lipid expression data
+head(SummarizedExperiment::assay(profiling_data)[, 1:5], 5)
+## data processing of exp_data
+exp_transform_SE <- data_process(
+    profiling_data, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5,  pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+head(SummarizedExperiment::assay(exp_transform_SE)[, 1:5], 5)
+@
+
+
+\subsection{Cross-sample variability}
+Now, let's start with a simple view of sample variability to compare the
+amount/expression difference of lipid between samples
+(i.e., patients vs. control). We provide \Rfunction{exp\_profiling} that can
+transform data as the input format for plotting three types of distribution
+plots and lipid class composition bar plots.
+
+<<Profiling: cross-sample variability>>=
+## get lipid characteristics
+lipid_char_table <- as.data.frame(SummarizedExperiment::rowData(profiling_data))
+char_var <- colnames(lipid_char_table)[-1]
+## conduct profiling function
+exp_profiling_result <- exp_profiling(profiling_data, char_var[1])
+
+## view result - tot.num.lip
+head(SummarizedExperiment::assay(exp_profiling_result$tot.num.lip), 5)
+## view result - dens.lip
+head(SummarizedExperiment::assay(exp_profiling_result$dens.lip), 5)
+@
+
+After conducting \Rfunction{exp\_profiling}, the output data can be applied
+for plotting. Below are the examples.
+
+<<Profiling: plotting expressed lipid number histogram>>=
+## extract the assay data from exp_profiling_result
+tot.num.lip <- SummarizedExperiment::assay(exp_profiling_result$tot.num.lip)
+## create histogram of number of expressed lipids
+expr.lip <- ggplot2::ggplot(
+    tot.num.lip, ggplot2::aes(x=sample_name, y=expr.count, fill=sample_name)) +
+    ggplot2::geom_col() +
+    ggplot2::labs(fill="Sample", y="Number of Expressed Lipids", x="") +
+    ggplot2::theme(
+        axis.text.x = ggplot2::element_text(angle=90, vjust=0.5,hjust=1 )) +
+    ggthemes::theme_hc()
+@
+
+<<numExpLipid, fig.cap="\\textbf{Histogram of number of expressed lipids}\\ The histogram overviews the total number of lipid species over samples. From the plot, we can discover the number of lipid species present in each sample.", fig.small=TRUE>>=
+## view histogram of number of expressed lipids
+expr.lip
+@
+
+\newpage
+
+<<Profiling: plotting lipid amount histogram>>=
+## extract the assay data from exp_profiling_result
+tot.num.lip <- SummarizedExperiment::assay(exp_profiling_result$tot.num.lip)
+## create histogram of lipid amount
+lipid_amount <- ggplot2::ggplot(
+    tot.num.lip, ggplot2::aes(
+        x=sample_name, y=lipid_amount, fill=sample_name)) +
+    ggplot2::geom_col() +
+    ggplot2::labs(fill='Sample', y='Lipid Amount', x="") +
+    ggplot2::theme(
+        axis.text.x = ggplot2::element_text(angle=90, vjust=0.5, hjust=1)) +
+    ggthemes::theme_hc()
+@
+
+<<lipid_amount, fig.cap="\\textbf{Histogram of lipid amount} The histogram describes the variability of the total lipid amount between samples.", fig.small=TRUE>>=
+## view histogram (total amount of lipid)
+lipid_amount
+@
+
+\newpage
+
+<<Profiling: plotting density plot>>=
+## extract the assay data from exp_profiling_result
+dens.lip <- SummarizedExperiment::assay(exp_profiling_result$dens.lip)
+## create density plot
+exp_density <- ggplot2::ggplot(
+    dens.lip, ggplot2::aes(x=log10(value), color=sample_name)) +
+    ggplot2::geom_density() +
+    ggplot2::labs(color='Sample', y='Density', x="log10(expression)") +
+    ggthemes::theme_hc()
+@
+
+<<desity_exp_distri, fig.cap ="\\textbf{Density plot of expression distribution} The density plot uncovers the distribution of lipid expression in each sample (line). All expression was log10 transformed. From this plot, we can have a deeper view of the distribution between samples.", fig.small=TRUE>>=
+## view density plot of expression distribution
+exp_density
+@
+
+\newpage
+
+\subsection{Lipid characteristics}
+\label{subsec:pro_char}
+Now, we are going to take a view of lipid expression over specific lipid
+characteristics. First, lipids are classified by characteristics selected from
+the 'Lipid characteristics' table. Here, we select "class" as the selected lipid
+characteristic. According to the result of \Rfunction{exp\_profiling},
+we can further plot two bar plots. Here are the examples
+<<Profiling: lipid characteristics>>=
+## get lipid characteristics
+lipid_char_table <- as.data.frame(SummarizedExperiment::rowData(profiling_data))
+char_var <- colnames(lipid_char_table)[-1]
+## conduct profiling function
+exp_profiling_result <- exp_profiling(profiling_data, char_var[1])
+
+## view result - exp.compo.by.lipid
+head(SummarizedExperiment::assay(exp_profiling_result$exp.compo.by.lipid), 5)
+@
+
+The output data can be further applied to plotting characteristic bar plot and
+stacked horizontal bar chart. Below are the examples.
+
+<<Profiling: plotting characteristics bar plot>>=
+## extract the assay data from exp_profiling_result
+## (only if exp.compo.by.lipid is not NULL can the plot be plotted.)
+exp.compo.by.lipid <- SummarizedExperiment::assay(
+    exp_profiling_result$exp.compo.by.lipid)
+## create bar plot classified by selected characteristic
+compo_bar_plot <- ggplot2::ggplot(
+    exp.compo.by.lipid, ggplot2::aes(
+        x=lipid.category.value, y=value, fill=sample_name)) +
+    ggplot2::geom_col(position = "dodge") +
+    ggplot2::labs(
+        fill="Sample name", y='Lipid Expression', x=Hmisc::capitalize(char_var),
+        title=paste0('Lipid ', Hmisc::capitalize(char_var))) +
+    ggthemes::theme_hc()
+@
+
+\newpage
+
+<<fig.cap = "\\textbf{Bar plot classified by selected characteristic} The bar plot depicts the expression level of each sample within each group (e.g., PE, PC) of selected characteristics (e.g., class).", fig.small=TRUE>>=
+## view bar plot classified by selected characteristic
+compo_bar_plot
+@
+
+
+<<Profiling: plotting stacked horizontal bar chart>>=
+## extract the assay data from exp_profiling_result
+## (only if exp.compo.by.lipid is not NULL can the plot be plotted.)
+exp.compo.by.lipid <- SummarizedExperiment::assay(
+    exp_profiling_result$exp.compo.by.lipid)
+## create stacked horizontal bar chart
+lipid_compo_plot <- ggplot2::ggplot(
+    exp.compo.by.lipid, ggplot2::aes(
+        x=value, y=sample_name, fill=lipid.category.value)) +
+    ggplot2::geom_col() +
+    ggplot2::labs(
+        fill=Hmisc::capitalize(char_var), y='', x="%",
+        title=paste0('Lipid ', Hmisc::capitalize(char_var), 'Composition')) +
+    ggthemes::theme_hc()
+@
+
+\newpage
+
+<<fig.cap = "\\textbf{Lipid class composition} The stacked horizontal bar chart illustrates the percentage of characteristics in each sample. The variability of percentage between samples can also be obtained from this plot.", fig.small=TRUE>>=
+## view lipid class composition - stacked horizontal bar chart
+lipid_compo_plot
+@
+
+
+\subsection{Dimensionality reduction}
+\label{DimensionReduce}
+Dimensionality reduction is commonly used when dealing with large numbers of
+observations and/or large numbers of variables in lipids analysis. It
+transforms data from a high-dimensional space into a low-dimensional space
+so that it retains vital properties of the original data and is close to
+its intrinsic dimension.
+
+Here, we provide the function \Rfunction{dim\_process} that can transform data
+as the input format for three dimensionality reduction methods: PCA, t-SNE,
+UMAP.
+
+\subsubsection{PCA}
+\label{PCA}
+PCA (Principal component analysis) is an unsupervised linear dimensionality
+reduction and data visualization technique for high dimensional data, which
+tries to preserve the global structure of the data. Scaling (by default)
+indicates that the variables should be scaled to have unit variance before the
+analysis takes place, which removes the bias towards high variances. In general,
+scaling (standardization) is advisable for data transformation when the
+variables in the original dataset have been measured on a significantly
+different scale. As for the centering options (by default), we offer the
+option of mean-centering, subtracting the mean of each variable from the values,
+making the mean of each variable equal to zero. It can help users to avoid the
+interference of misleading information given by the overall mean.
+
+<<Profiling: dimensionality reductionPCA>>=
+## data processing of exp_data
+exp_transform_SE <- data_process(
+    profiling_data, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5,  pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## conduct dimension reduction data processing
+dim_process_SE <- dim_process(
+    exp_transform_SE, sig_feature=NULL, type='PCA', insert_ref_group=NULL,
+    ref_group=NULL)
+## view result
+head(SummarizedExperiment::assay(dim_process_SE)[, 1:5], 5)
+## conduct PCA
+dim_process_table <- as.data.frame(SummarizedExperiment::assay(dim_process_SE))
+pca <- stats::prcomp(dim_process_table, scale=TRUE, center=TRUE)
+@
+
+\subsubsection{t-SNE}
+\label{t-SNE}
+t-SNE (t-Distributed Stochastic Neighbor Embedding) is an unsupervised
+non-linear dimensionality reduction technique that tries to retain the local
+structure(cluster) of data when visualizing the high-dimensional datasets.
+Package \CRANpkg{Rtsne} is used for calculation, and PCA is applied as a
+preprocessing step. In t-SNE, \Robject{perplexity} and \Robject{max\_iter}
+are adjustable for users. The \Robject{perplexity} may be considered as a knob
+that sets the number of effective nearest neighbors, while \Robject{max\_iter}
+is the maximum number of iterations to perform. The typical perplexity range
+between 5 and 50, but if the t-SNE plot shows a 'ball' with uniformly
+distributed points, you may need to lower your perplexity
+\cite{van2008visualizing}.
+<<Profiling: dimensionality reduction - t-SNE>>=
+## data processing of exp_data
+exp_transform_SE <- data_process(
+    profiling_data, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5,  pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## conduct dimension reduction data processing
+dim_process_SE <- dim_process(
+    exp_transform_SE, sig_feature=NULL, type='tsne', insert_ref_group=NULL,
+    ref_group=NULL)
+
+## view result
+head(SummarizedExperiment::assay(dim_process_SE)[, 1:5], 5)
+## conduct t-SNE
+dim_process_table <- as.data.frame(SummarizedExperiment::assay(dim_process_SE))
+tsne <- Rtsne::Rtsne(dim_process_table, check_duplicates=FALSE ,
+      pca=TRUE, perplexity=5, verbose=TRUE, max_iter=500, theta=0)
+@
+
+\subsubsection{UMAP}
+\label{UMAP}
+UMAP (Uniform Manifold Approximation and Projection) using a nonlinear
+dimensionality reduction method, Manifold learning, which effectively
+visualizing clusters or groups of data points and their relative proximities.
+Both tSNE and UMAP are intended to predominantly preserve the local structure
+that is to group neighboring data points which certainly delivers a very
+informative visualization of heterogeneity in the data. The significant
+difference with t-SNE is scalability, which allows UMAP eliminating the need for
+applying preprocessing step (such as PCA). Besides, UMAP applies Graph
+Laplacian for its initialization as tSNE by default implements random
+initialization. Thus, some people suggest that the key problem of tSNE
+is the Kullback-Leibler (KL) divergence, which makes UMAP superior over t-SNE.
+Nevertheless, UMAP's cluster may not good enough for multi-class pattern
+classification \cite{mcinnes2018umap}.
+
+The type of distance metric to find nearest neighbors the size of the local
+neighborhood (as for the number of neighboring sample points) are set by
+parameter \Robject{metric} and \Robject{n\_neighbors}. Larger values lead to
+more global views of the manifold, while smaller values result in more local
+data being preserved. Generally,  values are set in the range of 2 to 100.
+(default: 15).
+
+<<Profiling: dimensionality reduction - UMAP>>=
+## data processing of exp_data
+exp_transform_SE <- data_process(
+    profiling_data, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5,  pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+## conduct dimension reduction data processing
+dim_process_SE <- dim_process(
+    exp_transform_SE, sig_feature=NULL, type='UMAP', insert_ref_group=NULL,
+    ref_group=NULL)
+
+## view result
+head(SummarizedExperiment::assay(dim_process_SE)[, 1:5], 5)
+## conduct UMAP
+dim_process_table <- as.data.frame(SummarizedExperiment::assay(dim_process_SE))
+umap <- uwot::umap(
+    dim_process_table, n_neighbors=15, scale=TRUE, metric='euclidean')
+@
+
+\subsection{Correlation heatmap}
+The correlation heatmap illustrates the correlation between samples or lipid
+species and also depicts the patterns in each group. The correlation is
+calculated by the method defined by parameter \Robject{corr\_method}, and the
+correlation coefficient is then clustered depending on method defined by
+parameter \Robject{distfun} and the distance defined by parameter
+\Robject{hclustfun}. Users can choose to output the sample correlation or
+lipid correlation results by the parameter \Robject{type}.
+<<Profiling: correlation heatmap - sample>>=
+## data processing of exp_data
+exp_transform_SE <- data_process(
+    profiling_data, exclude_var_missing=TRUE, missing_pct_limit=50,
+    replace_zero=TRUE, zero2what='min', xmin=0.5, replace_NA=TRUE,
+    NA2what='min', ymin=0.5,  pct_transform=TRUE, data_transform=FALSE,
+    trans_type='log', centering=FALSE, scaling=FALSE)
+
+## sample correlation calculation
+corr_sample_result <- corr_heatmap(
+    exp_transform_SE, corr_method="pearson", distfun="maximum",
+    hclustfun="average", type='sample')
+
+## view result - sample correlation
+head(SummarizedExperiment::assay(corr_sample_result, i=1)[, 1:4], 5)
+head(SummarizedExperiment::assay(corr_sample_result, i=2)[, 1:4], 5)
+
+## lipid correlation calculation
+corr_lipid_result <- corr_heatmap(
+    exp_transform_SE, corr_method="pearson", distfun="maximum",
+    hclustfun="average", type='lipid')
+
+## view result - lipid correlation
+head(SummarizedExperiment::assay(corr_lipid_result, i=1)[, 1:4], 5)
+head(SummarizedExperiment::assay(corr_lipid_result, i=2)[, 1:4], 5)
+@
+
+The output data can be further applied to plotting correlation heatmap.
+Please note that if the number of lipids or samples is over 50, the names of
+lipids/samples will not be shown on the heatmap.\\
+
+Below is the example of sample to sample correlations heatmap.
+
+<<fig.cap = "\\textbf{Heatmap of sample to sample correlations} The heatmap reveals sample to sample correlations. Correlations between lipid species are colored from strong positive correlations (red) to no correlation (white).", fig.small=TRUE>>=
+## extract the assay data from corr_sample_result
+corr_coef <- SummarizedExperiment::assay(corr_sample_result, i=1)
+## set the correlation method, distance function, and clustering method
+corr_method <- "pearson"
+distfun <- "maximum"
+hclustfun <- "average"
+## create the column dendrogram
+col_dend <- if(distfun %in% c("pearson", "kendall", "spearman")) {
+    stats::hclust(
+        stats::as.dist(
+            1 - stats::cor(corr_coef, method=distfun)), method=hclustfun)
+    } else {
+        stats::hclust(
+            stats::dist(t(corr_coef), method=distfun), method=hclustfun)
+    }
+## create heatmap plot
+sample_col_dend <- function(x) col_dend
+stats::heatmap(
+    corr_coef, Rowv = TRUE, Colv = TRUE, dendrogram = 'both', trace = "none",
+    col = grDevices::colorRampPalette(c("blue", "white", "red"))(n = 300),
+    distfun = sample_col_dend, hclustfun = sample_col_dend,
+    main = NULL, margins = c(8, 8), lwid = c(1, 9), scale = 'none')
+@
+
+\newpage
+
+Here is the example of lipid species correlations heatmap.
+
+<<fig.cap = "\\textbf{Heatmap of lipid species correlations} The heatmap reveals correlations between lipids. Correlations between lipid species are colored from strong positive correlations (red) to negative correlation (blue).", fig.small=TRUE>>=
+## extract the assay data from corr_lipid_result
+corr_coef <- SummarizedExperiment::assay(corr_lipid_result, i=1)
+## set the correlation method, distance function, and clustering method
+corr_method <- "pearson"
+distfun <- "maximum"
+hclustfun <- "average"
+## define the col_dend
+col_dend <- if(distfun %in% c("pearson", "kendall", "spearman")) {
+    stats::hclust(
+        stats::as.dist(
+            1 - stats::cor(corr_coef, method=distfun)), method=hclustfun)
+    } else {
+        stats::hclust(
+            stats::dist(t(corr_coef), method=distfun), method=hclustfun)
+    }
+## create heatmap plot
+sample_col_dend <- function(x) col_dend
+stats::heatmap(
+    corr_coef, Rowv = TRUE, Colv = TRUE, dendrogram = 'both', trace = "none",
+    col = grDevices::colorRampPalette(c("blue", "white", "red"))(n = 300),
+    distfun = sample_col_dend, hclustfun = sample_col_dend,
+    main = NULL, margins = c(8, 8), lwid = c(1, 9), scale = 'none')
+@
+
+\newpage
+
+%---------------------------------------------------------
+\renewcommand\abstractname{Session info}
+\phantomsection{}
+\addcontentsline{toc}{section}{\abstractname}
+\section*{Session info}
+%---------------------------------------------------------
+
+<<sessionInfo, results='asis', echo=FALSE>>=
+toLatex(sessionInfo())
+@
+
+%---------------------------------------------------------
+\addcontentsline{toc}{section}{Reference}
+\bibliography{ref}
+
+
+\end{document}
