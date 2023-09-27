@@ -1,0 +1,43 @@
+Package: LipidSigR
+Type: Package
+Title: A comprehensive analysis for streamlined data mining of
+        lipidomic data
+Version: 0.99.29
+Authors@R: c(
+    person("Wei-Chung", "Cheng", email="chenglabomics@gmail.com", 
+    role = c("aut","cre","cph"), comment = c(ORCID = "0000-0002-1229-4857")),
+    person("Wen-Jen", "Lin", role = c("aut","ctb")),
+    person("Pei-Chun", "Shen", role = c("ctb")),
+    person("Hsiu-Cheng", "Liu", role = c("ctb")),
+    person("Meng-Hsin", "Tsai", role = c("ctb")))
+Description: 
+    "LipidSigR" is an R package developed based on LipidSig web-based tool 
+    (http://www.chenglab.cmu.edu.tw/lipidsig/). This package integrates a 
+    comprehensive analysis for streamlined data mining of lipidomic datasets. 
+    We provide 2 main analysis workflows, which is "Profiling" and "Differential 
+    expression". Each section provides unique aspects to analyze the lipidome 
+    profiling data based on different characteristics including lipid class, 
+    chain length, unsaturation, hydroxyl group, and fatty acid composition.
+    "Profiling" provides an overview of comprehensive analyses to efficiently 
+    examine data quality, the clustering of samples, the correlation between 
+    lipid species, and the composition of lipid characteristics. "Differential 
+    expression" integrates many useful lipid-focused analyses for identifying 
+    significant lipid species or lipid characteristics.
+License: MIT + file LICENSE
+URL: https://github.com/BioinfOMICS/LipidSigR
+BugReports: https://github.com/BioinfOMICS/LipidSigR/issues
+Encoding: UTF-8
+LazyData: FALSE
+RoxygenNote: 7.2.3
+biocViews: Lipidomics, GeneExpression, Classification, Clustering
+Depends: R (>= 4.3.0)
+Imports: plotly (>= 4.9.4.1), dplyr, tidyselect, stringr, magrittr,
+        tidyr, forcats, tibble, stats, SummarizedExperiment
+Suggests: devtools, roxygen2, knitr, methods, purrr,BiocStyle,
+        testthat (>= 3.0.0), cluster, foreign, nnet, rpart
+Enhances: data.table, ggforce, ggpubr, ggrepel,
+        showimage, rlang (>= 0.4.11), heatmaply, ggplot2,
+        tidyverse, parsnip, ggbeeswarm, 
+        wordcloud, ggthemes, mixOmics, Rtsne, uwot, grDevices, Hmisc
+VignetteBuilder: knitr
+Config/testthat/edition: 3

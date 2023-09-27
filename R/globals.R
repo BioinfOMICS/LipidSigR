@@ -1,0 +1,10 @@
+utils::globalVariables(c("feature", "group", "pair", ".",
+    "post_hoc_pvalue", "log2FC", "sig", "Combine_name", "p_value", "Category",
+    "Mean", "SD", "char_exp_data_SE", "Result_table_SE",
+    "Combined_char_data_SE", "Combine_char_result_table_SE",
+    "barTab_SE", "char_table_all_sig_SE", "sample_name", "value",
+    "ctrl", "mean_exp", "mean_ctrl", "FC", "p_adj", "sig_p", "sig_p_adj",
+    "lipid.category", "lipid.category.value", "characteristic",
+    "sig.count", "total.count", "condition", "m.log.p", "significant",
+    "log2FC.mean", "log2FC.sd", "log2FC.direction", "key", "is.expr",
+    "weight", "C", "Value", "sd"))
