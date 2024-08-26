@@ -1,6 +1,9 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^README.Rmd
+^README.md
+^NEWS.Rmd
 ^LICENSE\.md$
-^doc$
 ^Meta$
+^docs$
+^vignettes$
