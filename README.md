@@ -74,7 +74,8 @@ statistically significant, concordant differences between two biological states
 for constructing pathway activity network, lipid reaction network and GATOM network.
 
 If you need help starting the analysis, you can begin by reading our case 
-example for two-group and multi-group data. (A full tutorial is currently being prepared. Please stay tuned for its release!)
+example for two-group and multi-group data.
+$\textcolor{red}{(\ A\ full\ tutorial\ is\ currently\ being\ prepared\. Please\ stay\ tuned\ for\ its\ release\ !\) }$
 
 ## Citation
 <font size=3> You can cite the `LipidSigR` publication as follows:
