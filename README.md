@@ -14,6 +14,9 @@ lipidomic datasets. We provide 4 main analysis workflows, which is
 profiling data based on different characteristics including lipid class, 
 chain length, unsaturation, hydroxyl group, and fatty acid composition.
 
+> [!IMPORTANT]
+> ### $\textcolor{purple}{A\ full\ tutorial\ is\ currently\ being\ prepared\. Please\ stay\ tuned\ for\ its\ release\!  }$
+
 ## Installation
 We assume that you have already installed the R program (see the R project at 
 [http://www.r-project.org](http://www.r-project.org)  and are familiar with it. 
@@ -71,7 +74,7 @@ statistically significant, concordant differences between two biological states
 for constructing pathway activity network, lipid reaction network and GATOM network.
 
 If you need help starting the analysis, you can begin by reading our case 
-example for two-group and multi-group data.
+example for two-group and multi-group data. (A full tutorial is currently being prepared. Please stay tuned for its release!)
 
 ## Citation
 <font size=3> You can cite the `LipidSigR` publication as follows:
