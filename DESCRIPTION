@@ -1,8 +1,7 @@
 Package: LipidSigR
 Type: Package
-Title: A comprehensive analysis for streamlined data mining of
-        lipidomic data
-Version: 0.99.29
+Title: A comprehensive analysis for streamlined data mining of lipidomic data
+Version: 0.7.0
 Authors@R: c(
     person("Wei-Chung", "Cheng", email="chenglabomics@gmail.com", 
     role = c("aut","cre","cph"), comment = c(ORCID = "0000-0002-1229-4857")),
@@ -10,34 +9,47 @@ Authors@R: c(
     person("Pei-Chun", "Shen", role = c("ctb")),
     person("Hsiu-Cheng", "Liu", role = c("ctb")),
     person("Meng-Hsin", "Tsai", role = c("ctb")))
-Description: 
+Description:
     "LipidSigR" is an R package developed based on LipidSig web-based tool 
-    (http://www.chenglab.cmu.edu.tw/lipidsig/). This package integrates a 
+    (https://lipidsig.bioinfomics.org/). This package integrates a 
     comprehensive analysis for streamlined data mining of lipidomic datasets. 
-    We provide 2 main analysis workflows, which is "Profiling" and "Differential 
-    expression". Each section provides unique aspects to analyze the lipidome 
+    We provide 4 main analysis workflows, which is "Profiling", "Differential 
+    expression", "Enrichment", and "Network". Each section provides unique aspects to analyze the lipidome 
     profiling data based on different characteristics including lipid class, 
     chain length, unsaturation, hydroxyl group, and fatty acid composition.
     "Profiling" provides an overview of comprehensive analyses to efficiently 
     examine data quality, the clustering of samples, the correlation between 
     lipid species, and the composition of lipid characteristics. "Differential 
     expression" integrates many useful lipid-focused analyses for identifying 
-    significant lipid species or lipid characteristics.
+    significant lipid species or lipid characteristics. "Enrichment" 
+    provides two main approaches: 'Over Representation Analysis (ORA)' and 'Lipid Set 
+    Enrichment Analysis (LSEA)' to illustrates significant lipid species enriched in 
+    the categories of lipid class and determine whether an a priori-defined set of 
+    lipids shows statistically significant, concordant differences between two 
+    biological states (e.g., phenotypes). "Network" provides functions for generates 
+    input table for constructing pathway activity network, lipid reaction network and GATOM network.
 License: MIT + file LICENSE
-URL: https://github.com/BioinfOMICS/LipidSigR
-BugReports: https://github.com/BioinfOMICS/LipidSigR/issues
-Encoding: UTF-8
+URL: https://github.com/TMSWCChenglab/LipidSigR
+BugReports: https://github.com/TMSWCChenglab/LipidSigR/issues
 LazyData: FALSE
-RoxygenNote: 7.2.3
-biocViews: Lipidomics, GeneExpression, Classification, Clustering
-Depends: R (>= 4.3.0)
-Imports: plotly (>= 4.9.4.1), dplyr, tidyselect, stringr, magrittr,
-        tidyr, forcats, tibble, stats, SummarizedExperiment
-Suggests: devtools, roxygen2, knitr, methods, purrr,BiocStyle,
-        testthat (>= 3.0.0), cluster, foreign, nnet, rpart
-Enhances: data.table, ggforce, ggpubr, ggrepel,
-        showimage, rlang (>= 0.4.11), heatmaply, ggplot2,
-        tidyverse, parsnip, ggbeeswarm, 
-        wordcloud, ggthemes, mixOmics, Rtsne, uwot, grDevices, Hmisc
+Depends:
+    R (>= 4.2.0)
+Imports: dplyr, magrittr, plotly (>= 4.9.4.1), rgoslin, S4Vectors, 
+       SummarizedExperiment, stats, stringr, tibble, tidyr
+Suggests: BiocStyle, cluster, devtools, foreign, gatom, knitr, magick, 
+       methods, nnet, purrr, qpdf, 
+       roxygen2, rmarkdown, rpart, testthat (>= 3.0.0), tidyselect, Matrix (>= 1.6), irlba (>= 2.3.5.1), 
+Enhances: broom, data.table, dbscan, factoextra, fgsea, forcats, 
+       ggbeeswarm, ggforce, ggplot2, 
+       ggpubr, ggrepel, grDevices, ggthemes, heatmaply, Hmisc, hwordcloud, 
+       igraph, iheatmapr, imputeLCMD, mixOmics, missForest, mwcsr, parsnip, 
+       pcaMethods, preprocessCore, RColorBrewer, Rcpm, reshape2, rlang (>= 0.4.11), 
+       Rtsne, rstatix, tidyverse, scales, showimage, uwot, VIM, wordcloud,  
 VignetteBuilder: knitr
+Config/Needs/website: usethis, servr
+Config/potools/style: explicit
 Config/testthat/edition: 3
+Config/testthat/parallel: true
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
