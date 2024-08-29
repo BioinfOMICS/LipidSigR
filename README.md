@@ -38,8 +38,7 @@ devtools::install_github("BioinfOMICS/LipidSigR")
 # LipidSigR package depends on several packages, which can be installed using the below commands:
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-BiocManager::install(c('fgsea', 'gatom', 'mixOmics', 
-                       'S4Vectors', 'SummarizedExperiment', 'rgoslin'))
+BiocManager::install(c('fgsea', 'gatom', 'mixOmics', 'S4Vectors', 'SummarizedExperiment', 'rgoslin'))
 
 install.packages(c('devtools', 'magrittr', 'plotly', 'tidyverse'))
 devtools::install_github("ctlab/mwcsr")
