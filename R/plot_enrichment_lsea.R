@@ -75,20 +75,21 @@ plot_enrichment_lsea <- function(lsea_res, char, char_feature){
             round(enrich.tab$ES, digits=3), ', NES=', round(enrich.tab$NES, digits = 3))) +
         ggplot2::theme(text=ggplot2::element_text(size=15))
     ## interactive enrichment plot
-    enrich.inter <- plotly::ggplotly(enrich.plot) %>%
-        plotly::layout(title=list(font=list(size=18), y=0.97))
-    data.length <- length(enrich.inter$x$data)
-    for(t in 1:length(enrich.inter$x$data[[data.length]]$text)){
-        if(!is.na(enrich.inter$x$data[[data.length]]$text[t])){
-            split.text=rank=lipid=NULL
-            split.text <- stringr::str_split(
-                enrich.inter$x$data[[data.length]]$text[t], pattern = '<br />')
-            rank <- stringr::str_remove(split.text[[1]][1], '.* ') %>%
-                as.numeric()
-            lipid <- names(rank.list)[rank]
-            enrich.inter$x$data[[data.length]]$text[t] <- lipid
-        }
-    }
-    return(list(static_enrichPlot=enrich.plot,
-                interactive_enrichPlot=enrich.inter))
+    # enrich.inter <- plotly::ggplotly(enrich.plot) %>%
+    #     plotly::layout(title=list(font=list(size=18), y=0.97))
+    # data.length <- length(enrich.inter$x$data)
+    # for(t in 1:length(enrich.inter$x$data[[data.length]]$text)){
+    #     if(!is.na(enrich.inter$x$data[[data.length]]$text[t])){
+    #         split.text=rank=lipid=NULL
+    #         split.text <- stringr::str_split(
+    #             enrich.inter$x$data[[data.length]]$text[t], pattern = '<br />')
+    #         rank <- stringr::str_remove(split.text[[1]][1], '.* ') %>%
+    #             as.numeric()
+    #         lipid <- names(rank.list)[rank]
+    #         enrich.inter$x$data[[data.length]]$text[t] <- lipid
+    #     }
+    # }
+    # return(list(static_enrichPlot=enrich.plot,
+    #             interactive_enrichPlot=enrich.inter))
+    return(static_enrichPlot=enrich.plot)
 }
