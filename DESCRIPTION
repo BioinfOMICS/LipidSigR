@@ -5,10 +5,11 @@ Version: 0.7.0
 Authors@R: c(
     person("Wei-Chung", "Cheng", email="chenglabomics@gmail.com", 
     role = c("aut","cre","cph"), comment = c(ORCID = "0000-0002-1229-4857")),
+    person("Pei-Chun", "Shen", role = c("aut", "ctb")),
+    person("Chia-Hsin ", "Liu", role = c("aut", "ctb")),
     person("Wen-Jen", "Lin", role = c("aut","ctb")),
-    person("Pei-Chun", "Shen", role = c("ctb")),
-    person("Hsiu-Cheng", "Liu", role = c("ctb")),
-    person("Meng-Hsin", "Tsai", role = c("ctb")))
+    person("Hsiu-Cheng", "Liu", role = c("aut", "ctb")),
+    person("Meng-Hsin", "Tsai", role = c("aut", "ctb")))
 Description:
     "LipidSigR" is an R package developed based on LipidSig web-based tool 
     (https://lipidsig.bioinfomics.org/). This package integrates a 
@@ -34,17 +35,18 @@ BugReports: https://github.com/TMSWCChenglab/LipidSigR/issues
 LazyData: FALSE
 Depends:
     R (>= 4.2.0)
-Imports: dplyr, magrittr, plotly (>= 4.9.4.1), rgoslin, S4Vectors, 
-       SummarizedExperiment, stats, stringr, tibble, tidyr
-Suggests: BiocStyle, cluster, devtools, foreign, gatom, knitr, magick, 
+Imports: dplyr, factoextra, ggforce, ggthemes, Hmisc, hwordcloud, iheatmapr, magrittr, mixOmics, plotly (>= 4.9.4.1), rgoslin, Rtsne, S4Vectors, 
+       SummarizedExperiment, stats, stringr, tibble, tidyr, uwot, wordcloud
+Suggests: cluster, devtools, foreign, gatom, knitr, magick, 
        methods, nnet, purrr, qpdf, 
-       roxygen2, rmarkdown, rpart, testthat (>= 3.0.0), tidyselect, Matrix (>= 1.6), irlba (>= 2.3.5.1), 
-Enhances: broom, data.table, dbscan, factoextra, fgsea, forcats, 
-       ggbeeswarm, ggforce, ggplot2, 
-       ggpubr, ggrepel, grDevices, ggthemes, heatmaply, Hmisc, hwordcloud, 
-       igraph, iheatmapr, imputeLCMD, mixOmics, missForest, mwcsr, parsnip, 
+       roxygen2, rmarkdown, rpart, testthat (>= 3.0.0), tidyselect, 
+       Matrix (>= 1.6), irlba (>= 2.3.5.1), 
+Enhances: broom, data.table, dbscan, fgsea, forcats, 
+       ggbeeswarm, ggplot2, 
+       ggpubr, ggrepel, grDevices, heatmaply, 
+       igraph, imputeLCMD, missForest, mwcsr, parsnip, 
        pcaMethods, preprocessCore, RColorBrewer, Rcpm, reshape2, rlang (>= 0.4.11), 
-       Rtsne, rstatix, tidyverse, scales, showimage, uwot, VIM, wordcloud,  
+       rstatix, tidyverse, scales, showimage, VIM, wordcloud,  
 VignetteBuilder: knitr
 Config/Needs/website: usethis, servr
 Config/potools/style: explicit
