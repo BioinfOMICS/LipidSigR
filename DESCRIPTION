@@ -15,9 +15,10 @@ Description:
     (https://lipidsig.bioinfomics.org/). This package integrates a 
     comprehensive analysis for streamlined data mining of lipidomic datasets. 
     We provide 4 main analysis workflows, which is "Profiling", "Differential 
-    expression", "Enrichment", and "Network". Each section provides unique aspects to analyze the lipidome 
-    profiling data based on different characteristics including lipid class, 
-    chain length, unsaturation, hydroxyl group, and fatty acid composition.
+    expression", "Enrichment", and "Network". Each section provides unique aspects 
+    to analyze the lipidome profiling data based on different characteristics 
+    including lipid class, chain length, unsaturation, hydroxyl group, and 
+    fatty acid composition.
     "Profiling" provides an overview of comprehensive analyses to efficiently 
     examine data quality, the clustering of samples, the correlation between 
     lipid species, and the composition of lipid characteristics. "Differential 
@@ -28,14 +29,16 @@ Description:
     the categories of lipid class and determine whether an a priori-defined set of 
     lipids shows statistically significant, concordant differences between two 
     biological states (e.g., phenotypes). "Network" provides functions for generates 
-    input table for constructing pathway activity network, lipid reaction network and GATOM network.
+    input table for constructing pathway activity network, lipid reaction network 
+    and GATOM network.
 License: MIT + file LICENSE
 URL: https://github.com/TMSWCChenglab/LipidSigR
 BugReports: https://github.com/TMSWCChenglab/LipidSigR/issues
 LazyData: FALSE
 Depends:
     R (>= 4.2.0)
-Imports: dplyr, factoextra, ggforce, ggthemes, Hmisc, hwordcloud, iheatmapr, magrittr, mixOmics, plotly (>= 4.9.4.1), rgoslin, Rtsne, S4Vectors, 
+Imports: dplyr, factoextra, ggforce, ggthemes, Hmisc, hwordcloud, iheatmapr, 
+       magrittr, mixOmics, plotly (>= 4.9.4.1), rgoslin, Rtsne, S4Vectors, 
        SummarizedExperiment, stats, stringr, tibble, tidyr, uwot, wordcloud
 Suggests: cluster, devtools, foreign, gatom, knitr, magick, 
        methods, nnet, purrr, qpdf, 
