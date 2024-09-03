@@ -8,14 +8,15 @@
 [https://lipidsig.bioinfomics.org/](https://lipidsig.bioinfomics.org/). 
 
 This package integrates a comprehensive analysis for streamlined data mining of 
-lipidomic datasets. We provide 4 main analysis workflows, which is 
-**"Profiling"**, **"Differential expression"**, **"Enrichment"**, and 
-**"Network"**. Each section provides unique aspects to analyze the lipidome 
-profiling data based on different characteristics including lipid class, 
-chain length, unsaturation, hydroxyl group, and fatty acid composition.
+lipidomic datasets. We provide four main analysis workflows for analyzing 
+two-group and multi-group data: **"Profiling,"** **"Differential Expression,"** 
+**"Enrichment,"** and **"Network."** Each section offers unique aspects to 
+analyzing lipidome profiling data based on various characteristics, including 
+lipid class, chain length, unsaturation, hydroxyl groups, and fatty acid composition. 
+Please note that only two-group data can conduct the "Network" workflow.
 
 > [!IMPORTANT]
-> ### $\textcolor{purple}{A\ full\ tutorial\ is\ currently\ being\ prepared\. Please\ stay\ tuned\ for\ its\ release\!  }$
+> * #### For instructions and details on LipidSigR, please refer to https://lipidsig.bioinfomics.org/lipidsigr/.
 
 ## Installation
 We assume that you have already installed the R program (see the R project at 
@@ -50,31 +51,6 @@ git clone https://github.com/BioinfOMICS/LipidSigR.git
 R CMD build LipidSigR
 R CMD INSTALL LipidSigR_0.7.0.tar.gz
 ```
-## Introduction
-<font size=3> After the installation, you are ready to start using LipidSigR. There are 4 
-workflows provided for analysis and each of them is introduced briefly below. 
-
-* **Profiling**: The profiling workflow provides an overview of comprehensive 
-analyses for you to efficiently examine data quality, the clustering of samples, 
-the correlation between lipid species, and the composition of lipid characteristics.
-
-* **Differential expression**: The differential expression workflow integrates 
-many useful lipid-focused analyses for identifying significant lipid species or 
-lipid characteristics.
-
-* **Enrichment**: The enrichment workflow provides two main approaches: 
-'Over Representation Analysis (ORA)' and 'Lipid Set Enrichment Analysis (LSEA)' 
-to illustrates significant lipid species enriched in the categories of lipid 
-class and determine whether an a priori-defined set of lipids shows 
-statistically significant, concordant differences between two biological states 
-(e.g., phenotypes).
-
-* **Network**: The network wrokflow provides functions for generates input table 
-for constructing pathway activity network, lipid reaction network and GATOM network.
-
-If you need help starting the analysis, you can begin by reading our case 
-example for two-group and multi-group data.
-$\textcolor{red}{(\ A\ full\ tutorial\ is\ currently\ being\ prepared\. Please\ stay\ tuned\ for\ its\ release\ !\) }$
 
 ## Citation
 <font size=3> You can cite the `LipidSigR` publication as follows:
