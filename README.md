@@ -8,15 +8,13 @@
 [https://lipidsig.bioinfomics.org/](https://lipidsig.bioinfomics.org/). 
 
 This package integrates a comprehensive analysis for streamlined data mining of 
-lipidomic datasets. We provide four main analysis workflows for analyzing 
+lipidomic datasets. We provide five main analysis workflows for analyzing 
 two-group and multi-group data: **"Profiling,"** **"Differential Expression,"** 
-**"Enrichment,"** and **"Network."** Each section offers unique aspects to 
-analyzing lipidome profiling data based on various characteristics, including 
-lipid class, chain length, unsaturation, hydroxyl groups, and fatty acid composition. 
-Please note that only two-group data can conduct the "Network" workflow.
-
-> [!IMPORTANT]
-> * #### For instructions and details on LipidSigR, please refer to https://lipidsig.bioinfomics.org/lipidsigr/.
+**"Enrichment,"** **"Network,"** and **"Machine learning."** 
+Each section offers unique aspects to analyzing lipidome profiling data based on 
+various characteristics, including lipid class, chain length, unsaturation, 
+hydroxyl groups, and fatty acid composition. 
+Please note that only two-group data can conduct the "Network" and "Machine learning" workflow.
 
 ## Installation
 We assume that you have already installed the R program (see the R project at 
@@ -39,9 +37,16 @@ devtools::install_github("BioinfOMICS/LipidSigR")
 # LipidSigR package depends on several packages, which can be installed using the below commands:
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-BiocManager::install(c('fgsea', 'gatom', 'mixOmics', 'S4Vectors', 'SummarizedExperiment', 'rgoslin'))
+BiocManager::install(
+    c('fgsea', 'gatom', 'mixOmics', 'S4Vectors', 'BiocGenerics', 
+      'SummarizedExperiment', 'rgoslin'))
 
-install.packages(c('devtools', 'magrittr', 'plotly', 'tidyverse'))
+install.packages(
+    c('devtools', 'magrittr', 'plotly', 'tidyverse', 'factoextra', 'ggthemes', 
+      'ggforce', 'Hmisc', 'hwordcloud', 'iheatmapr', 'Rtsne', 'uwot', 
+      'wordcloud', 'rsample', 'ranger', 'caret', 'yardstick', 'fastshap', 
+      'SHAPforxgboost', 'visNetwork', 'tidygraph', 'ggraph'))
+
 devtools::install_github("ctlab/mwcsr")
 ```
 
@@ -49,8 +54,51 @@ devtools::install_github("ctlab/mwcsr")
 ```(r)
 git clone https://github.com/BioinfOMICS/LipidSigR.git
 R CMD build LipidSigR
-R CMD INSTALL LipidSigR_0.7.0.tar.gz
+R CMD INSTALL LipidSigR_0.9.0.tar.gz
 ```
+## Introduction
+<font size=3> After installation, you're ready to start using LipidSigR. 
+Based on functionality, LipidSigR functions can be categorized as tool functions 
+and 5 analysis workflows. Below is a brief introduction to each section.
+Please note that only two-group data can conduct the "Network" workflow. 
+
+* **Tool function**: Tool functions are utility functions designed to enhance 
+the convenience of conducting analyses. They include constructing input 
+SummarizedExperiment objects, viewing output results, listing selectable
+lipid characteristics, performing data processing, and more. 
+Please read `vignette("1_tool_function")`.
+
+* **Profiling**: The profiling workflow provides an overview of comprehensive 
+analyses for you to efficiently examine data quality, the clustering of samples, 
+the correlation between lipid characteristics, and the composition of lipid 
+characteristics. Please read `vignette("2_profiling")`.
+
+* **Differential expression**: The differential expression workflow integrates 
+many useful lipid-focused analyses for identifying significant lipid species or 
+lipid characteristics. Please read `vignette("3_de")`.
+
+* **Enrichment**: The enrichment workflow provides two main approaches: 
+'Over Representation Analysis (ORA)' and 'Lipid Set Enrichment Analysis (LSEA)' 
+to illustrates significant lipid species enriched in the categories of lipid 
+class and determine whether an a priori-defined set of lipids shows 
+statistically significant, concordant differences between different biological states 
+(e.g., phenotypes). Please read `vignette("4_enrichment")`.
+
+* **Network**: The network workflow provides functions for generates input table 
+for constructing pathway activity network, lipid reaction network and GATOM network.
+*(NOTE: Only provides for two-group data.)* Please read `vignette("5_network")`.
+
+* **Machine learning**: The machine learning workflow provides functions for 
+building binary classification models and several following analyses to evaluate 
+algorithm performance and identify critical lipid-related variables. *(NOTE: Only provides for two-group data.)*
+Please read `vignette("6_ml")`.
+
+You can analyze data using the tool functions and the five workflow functions. 
+If you need help getting started, try our case examples for two-group and 
+multi-group data! Refer to `vignette("8_case_twoGroup")` for two-group data 
+analysis and `vignette("9_case_multiGroup")` for multi-group data analysis. 
+These case examples provide a complete tutorial, from package installation and 
+input data preparation to data analysis and result visualization.
 
 ## Citation
 <font size=3> You can cite the `LipidSigR` publication as follows:
