@@ -1,7 +1,8 @@
 Package: LipidSigR
 Type: Package
-Title: A comprehensive analysis for streamlined data mining of lipidomic data
-Version: 0.7.0
+Title: A comprehensive analysis for streamlined data mining of
+        lipidomic data
+Version: 0.9.0
 Authors@R: c(
     person("Wei-Chung", "Cheng", email="chenglabomics@gmail.com", 
     role = c("aut","cre","cph"), comment = c(ORCID = "0000-0002-1229-4857")),
@@ -10,12 +11,12 @@ Authors@R: c(
     person("Wen-Jen", "Lin", role = c("aut","ctb")),
     person("Hsiu-Cheng", "Liu", role = c("aut", "ctb")),
     person("Meng-Hsin", "Tsai", role = c("aut", "ctb")))
-Description:
+Description: 
     "LipidSigR" is an R package developed based on LipidSig web-based tool 
     (https://lipidsig.bioinfomics.org/). This package integrates a 
     comprehensive analysis for streamlined data mining of lipidomic datasets. 
-    We provide 4 main analysis workflows, which is "Profiling", "Differential 
-    expression", "Enrichment", and "Network". Each section provides unique aspects 
+    We provide 5 main analysis workflows, which is "Profiling", "Differential 
+    expression", "Enrichment", "Network", and "Machine learning". Each section provides unique aspects 
     to analyze the lipidome profiling data based on different characteristics 
     including lipid class, chain length, unsaturation, hydroxyl group, and 
     fatty acid composition.
@@ -35,21 +36,22 @@ License: MIT + file LICENSE
 URL: https://github.com/TMSWCChenglab/LipidSigR
 BugReports: https://github.com/TMSWCChenglab/LipidSigR/issues
 LazyData: FALSE
-Depends:
-    R (>= 4.2.0)
-Imports: dplyr, factoextra, ggforce, ggthemes, Hmisc, hwordcloud, iheatmapr, 
-       magrittr, mixOmics, plotly (>= 4.9.4.1), rgoslin, Rtsne, S4Vectors, 
-       SummarizedExperiment, stats, stringr, tibble, tidyr, uwot, wordcloud
-Suggests: cluster, devtools, foreign, gatom, knitr, magick, 
-       methods, nnet, purrr, qpdf, 
-       roxygen2, rmarkdown, rpart, testthat (>= 3.0.0), tidyselect, 
-       Matrix (>= 1.6), irlba (>= 2.3.5.1), 
-Enhances: broom, data.table, dbscan, fgsea, forcats, 
-       ggbeeswarm, ggplot2, 
-       ggpubr, ggrepel, grDevices, heatmaply, 
-       igraph, imputeLCMD, missForest, mwcsr, parsnip, 
-       pcaMethods, preprocessCore, RColorBrewer, Rcpm, reshape2, rlang (>= 0.4.11), 
-       rstatix, tidyverse, scales, showimage, VIM, wordcloud,  
+Depends: R (>= 4.2.0)
+Imports: BiocGenerics, dplyr, factoextra, ggforce, ggthemes, Hmisc,
+        hwordcloud, iheatmapr, magrittr, mixOmics, plotly (>= 4.9.4.1),
+        rgoslin, Rtsne, S4Vectors, visNetwork, SummarizedExperiment,
+        stats, stringr, tibble, tidyr, uwot, wordcloud, rsample,
+        ranger, caret, yardstick, fastshap, SHAPforxgboost, tidygraph,
+        ggraph
+Suggests: cluster, devtools, e1071, foreign, gatom, glmnet, knitr,
+        methods, nnet, purrr, qpdf, roxygen2, rmarkdown, rpart,
+        testthat (>= 3.0.0), tidyselect, Matrix (>= 1.6), irlba (>=
+        2.3.5.1),
+Enhances: broom, data.table, dbscan, fgsea, forcats, ggbeeswarm,
+        ggplot2, ggpubr, ggrepel, grDevices, heatmaply, igraph,
+        imputeLCMD, missForest, mwcsr, parsnip, pcaMethods, pROC,
+        preprocessCore, RColorBrewer, Rcpm, reshape2, rlang (>=
+        0.4.11), rstatix, tidyverse, scales, showimage, VIM, xgboost,
 VignetteBuilder: knitr
 Config/Needs/website: usethis, servr
 Config/potools/style: explicit
@@ -58,3 +60,13 @@ Config/testthat/parallel: true
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
+NeedsCompilation: no
+Packaged: 2024-11-14 08:21:43 UTC; hsin
+Author: Wei-Chung Cheng [aut, cre, cph]
+    (<https://orcid.org/0000-0002-1229-4857>),
+  Pei-Chun Shen [aut, ctb],
+  Chia-Hsin Liu [aut, ctb],
+  Wen-Jen Lin [aut, ctb],
+  Hsiu-Cheng Liu [aut, ctb],
+  Meng-Hsin Tsai [aut, ctb]
+Maintainer: Wei-Chung Cheng <chenglabomics@gmail.com>
