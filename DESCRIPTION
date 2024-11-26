@@ -41,11 +41,11 @@ biocViews: Software, Lipidomics, GeneExpression, Classification, Clustering
 Imports: BiocGenerics, dplyr, factoextra, ggforce, ggthemes, Hmisc,
         hwordcloud, iheatmapr, magrittr, mixOmics, plotly (>= 4.9.4.1),
         rgoslin, Rtsne, S4Vectors, visNetwork, SummarizedExperiment,
-        stats, stringr, tibble, tidyr, uwot, wordcloud, rsample,
+        stats, stringr, tibble, tidyr, uwot, wordcloud, rmarkdown, rsample,
         ranger, caret, yardstick, fastshap, SHAPforxgboost, tidygraph,
         ggraph
 Suggests: cluster, devtools, e1071, foreign, gatom, glmnet, knitr,
-        methods, nnet, purrr, qpdf, roxygen2, rmarkdown, rpart,
+        methods, nnet, purrr, qpdf, roxygen2, rpart,
         testthat (>= 3.0.0), tidyselect, Matrix (>= 1.6), irlba (>=
         2.3.5.1),
 Enhances: broom, data.table, dbscan, fgsea, forcats, ggbeeswarm,
