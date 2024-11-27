@@ -39,7 +39,7 @@ LazyData: FALSE
 Depends: R (>= 4.2.0)
 biocViews: Software, Lipidomics, GeneExpression, Classification, Clustering
 Imports: BiocGenerics, dplyr, factoextra, ggforce, ggthemes, Hmisc,
-        hwordcloud, iheatmapr, magrittr, mixOmics, Pandoc, plotly (>= 4.9.4.1),
+        hwordcloud, iheatmapr, magrittr, mixOmics, plotly (>= 4.9.4.1),
         rgoslin, Rtsne, S4Vectors, visNetwork, SummarizedExperiment,
         stats, stringr, tibble, tidyr, uwot, wordcloud, rmarkdown, rsample,
         ranger, caret, yardstick, fastshap, SHAPforxgboost, tidygraph,
