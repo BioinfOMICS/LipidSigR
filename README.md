@@ -23,20 +23,27 @@ You need to have R 4.2.0 or a later version installed for running LipidSigR.
 
 Our package is available at the github 
 [https://github.com/BioinfOMICS/LipidSigR](https://github.com/BioinfOMICS/LipidSigR). 
-There are 2 recommended ways to install our package.
+Following are the instructions for installing our package.
 
-### 1. Install the package directly from github by using the devtools package
 ```(r)
 # Step 1: Install devtools
 install.packages("devtools")
 library(devtools)
 
-# Step 2: Install LipidSigR
-devtools::install_github("BioinfOMICS/LipidSigR")
-
-# LipidSigR package depends on several packages, which can be installed using the below commands:
+# Step 2: Install BiocManager
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
+
+# Step 3: Install LipidSigR
+devtools::install_github(
+    "BioinfOMICS/LipidSigR", 
+    dependencies=TRUE, repo=BiocManager::repositories())
+```
+
+LipidSigR relies on several dependencies. If an error indicates a missing package, 
+you can install the required packages using the commands below.
+```(r)
+# LipidSigR package depends on several packages, which can be installed using the below commands:
 BiocManager::install(
     c('fgsea', 'gatom', 'mixOmics', 'S4Vectors', 'BiocGenerics', 
       'SummarizedExperiment', 'rgoslin'))
@@ -50,12 +57,6 @@ install.packages(
 devtools::install_github("ctlab/mwcsr")
 ```
 
-### 2. Clone Github and install locally
-```(r)
-git clone https://github.com/BioinfOMICS/LipidSigR.git
-R CMD build LipidSigR
-R CMD INSTALL LipidSigR_0.9.0.tar.gz
-```
 ## Introduction
 <font size=3> After installation, you're ready to start using LipidSigR. 
 Based on functionality, LipidSigR functions can be categorized as tool functions 
