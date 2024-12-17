@@ -35,9 +35,17 @@ if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
 # Step 3: Install LipidSigR
+## Update repositories
+options(repos = c(
+    CRAN = "https://cloud.r-project.org/",
+    BiocManager::repositories()
+))
+
+## Install dependencies and package
 devtools::install_github(
     "BioinfOMICS/LipidSigR", 
-    dependencies=TRUE, repo=BiocManager::repositories())
+    dependencies = TRUE
+)
 ```
 
 LipidSigR relies on several dependencies. If an error indicates a missing package, 
