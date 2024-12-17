@@ -10,7 +10,7 @@
 This package integrates a comprehensive analysis for streamlined data mining of 
 lipidomic datasets. We provide five main analysis workflows for analyzing 
 two-group and multi-group data: **"Profiling,"** **"Differential Expression,"** 
-**"Enrichment,"** **"Network,"** and **"Machine learning."** 
+**"Enrichment,"** **"Network,"** **"Machine learning,"** and **"Correlation."** 
 Each section offers unique aspects to analyzing lipidome profiling data based on 
 various characteristics, including lipid class, chain length, unsaturation, 
 hydroxyl groups, and fatty acid composition. 
@@ -61,7 +61,7 @@ devtools::install_github("ctlab/mwcsr")
 <font size=3> After installation, you're ready to start using LipidSigR. 
 Based on functionality, LipidSigR functions can be categorized as tool functions 
 and 5 analysis workflows. Below is a brief introduction to each section.
-Please note that only two-group data can conduct the "Network" workflow. 
+Please note that only two-group data can conduct the "Network" and "Machine learning" workflow. 
 
 * **Tool function**: Tool functions are utility functions designed to enhance 
 the convenience of conducting analyses. They include constructing input 
@@ -93,6 +93,11 @@ for constructing pathway activity network, lipid reaction network and GATOM netw
 building binary classification models and several following analyses to evaluate 
 algorithm performance and identify critical lipid-related variables. *(NOTE: Only provides for two-group data.)*
 Please read `vignette("6_ml")`.
+
+* **Correlation**: The correlation workflow provides functions such as correlation 
+coefficients and linear regression to analyze continuous clinical features 
+correlating with lipid species or characteristics.
+Please read `vignette("7_corr")`.
 
 You can analyze data using the tool functions and the five workflow functions. 
 If you need help getting started, try our case examples for two-group and 
