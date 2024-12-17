@@ -126,22 +126,24 @@ as_summarized_experiment <- function(
     note <- append(note, paste0("se_type: ", se_type, "\n"))
     note <- append(note, paste0("Number of lipids (features) available for analysis: ", dim(se)[1], "\n"))
     note <- append(note, paste0("Number of samples: ", dim(se)[2], "\n"))
-    if (!is.null(group_info)) {
-        se_group_info <- as.data.frame(SummarizedExperiment::colData(se))
-        note <- append(note, paste0("Number of group: ", length(unique(se_group_info$group)), "\n"))
-        if (isTRUE(paired_sample) ){
-            paired <- "Paired samples."
+    if (se_type!="corr") {
+        if (!is.null(group_info)) {
+            se_group_info <- as.data.frame(SummarizedExperiment::colData(se))
+            note <- append(note, paste0("Number of group: ", length(unique(se_group_info$group)), "\n"))
+            if (isTRUE(paired_sample) ){
+                paired <- "Paired samples."
+            } else {
+                paired <- "Not paired samples."
+            }
+            note <- append(note, paired)
         } else {
-            paired <- "Not paired samples."
+            note <- append(note, "Number of group: Group information table is not provided.")
         }
-        note <- append(note, paired)
-    } else {
-        note <- append(note, "Number of group: Group information table is not provided.")
     }
     return(note)
 }
 
-# desciption: get data.frames from SE
+# description: get data.frames from SE
 # input: 1 SE, type in (abundance, lipid, group, condition, adjusted)
 # output: 1 data.frame
 .extract_df <- function(se, type="abundance") {
@@ -228,6 +230,7 @@ extract_summarized_experiment <- function(se){
 #' length-double bond correlation analysis.
 #' \item common_list: List of lipid characteristics for other analyses in
 #' LipidSigR, such as Profiling and Enrichment.
+#' \item ml_char_list: List of lipid characteristics for conducting machine learning analysis.
 #' }
 #' @export
 #' @examples
