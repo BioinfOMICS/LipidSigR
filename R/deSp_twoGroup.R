@@ -239,7 +239,7 @@ plot_deSp_twoGroup <- function(deSp_se){
             lipidPlot <- lipidPlot + ggplot2::geom_point(
                 ggplot2::aes(
                     text=paste("feature :", feature, "<br>", "log2(FC) : ",
-                               round(log2FC, 2)), color=log2FC,size=2.5))+
+                               round(log2FC, 2)), color=log2FC,size=2.5)) +
                 ggplot2::guides(size='none') + ggplot2::labs(colour="log2(FC)") +
                 ggplot2::scale_colour_gradient2(
                     low="steelblue", mid="white", high="red", midpoint=0)  +
@@ -258,18 +258,22 @@ plot_deSp_twoGroup <- function(deSp_se){
                 ggplot2::theme(legend.position="none")
         } else {
             lipidPlot <- lipidPlot + ggplot2::geom_point(
-                ggplot2::aes(
-                    text=paste("feature :", feature, "<br>", "log2(FC) : ",
-                               round(log2FC, 2), "<br>", paste0("-log10(", significant, ") :"),
-                               round(get(paste0("negLog10", significant)), 2 )),
-                    color=get(paste0("negLog10", significant)), size=2.5)) +
+                ggplot2::aes(color=get(paste0("negLog10", significant)), size=2.5)) +
                 ggplot2::guides(size="none") +
                 ggplot2::labs(colour=paste0("-log10(", significant, ")")) +
                 ggplot2::scale_colour_gradient2(low="steelblue", mid="white", high="red", midpoint=0)
         }
-
     })
     in.lipidPlot <- plotly::ggplotly(lipidPlot, tooltip="text")
+    hover_table <- table_de_lipid %>% dplyr::arrange(log2FC) %>%
+        dplyr::select(feature, log2FC, paste0("negLog10", significant) )
+    hover_text <- paste(
+        "feature :", hover_table$feature, "<br>", "log2(FC) : ",
+        round(hover_table$log2FC, 2), "<br>",
+        paste0("-log10(", significant, ") :"),
+        round(hover_table[, paste0("negLog10", significant)], 2 ))
+
+    in.lipidPlot[["x"]][["data"]][[1]][["text"]] <- hover_text
     return(list(in.lipidPlot=in.lipidPlot, lipidPlot=lipidPlot))
 }
 
