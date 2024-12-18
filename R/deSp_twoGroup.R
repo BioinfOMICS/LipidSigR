@@ -185,7 +185,7 @@ plot_deSp_twoGroup <- function(deSp_se){
             }
 
         }
-        lipidPlot <- .lipidPlot(table_de_lipid, significant)
+        lipidPlot <- suppressWarnings( .lipidPlot(table_de_lipid, significant) )
     }
     ## MA plot & volcano plot
     #if (isTRUE("sig_FC" %in% colnames(sig_table)) ){

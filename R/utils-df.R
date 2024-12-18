@@ -272,7 +272,11 @@ list_lipid_char <- function(processed_se){
     names(common_char_list) <- common_char$aspect
 
     if (ncol(group_info) > 1) {
-        if (all(unique(group_info$group)==c(0,1)) ) {
+        if (all(
+            suppressWarnings(
+                unique(group_info$group)==c(0,1)
+            )
+            )) {
             ml_char_list <- common_char_list[common_char_list %in% c("class", "Total.OH", "Total.DB", "FA.OH", "FA.DB", "FA.C")]
             de_char_list <- "Only provided when differential analysis data is input."
             heatmap_char_list <- "Only provided when differential analysis data is input."

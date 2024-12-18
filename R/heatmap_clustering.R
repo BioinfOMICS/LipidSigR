@@ -109,10 +109,14 @@ heatmap_clustering <- function(
     }
 
     ## heatmap
-    heat.res <- .heatmap_in(
-        abundance.mat, lipid_char_table, char, distfun, hclustfun, colGroup, row_color_label)
-    static_heatmap <- .heatmap_static(
-        abundance.mat, lipid_char_table, char, distfun, hclustfun, colGroup, row_color_label)
+    heat.res <- suppressWarnings(
+        .heatmap_in(
+            abundance.mat, lipid_char_table, char, distfun, hclustfun, colGroup, row_color_label)
+    )
+    static_heatmap <- suppressWarnings(
+        .heatmap_static(
+            abundance.mat, lipid_char_table, char, distfun, hclustfun, colGroup, row_color_label)
+    )
     return(list(
         interactive_heatmap=heat.res$heatmap, static_heatmap=static_heatmap,
         corr_coef_matrix=heat.res$reorder.data))

@@ -132,8 +132,10 @@ corr_cor_heatmap <- function(
 
     condition_table <- condition_table %>% dplyr::arrange(sample_name)
     #---------Cor-----------------------------
-    cor_table_all <- .corr(
-        abundance, condition_table, correlation, p_cutoff, cor_coef_cutoff, adjust_p_method)
+    cor_table_all <- suppressWarnings(
+        .corr(
+            abundance, condition_table, correlation, p_cutoff, cor_coef_cutoff, adjust_p_method)
+    )
     cor_table_sig <- cor_table_all %>%
         dplyr::filter(!!rlang::sym(paste0("sig_", significant))=='yes')
     #---------heatmap-----------------------------

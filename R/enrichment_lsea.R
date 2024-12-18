@@ -68,8 +68,6 @@ enrichment_lsea <- function(deSp_se, char=NULL,
                             rank_by=c('log2FC', 'pval', 'padj', 'statistic'),
                             significant=c('pval', 'padj'), p_cutoff=0.05,
                             n_lipid=2){
-    ## List of Lipid characteristics
-    #data("lipidChar")
     ## Check parameter
     .check_inputSE(deSp_se, metadata_list=c(
         'all_deSp_result', 'sig_deSp_result', 'significant', 'p_cutoff'))
@@ -134,8 +132,10 @@ enrichment_lsea <- function(deSp_se, char=NULL,
     lipidrank <- lipid.stat$rank
     names(lipidrank) <- lipid.stat$feature
     ## LSEA
-    lsea.res <- fgsea::fgsea(pathways=lipidset, stats=lipidrank,
-                             eps=0, nPermSimple=5000)
+    lsea.res <- suppressWarnings(
+        fgsea::fgsea(pathways=lipidset, stats=lipidrank, eps=0, nPermSimple=5000)
+    )
+
     if(significant == 'pval') lsea.res %<>% dplyr::mutate(p=pval)
     if(significant == 'padj') lsea.res %<>% dplyr::mutate(p=padj)
     lsea.res %<>% dplyr::arrange(p) %>%

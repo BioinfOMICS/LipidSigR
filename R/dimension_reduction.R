@@ -98,11 +98,15 @@ dr_pca <- function(
     pca_rotated_data %<>% dplyr::mutate(group=cluster_group) %>%
         dplyr::select(sample_name, group, dplyr::everything())
     ## biplot
-    pcaPlot <- .pca_plot(pca, clustering, cluster_group, cluster_num, color)
+    pcaPlot <- suppressWarnings(
+        .pca_plot(pca, clustering, cluster_group, cluster_num, color)
+    )
     ## pca_plot
-    screenPlot <- .screeplot(pca)
-    featureContrib <- .feature_contrib(pca, feature_contrib_pc, plot_topN)
-    variablePlot <- .pca_variable(pca, plot_topN)
+    screenPlot <- suppressWarnings( .screeplot(pca))
+    featureContrib <- suppressWarnings(
+        .feature_contrib(pca, feature_contrib_pc, plot_topN)
+    )
+    variablePlot <- suppressWarnings( .pca_variable(pca, plot_topN) )
 
     ## pca contribution table
     contrib_table <- factoextra::get_pca_var(pca)$contrib %>%
