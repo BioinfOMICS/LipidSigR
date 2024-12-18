@@ -227,46 +227,48 @@ plot_deSp_twoGroup <- function(deSp_se){
 }
 
 .lipidPlot <- function(table_de_lipid, significant){
-    ## Prepare the hover text in advance
-    if (isTRUE("sig_FC" %in% colnames(table_de_lipid))) {
-        table_de_lipid$hover_text <- paste(
-            "feature:", table_de_lipid$feature,
-            "<br>log2(FC):", round(table_de_lipid$log2FC, 2))
-    } else {
-        table_de_lipid$hover_text <- paste(
-            "feature:", table_de_lipid$feature,
-            "<br>log2(FC):", round(table_de_lipid$log2FC, 2),
-            paste0("<br>-log10(", significant, "):",
-                   round(table_de_lipid[, paste0("negLog10", significant)], 2)) )
-    }
-    ## Create the base plot
-    lipidPlot <- ggpubr::ggdotchart(
-        table_de_lipid, x="feature", y="log2FC", rotate=TRUE, color="white",
-        sorting="descending", add="segments", dot.size=2.5,
-        legend.title="log2(FC)", xlab=" ", ylab="log2(Fold Change)",
-        legend="right", ggtheme=ggpubr::theme_pubr())
+    ## all sig. lipid is finite
+    suppressWarnings({
 
-    ## Add color and styling based on conditions
-    if (isTRUE("sig_FC" %in% colnames(table_de_lipid))) {
-        lipidPlot <- lipidPlot +
-            ggplot2::geom_point(
-                ggplot2::aes(color=log2FC, size=2.5, text=hover_text)) +
-            ggplot2::guides(size='none') + ggplot2::labs(colour="log2(FC)") +
-            ggplot2::scale_colour_gradient2(
-                low="steelblue", mid="white", high="red", midpoint=0) +
-            ggplot2::scale_y_continuous(
-                breaks=c(-5, -2, -1, 0, 1, 2, 5), labels=c('-Inf', -2, -1, 0, 1, 2, 'Inf'),
-                limits=c(-6, 6))
-    } else {
-        lipidPlot <- lipidPlot +
-            ggplot2::geom_point(
+        lipidPlot <- ggpubr::ggdotchart(
+            table_de_lipid, x="feature", y="log2FC", rotate=TRUE, color="white",
+            sorting="descending", add="segments", dot.size=2.5,
+            legend.title="log2(FC)", xlab=" ", ylab="log2(Fold Change)",
+            legend="right", ggtheme=ggpubr::theme_pubr())
+        if (isTRUE("sig_FC" %in% colnames(table_de_lipid)) ) {
+            lipidPlot <- lipidPlot + ggplot2::geom_point(
                 ggplot2::aes(
-                    color=get(paste0("negLog10", significant)), size=2.5, text=hover_text)) +
-            ggplot2::guides(size="none") +
-            ggplot2::labs(colour=paste0("-log10(", significant, ")")) +
-            ggplot2::scale_colour_gradient2(
-                low="steelblue", mid="white", high="red", midpoint=0)
-    }
+                    text=paste("feature :", feature, "<br>", "log2(FC) : ",
+                               round(log2FC, 2)), color=log2FC,size=2.5))+
+                ggplot2::guides(size='none') + ggplot2::labs(colour="log2(FC)") +
+                ggplot2::scale_colour_gradient2(
+                    low="steelblue", mid="white", high="red", midpoint=0)  +
+                ggplot2::scale_y_continuous(
+                    breaks=c(-5, -2, -1, 0, 1, 2, 5),
+                    labels=c('-Inf', -2, -1, 0, 1, 2, 'Inf'), limits=c(-6, 6))
+        } else if (nrow(table_de_lipid) == 1) {
+            lipidPlot <- lipidPlot + ggplot2::geom_point(
+                ggplot2::aes(
+                    text=paste("feature :", feature, "<br>", "log2(FC) : ",
+                               round(log2FC, 2), "<br>", paste0("-log10(", significant, ") :"),
+                               round(get(paste0("negLog10", significant)), 2 )),
+                    color=ifelse(
+                        get(paste0("negLog10", significant)) > 0, "red", "steelblue"), size=2.5)) +
+                ggplot2::guides(size="none") +
+                ggplot2::theme(legend.position="none")
+        } else {
+            lipidPlot <- lipidPlot + ggplot2::geom_point(
+                ggplot2::aes(
+                    text=paste("feature :", feature, "<br>", "log2(FC) : ",
+                               round(log2FC, 2), "<br>", paste0("-log10(", significant, ") :"),
+                               round(get(paste0("negLog10", significant)), 2 )),
+                    color=get(paste0("negLog10", significant)), size=2.5)) +
+                ggplot2::guides(size="none") +
+                ggplot2::labs(colour=paste0("-log10(", significant, ")")) +
+                ggplot2::scale_colour_gradient2(low="steelblue", mid="white", high="red", midpoint=0)
+        }
+
+    })
     in.lipidPlot <- plotly::ggplotly(lipidPlot, tooltip="text")
     return(list(in.lipidPlot=in.lipidPlot, lipidPlot=lipidPlot))
 }
