@@ -211,12 +211,12 @@ plot_deSp_twoGroup <- function(deSp_se){
                     ifelse(-M>log2(FC_cutoff) & get(paste0("negLog10", significant))>-log10(p_cutoff), 'down-regulated','none'))
             )
         table_maVol$sig_fc.pval_color <- factor(table_maVol$sig_fc.pval_color, levels=c("down-regulated", "none", "up-regulated"))
-        volcanoPlot <- .volcanoPlot(all_table, table_maVol, significant)
+        volcanoPlot <- suppressWarnings( .volcanoPlot(all_table, table_maVol, significant) )
     }
     if (isFALSE(sum(group_info$group=="ctrl")==1 && sum(group_info$group=="exp")==1) ){
         table_maVol %<>% dplyr::select(-c("negLog10pval", "negLog10padj"))
     }
-    maPlot <- .maPlot(table_maVol, significant)
+    maPlot <- suppressWarnings( .maPlot(table_maVol, significant) )
 
     return(list(
         interactive_de_lipid=lipidPlot$in.lipidPlot, interactive_maPlot=maPlot$in.maPlot,
