@@ -236,10 +236,8 @@ plot_deSp_twoGroup <- function(deSp_se){
             legend.title="log2(FC)", xlab=" ", ylab="log2(Fold Change)",
             legend="right", ggtheme=ggpubr::theme_pubr())
         if (isTRUE("sig_FC" %in% colnames(table_de_lipid)) ) {
-            lipidPlot <- lipidPlot + ggplot2::geom_point(
-                ggplot2::aes(
-                    text=paste("feature :", feature, "<br>", "log2(FC) : ",
-                               round(log2FC, 2)), color=log2FC,size=2.5)) +
+            lipidPlot <- lipidPlot +
+                ggplot2::geom_point(ggplot2::aes(color=log2FC, size=2.5)) +
                 ggplot2::guides(size='none') + ggplot2::labs(colour="log2(FC)") +
                 ggplot2::scale_colour_gradient2(
                     low="steelblue", mid="white", high="red", midpoint=0)  +
@@ -247,12 +245,9 @@ plot_deSp_twoGroup <- function(deSp_se){
                     breaks=c(-5, -2, -1, 0, 1, 2, 5),
                     labels=c('-Inf', -2, -1, 0, 1, 2, 'Inf'), limits=c(-6, 6))
         } else if (nrow(table_de_lipid) == 1) {
-            lipidPlot <- lipidPlot + ggplot2::geom_point(
-                ggplot2::aes(
-                    text=paste("feature :", feature, "<br>", "log2(FC) : ",
-                               round(log2FC, 2), "<br>", paste0("-log10(", significant, ") :"),
-                               round(get(paste0("negLog10", significant)), 2 )),
-                    color=ifelse(
+            lipidPlot <- lipidPlot +
+                ggplot2::geom_point(
+                    ggplot2::aes(color=ifelse(
                         get(paste0("negLog10", significant)) > 0, "red", "steelblue"), size=2.5)) +
                 ggplot2::guides(size="none") +
                 ggplot2::theme(legend.position="none")
