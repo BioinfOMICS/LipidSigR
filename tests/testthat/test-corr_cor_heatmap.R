@@ -10,6 +10,11 @@ processed_se <- data_process(
     replace_na_method='min', replace_na_method_ref=0.5,
     normalization='Percentage')
 
+data("corr_group_info")
+corr_group_info[2, 3] <- NA
+corr_data_err <- processed_se
+SummarizedExperiment::colData(corr_data_err) <- S4Vectors::DataFrame(corr_group_info)
+
 # get char list
 char_list <- list_lipid_char(processed_se)$common_list
 names(char_list) <- NULL
@@ -197,6 +202,49 @@ test_that("corr_cor_heatmap can handle all adjust_p_method.", {
             transform='log10', type='Sp')
         expect_corr_heatmap(res_padj)
     }
+})
+
+test_that("corr_cor_heatmap can handle condition_col and adjusted_col inputs.", {
+    expect_error(
+        corr_cor_heatmap(
+            processed_se, char=NULL,
+            condition_col=c("ABC", "Emphysema", "Exacerbations"),
+            side_color_char='class', correlation='pearson', significant='pval',
+            p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=0,
+            distfun='spearman', hclustfun='average', heatmap_col='statistic',
+            transform='log10', type='Sp'),
+        "The condition_col must be column names selected from FEV1_FVC, Emphysema, Exacerbations, Age, Sex, Smoking, BMI, FEV1."
+    )
+    expect_error(
+        corr_cor_heatmap(
+            processed_se, char=NULL,
+            condition_col=c("Exacerbations"),
+            side_color_char='class', correlation='pearson', significant='pval',
+            p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=0,
+            distfun='spearman', hclustfun='average', heatmap_col='statistic',
+            transform='log10', type='Sp'),
+        "The condition_col must include at least two columns from FEV1_FVC, Emphysema, Exacerbations, Age, Sex, Smoking, BMI, FEV1."
+    )
+    expect_error(
+        corr_cor_heatmap(
+            processed_se, char=NULL,
+            condition_col=NULL,
+            side_color_char='class', correlation='pearson', significant='pval',
+            p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=0,
+            distfun='spearman', hclustfun='average', heatmap_col='statistic',
+            transform='log10', type='Sp'),
+        "The condition_col parameter cannot be null. Select at least two columns from FEV1_FVC, Emphysema, Exacerbations, Age, Sex, Smoking, BMI, FEV1."
+    )
+    expect_error(
+        corr_cor_heatmap(
+            corr_data_err, char=NULL,
+            condition_col=c("FEV1_FVC", "Emphysema", "Exacerbations"),
+            side_color_char='class', correlation='pearson', significant='pval',
+            p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=0,
+            distfun='spearman', hclustfun='average', heatmap_col='statistic',
+            transform='log10', type='Sp'),
+        "Except for the first column, sample_name, the group information table must include at least two columns with numeric values and no missing values."
+    )
 })
 
 test_that("corr_cor_heatmap can handle all distfun & hclustfun.", {

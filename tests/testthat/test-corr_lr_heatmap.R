@@ -10,6 +10,11 @@ processed_se <- data_process(
     replace_na_method='min', replace_na_method_ref=0.5,
     normalization='Percentage')
 
+data("corr_group_info")
+corr_group_info[2, "Age"] <- NA
+corr_data_err <- processed_se
+SummarizedExperiment::colData(corr_data_err) <- S4Vectors::DataFrame(corr_group_info)
+
 # get char list
 char_list <- list_lipid_char(processed_se)$common_list
 names(char_list) <- NULL
@@ -54,7 +59,7 @@ test_that("corr_lr_heatmap can handle error inputs", {
     expect_error(
         corr_lr_heatmap(
             processed_se, char='char', condition_col=c("FEV1_FVC", "Emphysema"),
-            adjusted_col=c("Age", "Sex", "Smoking", "BMI", ),
+            adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
             side_color_char=NULL, significant='pval', p_cutoff=0.05,
             adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
             heatmap_col='t_statistic', transform='log10', type='Char'),
@@ -158,6 +163,73 @@ test_that("corr_lr_heatmap can handle error inputs", {
             adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
             heatmap_col='t_statistic', transform='log10', type='Char'),
         "If type is set to 'Char' for running lipid characteristics correlation analysis, side_color_char must be set to NULL."
+    )
+})
+
+test_that("corr_lr_heatmap can handle condition_col and adjusted_col inputs.", {
+    expect_error(
+        corr_lr_heatmap(
+            processed_se, char=NULL, condition_col=c("ABC", "Emphysema"),
+            adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
+            side_color_char=NULL, significant='pval', p_cutoff=0.05,
+            adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
+            heatmap_col='t_statistic', transform='log10', type='Sp'),
+        "The condition_col must be column names selected from FEV1_FVC, Emphysema, Exacerbations, Age, Sex, Smoking, BMI, FEV1."
+    )
+    expect_error(
+        corr_lr_heatmap(
+            processed_se, char=NULL, condition_col=c("Emphysema"),
+            adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
+            side_color_char=NULL, significant='pval', p_cutoff=0.05,
+            adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
+            heatmap_col='t_statistic', transform='log10', type='Sp'),
+        "The condition_col must include at least two columns from FEV1_FVC, Emphysema, Exacerbations, Age, Sex, Smoking, BMI, FEV1."
+    )
+    expect_error(
+        corr_lr_heatmap(
+            processed_se, char=NULL, condition_col=NULL,
+            adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
+            side_color_char=NULL, significant='pval', p_cutoff=0.05,
+            adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
+            heatmap_col='t_statistic', transform='log10', type='Sp'),
+        "The condition_col parameter cannot be null. Select at least two columns from FEV1_FVC, Emphysema, Exacerbations, Age, Sex, Smoking, BMI, FEV1."
+    )
+    # adjusted_col with NA
+    res <- corr_lr_heatmap(
+        corr_data_err, char=NULL, condition_col=c("FEV1_FVC", "Emphysema", "Exacerbations"),
+        adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
+        side_color_char=NULL, significant='pval', p_cutoff=1,
+        adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
+        heatmap_col='t_statistic', transform='log10', type='Sp')
+    expect_corr_heatmap(res)
+    corr_group_info[2, "FEV1_FVC"] <- NA
+    SummarizedExperiment::colData(corr_data_err) <- S4Vectors::DataFrame(corr_group_info)
+    expect_error(
+        corr_lr_heatmap(
+            corr_data_err, char=NULL, condition_col=c("FEV1_FVC", "Emphysema"),
+            adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
+            side_color_char=NULL, significant='pval', p_cutoff=0.05,
+            adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
+            heatmap_col='t_statistic', transform='log10', type='Sp'),
+        "Except for the first column, sample_name, the group information table must include at least two columns with numeric values and no missing values."
+    )
+    expect_error(
+        corr_lr_heatmap(
+            processed_se, char=NULL, condition_col=c("FEV1_FVC", "Emphysema"),
+            adjusted_col=c("FEV1_FVC", "Age", "Sex", "Smoking", "BMI"),
+            side_color_char=NULL, significant='pval', p_cutoff=0.05,
+            adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
+            heatmap_col='t_statistic', transform='log10', type='Sp'),
+        "The condition_col and adjusted_col must not have overlapping columns."
+    )
+    expect_error(
+        corr_lr_heatmap(
+            processed_se, char=NULL, condition_col=c("FEV1_FVC", "Emphysema"),
+            adjusted_col=c("ABC", "Sex", "Smoking", "BMI"),
+            side_color_char=NULL, significant='pval', p_cutoff=0.05,
+            adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
+            heatmap_col='t_statistic', transform='log10', type='Sp'),
+        "The adjusted_col must be column names selected from FEV1_FVC, Emphysema, Exacerbations, Age, Sex, Smoking, BMI, FEV1."
     )
 })
 

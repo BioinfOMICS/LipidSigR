@@ -31,6 +31,15 @@ ml_abundance <- ml_abundance %>%
 ml_char_table <- ml_parse_lipid %>%
     dplyr::filter(Original.Name %in% ml_recognized_lipid)
 
+data("corr_abundance")
+data("corr_group_info")
+corr_parse_lipid <- rgoslin::parseLipidNames(lipidNames=corr_abundance$feature)
+corr_recognized_lipid <- corr_parse_lipid$Original.Name[which(corr_parse_lipid$Grammar != 'NOT_PARSEABLE')]
+corr_abundance <- corr_abundance %>%
+    dplyr::filter(feature %in% corr_recognized_lipid)
+corr_char_table <- corr_parse_lipid %>%
+    dplyr::filter(Original.Name %in% corr_recognized_lipid)
+
 
 expect_correct_se <- function(se){
     expect_true(inherits(se, "SummarizedExperiment"))
@@ -70,10 +79,16 @@ test_that("as_summarized_experiment build SE correctly.", {
             multi_abundance, multi_char_table, group_info_multiGroup, se_type='de_multiple',
             paired_sample=NULL))
     expect_correct_se(multi_se)
+    # ML
     ml_se <- suppressWarnings(
         as_summarized_experiment(
             ml_abundance, ml_char_table, condition_table, se_type='ml', paired_sample=NULL))
     expect_correct_se(ml_se)
+    # Corr
+    corr_se <- suppressWarnings(
+        as_summarized_experiment(
+            corr_abundance, corr_char_table, corr_group_info, se_type='corr', paired_sample=NULL))
+    expect_correct_se(corr_se)
 })
 
 # Test for error input
@@ -186,6 +201,37 @@ test_that("as_summarized_experiment can handle group_info format error.", {
         or skipped numbers; otherwise, the value must be marked as NA.")
 })
 
+# Test for correlation analysis
+test_that("as_summarized_experiment can handle wrong correlation group_info.", {
+    group_info <- corr_group_info[, 1:2]
+    expect_error(
+        as_summarized_experiment(
+            corr_abundance, corr_char_table, group_info,
+            se_type='corr', paired_sample=NULL),
+        "Group information table must include columns for sample_name and at least two clinical terms."
+    )
+    group_info <- corr_group_info[, 1:2] %>% dplyr::mutate(A="A", .after=sample_name)
+    expect_error(
+        as_summarized_experiment(
+            corr_abundance, corr_char_table, group_info,
+            se_type='corr', paired_sample=NULL),
+        "Except for the first column, sample_name, the group information table must include at least two columns with numeric values and no missing values."
+    )
+    group_info <- corr_group_info[, 1:3]
+    group_info[2:4, 3] <- NA
+    expect_error(
+        as_summarized_experiment(
+            corr_abundance, corr_char_table, group_info,
+            se_type='corr', paired_sample=NULL),
+        "Except for the first column, sample_name, the group information table must include at least two columns with numeric values and no missing values."
+    )
+    group_info <- corr_group_info[, 1:3] %>% dplyr::mutate(A="A", .after=sample_name)
+    corr_se <- as_summarized_experiment(
+        corr_abundance, corr_char_table, corr_group_info, se_type='corr', paired_sample=NULL)
+    expect_correct_se(corr_se)
+})
+
+
 # Test for error data frame input
 test_that("as_summarized_experiment can handle wrong input.", {
     expect_error(as_summarized_experiment(
@@ -258,6 +304,14 @@ ml_se <- data_process(
     ml_raw, exclude_missing=TRUE, exclude_missing_pct=70,
     replace_na_method='min', replace_na_method_ref=0.5, normalization='Percentage')
 
+corr_raw <- suppressWarnings(
+    as_summarized_experiment(
+        corr_abundance, corr_char_table, corr_group_info, se_type='corr', paired_sample=NULL)
+)
+corr_se <- data_process(
+    corr_raw, exclude_missing=TRUE, exclude_missing_pct=70,
+    replace_na_method='min', replace_na_method_ref=0.5, normalization='Percentage')
+
 # Test for basic functionality and output structure
 test_that("list_lipid_char can output correct lipid list.", {
     result_list <- list_lipid_char(profiling_se)
@@ -268,6 +322,8 @@ test_that("list_lipid_char can output correct lipid list.", {
     suppressWarnings( expect_correct_charList(multi_se, result_list) )
     result_list <- list_lipid_char(ml_se)
     expect_correct_charList(ml_se, result_list)
+    result_list <- list_lipid_char(corr_se)
+    expect_correct_charList(corr_se, result_list)
 })
 
 # Test for wrong input
