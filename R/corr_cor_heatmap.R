@@ -62,7 +62,8 @@ corr_cor_heatmap <- function(
 
     .check_inputSE(processed_se, metadata_list=NULL)
     ## check for condition_col & adjusted_col
-
+    group_info <- .extract_df(processed_se, type='group')
+    .check_df_corrCol(group_info, condition_col, adjusted_col, cor_type='corr')
     ######
     if (is.null(correlation) | isFALSE(correlation %in% c("pearson", "spearman", "kendall")) ) {
         stop("correlation must be one of 'pearson', 'spearman', or 'kendall'.")
@@ -120,8 +121,9 @@ corr_cor_heatmap <- function(
         stop("type must be one of 'Sp' or 'Char'.")
     }
     abundance <- .transform(abundance_raw, transform)
+    conCol <- c("sample_name", condition_col)
     condition_table <- .extract_df(processed_se,type='group') %>%
-        dplyr::select(c(sample_name, all_of(condition_col)) ) %>% as.data.frame()
+        dplyr::select(all_of(conCol)) %>% as.data.frame()
 
     .check_imputation(abundance)
 
@@ -130,7 +132,7 @@ corr_cor_heatmap <- function(
     abundance %<>% tidyr::gather(-feature, key='sample_name', value='value') %>%
         tidyr::spread(key='feature', value='value') %>% dplyr::arrange(sample_name)
 
-    condition_table <- condition_table %>% dplyr::arrange(sample_name)
+    condition_table %<>% dplyr::arrange(sample_name)
     #---------Cor-----------------------------
     cor_table_all <- suppressWarnings(
         .corr(

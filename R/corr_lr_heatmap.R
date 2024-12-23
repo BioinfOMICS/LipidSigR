@@ -60,7 +60,8 @@ corr_lr_heatmap <- function(
 
     .check_inputSE(processed_se, metadata_list=NULL)
     ## check for condition_col & adjusted_col
-
+    group_info <- .extract_df(processed_se, type='group')
+    .check_df_corrCol(group_info, condition_col, adjusted_col, cor_type='lr')
     ######
     if (is.null(significant) | isFALSE(significant %in% c('pval', 'padj')) ) {
         stop("significant must be one of 'pval' or 'padj'.")
@@ -113,11 +114,13 @@ corr_lr_heatmap <- function(
     }
 
     abundance <- .transform(abundance_raw, transform)
+    conCol <- c("sample_name", condition_col)
     condition_table <- .extract_df(processed_se,type='group') %>%
-        dplyr::select(c(sample_name, all_of(condition_col)) ) %>% as.data.frame()
+        dplyr::select(all_of(conCol)) %>% as.data.frame()
     if (!is.null(adjusted_col)) {
+        adCol <- c("sample_name", adjusted_col)
         adjusted_table <- .extract_df(processed_se,type='group') %>%
-            dplyr::select(c(sample_name, all_of(adjusted_col)) ) %>% as.data.frame()
+            dplyr::select(all_of(adCol)) %>% as.data.frame()
     } else {
         adjusted_table <- NULL
     }
@@ -128,7 +131,7 @@ corr_lr_heatmap <- function(
     abundance <- abundance %>% tidyr::gather(-feature, key='sample_name', value='value') %>%
         tidyr::spread(key='feature', value='value') %>% dplyr::arrange(sample_name)
 
-    condition_table <- condition_table %>% dplyr::arrange(sample_name)
+    condition_table %<>% dplyr::arrange(sample_name)
     if(!is.null(adjusted_table)){
         adjusted_table <- adjusted_table %>% dplyr::arrange(sample_name)
     }

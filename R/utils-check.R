@@ -68,9 +68,9 @@
         if (ncol(group_info) < 3) {
             stop("Group information table must include columns for sample_name and at least two clinical terms.")
         } else if (isFALSE(.check_colName(group_info[1], "sample_name", type="identical"))) {
-            stop("The first column of Group information table column must be 'sample_name'.")
-        } else if (isFALSE( .check_corr_input(group_info[-1])) ) {
-            stop("Except for the first column, sample_name, all other columns must contain numeric values. NAs are not allowed.")
+            stop("The first column of group information table column must be 'sample_name'.")
+        } else if (isFALSE( .check_corr_input(group_info) ) ) {
+            stop("Except for the first column, sample_name, the group information table must include at least two columns with numeric values and no missing values.")
         }
     }
     ## abundance colnames match group_info sample_name
@@ -336,11 +336,20 @@
     ifelse(all(col %in% c(0, 1)), TRUE, FALSE)
 }
 
-.check_corr_input <- function(df) {
-    ifelse (
-        all(sapply(df, function(col){is.numeric(col) && !any(is.na(col))})),
-        TRUE, FALSE
-    )
+.check_corr_input <- function(group_info) {
+    # Get all columns except the first one
+    numeric_cols <- group_info[, -1, drop=FALSE]
+    # Check if there are at least 2 numeric columns
+    num_numeric_cols <- sum(sapply(numeric_cols, is.numeric))
+    if (num_numeric_cols < 2) {
+        return (FALSE)
+    }
+    # Check for any NA values in numeric columns
+    na_cols <- any(
+        sapply(numeric_cols[, sapply(numeric_cols, is.numeric), drop=FALSE],
+               function(x) any(is.na(x))))
+    check_res <- ifelse(isTRUE(na_cols), FALSE, TRUE)
+    return (check_res)
 }
 
 .check_all_character <- function(df){
@@ -481,28 +490,37 @@
 }
 
 ## check for correlation df column for split into condition/ adjusted table
-# .check_df_corrCol <- function(group_info, condition_col, adjusted_col) {
-#     if (is.null(condition_col)) {
-#         stop(paste0("The condition_col parameter cannot be null. Select at least two columns from ",
-#                     paste(colnames(group_info)[-1], collapse = ", "), "." ))
-#     } else if (isFALSE(condition_col %in% colnames(group_info)[-1]) ) {
-#         stop(paste0("The condition_col must be column names selected from ",
-#                     paste(colnames(group_info)[-1], collapse = ", "), "." ))
-#     } else if (length(condition_col) <3) {
-#         stop(paste0("The condition_col must include at least two columns from ",
-#                     paste(colnames(group_info)[-1], collapse = ", "), "." ))
-#     }
-#     if (!is.null(adjusted_col)) {
-#         if (isFALSE(adjusted_col %in% colnames(group_info)[-1]) ) {
-#             stop(paste0("The adjusted_col must be column names selected from ",
-#                         paste(colnames(group_info)[-1], collapse = ", "), "." )
-#         } else if (any(condition_col %in% adjusted_col)) {
-#             stop("The condition_col and adjusted_col must not have overlapping columns.")
-#         }
-#     } else {
-#         message("No adjusted variables is selected.")
-#     }
-# }
+.check_df_corrCol <- function(group_info, condition_col, adjusted_col, cor_type) {
+    if (is.null(condition_col)) {
+        stop(paste0("The condition_col parameter cannot be null. Select at least two columns from ",
+                    paste(colnames(group_info)[-1], collapse = ", "), "." ))
+    } else if (length(condition_col) <2) {
+        stop(paste0("The condition_col must include at least two columns from ",
+                    paste(colnames(group_info)[-1], collapse = ", "), "." ))
+    } else if (isFALSE( all(condition_col %in% colnames(group_info)[-1])) ) {
+        stop(paste0("The condition_col must be column names selected from ",
+                    paste(colnames(group_info)[-1], collapse = ", "), "." ))
+    } else {
+        condition_table <- group_info %>%
+            dplyr::select(sample_name, all_of(condition_col)) %>% as.data.frame()
+        if (isFALSE(.check_corr_input(condition_table)) ) {
+            stop("Except for the first column, sample_name, the group information table must include at least two columns with numeric values and no missing values.")
+        }
+    }
+
+    if (cor_type=="lr") {
+        if (!is.null(adjusted_col)) {
+            if (isFALSE( all(adjusted_col %in% colnames(group_info)[-1])) ) {
+                stop(paste0("The adjusted_col must be column names selected from ",
+                            paste(colnames(group_info)[-1], collapse = ", "), "." ))
+            } else if (any(condition_col %in% adjusted_col)) {
+                stop("The condition_col and adjusted_col must not have overlapping columns.")
+            }
+        } else {
+            message("No adjusted variables is selected.")
+        }
+    }
+}
 
 ## Only for checking SE in deSp & deChar downstream function
 .check_de_outputSE <- function(de_se, de_type=c("deSp", "deChar", "all")){
