@@ -68,7 +68,7 @@ test_that("corr_lr_heatmap can handle error inputs", {
     expect_error(
         corr_lr_heatmap(
             processed_se, char=NULL, condition_col=c("FEV1_FVC", "Emphysema"),
-            adjusted_col=c("Age", "Sex", "Smoking", "BMI", ),
+            adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
             side_color_char=NULL, significant='p', p_cutoff=0.05,
             adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
             heatmap_col='t_statistic', transform='log10', type='Sp'),
@@ -77,7 +77,7 @@ test_that("corr_lr_heatmap can handle error inputs", {
     expect_error(
         corr_lr_heatmap(
             processed_se, char=NULL, condition_col=c("FEV1_FVC", "Emphysema"),
-            adjusted_col=c("Age", "Sex", "Smoking", "BMI", ),
+            adjusted_col=c("Age", "Sex", "Smoking", "BMI", "FEV1"),
             side_color_char=NULL, significant='pval', p_cutoff=NULL,
             adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
             heatmap_col='t_statistic', transform='log10', type='Sp'),
