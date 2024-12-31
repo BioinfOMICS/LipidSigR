@@ -1,6 +1,6 @@
 # LipidSigR
 <!-- badges: start -->
-[![R >4.2](https://img.shields.io/badge/R-%3E4.2-success.svg)](https://www.r-project.org/) 
+[![R >4.3](https://img.shields.io/badge/R-%3E4.2-success.svg)](https://www.r-project.org/) 
 <a href='#devtools'>![installed with devtools](https://img.shields.io/badge/installed%20with-devtools-blueviolet.svg)</a>
 <!-- badges: end -->
 
@@ -19,7 +19,7 @@ Please note that only two-group data can conduct the "Network" and "Machine lear
 ## Installation
 We assume that you have already installed the R program (see the R project at 
 [http://www.r-project.org](http://www.r-project.org)  and are familiar with it. 
-You need to have R 4.2.0 or a later version installed for running LipidSigR.
+You need to have R 4.3.0 or a later version installed for running LipidSigR.
 
 Our package is available at the github 
 [https://github.com/BioinfOMICS/LipidSigR](https://github.com/BioinfOMICS/LipidSigR). 
