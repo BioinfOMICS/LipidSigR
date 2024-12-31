@@ -1,6 +1,6 @@
 # LipidSigR
 <!-- badges: start -->
-[![R >4.3](https://img.shields.io/badge/R-%3E4.2-success.svg)](https://www.r-project.org/) 
+[![R >4.3](https://img.shields.io/badge/R-%3E4.3-success.svg)](https://www.r-project.org/) 
 <a href='#devtools'>![installed with devtools](https://img.shields.io/badge/installed%20with-devtools-blueviolet.svg)</a>
 <!-- badges: end -->
 
