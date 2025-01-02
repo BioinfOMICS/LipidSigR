@@ -28,12 +28,15 @@ Following are the instructions for installing our package.
 ```(r)
 # Step 1: Install devtools
 install.packages("devtools")
-library(devtools)
+```
 
+```(r)
 # Step 2: Install BiocManager
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
+```
 
+```(r)
 # Step 3: Install LipidSigR
 ## Update repositories
 options(repos = c(
