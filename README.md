@@ -54,7 +54,7 @@ you can install the required packages using the commands below.
 ```(r)
 # LipidSigR package depends on several packages, which can be installed using the below commands:
 BiocManager::install(
-    c('fgsea', 'gatom', 'mixOmics', 'S4Vectors', 'BiocGenerics', 'fgsea',
+    c('fgsea', 'gatom', 'mixOmics', 'S4Vectors', 'BiocGenerics',
       'SummarizedExperiment', 'rgoslin'))
 
 install.packages(
