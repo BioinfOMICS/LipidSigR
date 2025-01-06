@@ -7,7 +7,7 @@ description: >
    (https://lipidsig.bioinfomics.org/). This package integrates a 
    comprehensive analysis for streamlined data mining of lipidomic datasets. 
    We provide 6 main analysis workflows, which is "Profiling", "Differential 
-   expression", "Enrichment", "Machine learning", and "Correlation". 
+   expression", "Enrichment", and "Correlation". 
 vignette: >
   %\VignetteIndexEntry{Case - multi-group data}
   %\VignetteEngine{knitr::rmarkdown}
@@ -38,7 +38,7 @@ groups: DHA-supplementation (N = 6) and AA-supplementation (N = 4).
 Here is the procedures of running the **LipidSigR** package on your system. 
 We assume that you have already installed the R program (see the R project at 
 [http://www.r-project.org](http://www.r-project.org)  and are familiar with it. 
-You need to have R 4.2.0 or a later version installed for running LipidSigR.
+You need to have R 4.3.0 or a later version installed for running LipidSigR.
 
 Our package is available at the github 
 [https://github.com/BioinfOMICS/LipidSigR](https://github.com/BioinfOMICS/LipidSigR). 
@@ -47,16 +47,23 @@ Following are the instructions for installing our package.
 ```{r install package method 1, eval=FALSE}
 # Step 1: Install devtools
 install.packages("devtools")
-library(devtools)
-
+```
+```{r , eval=FALSE}
 # Step 2: Install BiocManager
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-
+```
+```{r , eval=FALSE}
 # Step 3: Install LipidSigR
+## Update repositories
+options(repos = c(
+    CRAN = "https://cloud.r-project.org/",
+    BiocManager::repositories()))
+
+## Install dependencies and package
 devtools::install_github(
     "BioinfOMICS/LipidSigR", 
-    dependencies=TRUE, repo=BiocManager::repositories())
+    dependencies = TRUE)
 ```
 
 LipidSigR relies on several dependencies. If an error indicates a missing package, 
@@ -69,7 +76,7 @@ BiocManager::install(
 
 install.packages(
     c('devtools', 'magrittr', 'plotly', 'tidyverse', 'factoextra', 'ggthemes', 
-      'ggforce', 'Hmisc', 'hwordcloud', 'iheatmapr', 'Rtsne', 'uwot', 
+      'ggforce', 'Hmisc', 'heatmaply', 'hwordcloud', 'iheatmapr', 'Rtsne', 'uwot', 
       'wordcloud', 'rsample', 'ranger', 'caret', 'yardstick', 'fastshap', 
       'SHAPforxgboost', 'visNetwork', 'tidygraph', 'ggraph'))
 
@@ -1134,7 +1141,7 @@ lipid species into 'up-regulated' or 'down-regulated' groups based on NES
 ```{r Enrichment: LSEA all, fig.width=10}
 # conduct LSEA
 lsea_all <- enrichment_lsea(
-    deSp_se, char=NULL, rank_by='statistic', significant='pval', 
+    deSp_se, char=NULL, rank_by='log2FC', significant='pval', 
     p_cutoff=0.05)
 # result summary 
 summary(lsea_all)
@@ -1151,7 +1158,7 @@ The bar plot shows the top 20 terms.
 list_lipid_char(processed_se)$common_list
 # conduct LSEA of a specific `char`
 lsea_one <- enrichment_lsea(
-    deSp_se, char='class', rank_by='statistic', 
+    deSp_se, char='class', rank_by='log2FC', 
     significant='pval', p_cutoff=0.05)
 # result summary 
 summary(lsea_one)
