@@ -5,7 +5,7 @@ bibliography: ref.bib
 description: >
      "Machine learning" provides many feature selection methods and classifiers for building binary classification models. Additionally, several following analyses help users evaluate algorithm performance and identify key lipid-related variables.
 vignette: >
-  %\VignetteIndexEntry{Machine learning}
+  %\VignetteIndexEntry{3. Machine learning}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
