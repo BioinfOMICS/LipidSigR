@@ -6,7 +6,7 @@ description: >
   "Differential expression" integrates many useful lipid-focused analyses for identifying 
     significant lipid species or lipid characteristics.
 vignette: >
-  %\VignetteIndexEntry{Differential expression}
+  %\VignetteIndexEntry{2. Differential expression}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
