@@ -7,7 +7,7 @@ description: >
    examine data quality, the clustering of samples, the correlation between 
   lipid species, and the composition of lipid characteristics.
 vignette: >
-  %\VignetteIndexEntry{Profiling}
+  %\VignetteIndexEntry{1. Profiling}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
