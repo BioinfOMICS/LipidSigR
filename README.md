@@ -46,7 +46,7 @@ options(repos = c(
 ## Install dependencies and package
 devtools::install_github(
     "BioinfOMICS/LipidSigR", 
-    dependencies = TRUE)
+    build_vignettes = TRUE, dependencies = TRUE)
 ```
 
 LipidSigR relies on several dependencies. If an error indicates a missing package, 
@@ -76,42 +76,42 @@ Please note that only two-group data can conduct the "Network" and "Machine lear
 the convenience of conducting analyses. They include constructing input 
 SummarizedExperiment objects, viewing output results, listing selectable
 lipid characteristics, performing data processing, and more. 
-Please read `vignette("1_tool_function")`.
+Please read `vignette("tool_function")`.
 
 * **Profiling**: The profiling workflow provides an overview of comprehensive 
 analyses for you to efficiently examine data quality, the clustering of samples, 
 the correlation between lipid characteristics, and the composition of lipid 
-characteristics. Please read `vignette("2_profiling")`.
+characteristics. Please read `vignette("profiling")`.
 
 * **Differential expression**: The differential expression workflow integrates 
 many useful lipid-focused analyses for identifying significant lipid species or 
-lipid characteristics. Please read `vignette("3_de")`.
+lipid characteristics. Please read `vignette("de")`.
 
 * **Enrichment**: The enrichment workflow provides two main approaches: 
 'Over Representation Analysis (ORA)' and 'Lipid Set Enrichment Analysis (LSEA)' 
 to illustrates significant lipid species enriched in the categories of lipid 
 class and determine whether an a priori-defined set of lipids shows 
 statistically significant, concordant differences between different biological states 
-(e.g., phenotypes). Please read `vignette("4_enrichment")`.
+(e.g., phenotypes). Please read `vignette("enrichment")`.
 
 * **Network**: The network workflow provides functions for generates input table 
 for constructing pathway activity network, lipid reaction network and GATOM network.
-*(NOTE: Only provides for two-group data.)* Please read `vignette("5_network")`.
+*(NOTE: Only provides for two-group data.)* Please read `vignette("network")`.
 
 * **Machine learning**: The machine learning workflow provides functions for 
 building binary classification models and several following analyses to evaluate 
 algorithm performance and identify critical lipid-related variables. *(NOTE: Only provides for two-group data.)*
-Please read `vignette("6_ml")`.
+Please read `vignette("ml")`.
 
 * **Correlation**: The correlation workflow provides functions such as correlation 
 coefficients and linear regression to analyze continuous clinical features 
 correlating with lipid species or characteristics.
-Please read `vignette("7_corr")`.
+Please read `vignette("corr")`.
 
 You can analyze data using the tool functions and the five workflow functions. 
 If you need help getting started, try our case examples for two-group and 
-multi-group data! Refer to `vignette("8_case_twoGroup")` for two-group data 
-analysis and `vignette("9_case_multiGroup")` for multi-group data analysis. 
+multi-group data! Refer to `vignette("case_twoGroup")` for two-group data 
+analysis and `vignette("case_multiGroup")` for multi-group data analysis. 
 These case examples provide a complete tutorial, from package installation and 
 input data preparation to data analysis and result visualization.
 
