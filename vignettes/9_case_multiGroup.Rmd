@@ -1141,7 +1141,7 @@ lipid species into 'up-regulated' or 'down-regulated' groups based on NES
 ```{r Enrichment: LSEA all, fig.width=10}
 # conduct LSEA
 lsea_all <- enrichment_lsea(
-    deSp_se, char=NULL, rank_by='log2FC', significant='pval', 
+    deSp_se, char=NULL, rank_by='pval', significant='pval', 
     p_cutoff=0.05)
 # result summary 
 summary(lsea_all)
@@ -1158,7 +1158,7 @@ The bar plot shows the top 20 terms.
 list_lipid_char(processed_se)$common_list
 # conduct LSEA of a specific `char`
 lsea_one <- enrichment_lsea(
-    deSp_se, char='class', rank_by='log2FC', 
+    deSp_se, char='class', rank_by='pval', 
     significant='pval', p_cutoff=0.05)
 # result summary 
 summary(lsea_one)
