@@ -1,6 +1,11 @@
 ---
 title: "Profiling"
-output: rmarkdown::html_vignette
+author: "Wei-Chung Cheng"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
 bibliography: ref.bib 
 description: >
   "Profiling" provides an overview of comprehensive analyses to efficiently 
