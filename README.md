@@ -19,8 +19,8 @@ Please note that only two-group data can conduct the "Network" and "Machine lear
 ## Installation
 We assume that you have already installed the R program (see the R project at 
 [http://www.r-project.org](http://www.r-project.org)  and are familiar with it. 
-You need to have R 4.3.0 or a later version installed for running LipidSigR.
-NOTE: LipidSigR can only be installed on Windows 10 or later.
+You need to have R 4.3.0 or a later version installed for running LipidSigR. 
+* NOTE: For Windows systems, LipidSigR is supported only on Windows 10 or later.
 
 Our package is available at the github 
 [https://github.com/BioinfOMICS/LipidSigR](https://github.com/BioinfOMICS/LipidSigR). 
