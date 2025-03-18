@@ -67,13 +67,20 @@ convert_sp2char <- function(
     if(is.null(char_data_all)) {
         stop("No enough data.")
     }
-    transform_data <- char_data_all %>%
-        dplyr::mutate(rowName=paste(characteristic, feature, sep="|"))
-    transform_select <- transform_data %>%
-        tibble::column_to_rownames(var="rowName")
-    transform_mat <- as.matrix(transform_select[, group_info$sample_name])
-    row_data <- char_data_all[, c("characteristic", "feature")]
+    #transform_data <- char_data_all %>%
+    #    dplyr::mutate(rowName=paste(characteristic, feature, sep="|"))
+    #transform_select <- transform_data %>%
+    #    tibble::column_to_rownames(var="rowName")
+    #transform_mat <- as.matrix(transform_select[, group_info$sample_name])
+    #row_data <- char_data_all[, c("characteristic", "feature")]
+    transform_mat <- char_data_all %>%
+          dplyr::mutate(rowName=paste(characteristic, feature, sep="|")) %>%
+          tibble::column_to_rownames(var="rowName") %>%
+          dplyr::select(dplyr::all_of(group_info$sample_name))
+    row_data <- char_data_all %>%
+          dplyr::select(characteristic,feature)
 
+        
     char_se <- SummarizedExperiment::SummarizedExperiment(
         assays=list(transform_table=transform_mat),
         rowData=row_data,
