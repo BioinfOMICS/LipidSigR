@@ -32,14 +32,14 @@
 #' data("de_data_twoGroup")
 #' processed_data <- data_process(de_data_twoGroup, exclude_missing=TRUE,
 #'     exclude_missing_pct=70, replace_na_method='min', replace_na_method_ref=0.5,
-#'     normalization='Percentage', transfomation='log10')
+#'     normalization='Percentage', transform='log10')
 
 data_process <- function(
       se, exclude_missing=TRUE, exclude_missing_pct=70,
       replace_na_method=c('none', 'QRILC', 'SVD', 'KNN', 'IRMI', 'min', 'mean', 'median', 'PPCA', 'BPCA', 'RandomForest'),
       replace_na_method_ref=0.5,
       normalization=c('none', 'Percentage', 'PQN', 'Quantile', 'Sum', 'Median'),
-      transfomation=c('none', 'log10', 'cube', 'square')){
+      transform=c('none', 'log10', 'cube', 'square')){
    # check input SE
    .check_inputSE(se, metadata_list=NULL)
    abundance <- .extract_df(se, type = "abundance")
@@ -68,7 +68,7 @@ data_process <- function(
    if (is.null(normalization) | isFALSE(normalization %in% c('Percentage', 'PQN', 'Quantile', 'Sum', 'Median', 'none')) ) {
       stop("normalization must be one of 'Percentage', 'PQN', 'Quantile', 'Sum', 'Median', or 'none'.")
    }
-   if (is.null(transfomation) | isFALSE(transfomation %in% c('none', 'log10', 'cube', 'square')) ) {
+   if (is.null(transform) | isFALSE(transform %in% c('none', 'log10', 'cube', 'square')) ) {
        stop("transfomation must be one of 'log10', 'cube', 'square', or 'none'.")
    }
 
