@@ -32,13 +32,14 @@
 #' data("de_data_twoGroup")
 #' processed_data <- data_process(de_data_twoGroup, exclude_missing=TRUE,
 #'     exclude_missing_pct=70, replace_na_method='min', replace_na_method_ref=0.5,
-#'     normalization='Percentage')
+#'     normalization='Percentage', transfomation='log10')
 
 data_process <- function(
       se, exclude_missing=TRUE, exclude_missing_pct=70,
       replace_na_method=c('none', 'QRILC', 'SVD', 'KNN', 'IRMI', 'min', 'mean', 'median', 'PPCA', 'BPCA', 'RandomForest'),
       replace_na_method_ref=0.5,
-      normalization=c('none', 'Percentage', 'PQN', 'Quantile', 'Sum', 'Median')){
+      normalization=c('none', 'Percentage', 'PQN', 'Quantile', 'Sum', 'Median'),
+      transfomation=c('none', 'log10', 'cube', 'square')){
    # check input SE
    .check_inputSE(se, metadata_list=NULL)
    abundance <- .extract_df(se, type = "abundance")
@@ -67,6 +68,9 @@ data_process <- function(
    if (is.null(normalization) | isFALSE(normalization %in% c('Percentage', 'PQN', 'Quantile', 'Sum', 'Median', 'none')) ) {
       stop("normalization must be one of 'Percentage', 'PQN', 'Quantile', 'Sum', 'Median', or 'none'.")
    }
+   if (is.null(transfomation) | isFALSE(transfomation %in% c('none', 'log10', 'cube', 'square')) ) {
+       stop("transfomation must be one of 'log10', 'cube', 'square', or 'none'.")
+   }
 
    # replace 0 to NA
    abundance[abundance==0] <- NA
@@ -85,6 +89,10 @@ data_process <- function(
    if(normalization != 'none'){
       abundance <-  .normalization(abundance, normalization)
    }
+   if(transfomation != 'none'){
+       processed_abund <-  .transform(abundance, transfomation)
+   }
+
 
    abundance_mat <- abundance %>% dplyr::arrange(feature) %>%
       tibble::column_to_rownames(var="feature")
@@ -96,7 +104,9 @@ data_process <- function(
    transform_SE <- SummarizedExperiment::SummarizedExperiment(
       assays=list(abundance=as.matrix(abundance_mat) ),
       rowData=S4Vectors::DataFrame(lipid_char_table_trans, row.names=lipid_char_table_trans$feature),
-      colData=SummarizedExperiment::colData(se))
+      colData=SummarizedExperiment::colData(se),
+      metadata=list(processed_abund=processed_abund,
+                    transform=transfomation))
 
    return(transform_SE)
 } #function: data_process()
