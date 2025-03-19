@@ -89,8 +89,8 @@ data_process <- function(
    if(normalization != 'none'){
       abundance <-  .normalization(abundance, normalization)
    }
-   if(transfomation != 'none'){
-       processed_abund <-  .transform(abundance, transfomation)
+   if(transform != 'none'){
+       processed_abund <-  .transform(abundance, transform)
    }
 
 
