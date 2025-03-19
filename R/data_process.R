@@ -69,7 +69,7 @@ data_process <- function(
       stop("normalization must be one of 'Percentage', 'PQN', 'Quantile', 'Sum', 'Median', or 'none'.")
    }
    if (is.null(transform) | isFALSE(transform %in% c('none', 'log10', 'cube', 'square')) ) {
-       stop("transfomation must be one of 'log10', 'cube', 'square', or 'none'.")
+       stop("transform must be one of 'log10', 'cube', 'square', or 'none'.")
    }
 
    # replace 0 to NA
@@ -106,7 +106,7 @@ data_process <- function(
       rowData=S4Vectors::DataFrame(lipid_char_table_trans, row.names=lipid_char_table_trans$feature),
       colData=SummarizedExperiment::colData(se),
       metadata=list(processed_abund=processed_abund,
-                    transform=transfomation))
+                    transform=transform))
 
    return(transform_SE)
 } #function: data_process()
