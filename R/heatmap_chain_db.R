@@ -167,6 +167,7 @@ heatmap_chain_db <- function(
     ## Chian-DB abundance
     chain_db_abund <- .chain_db_abundance(
         lipid_char=lipid.char, abundance, group_info, char_feature)
+    if(nrow(chain_db_abund$char.abund) == 0) return(NULL)
     ## Statistic test
     abund_data <- chain_db_abund$char.abund.mat %>%
         tibble::column_to_rownames(var='FA') %>% as.matrix()
@@ -308,8 +309,3 @@ heatmap_chain_db <- function(
     return(list(two.char.heatmap=two.char.heatmap,
                 two.char.tab=two.char.tab))
 }
-
-
-
-
-
