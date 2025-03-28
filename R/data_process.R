@@ -95,6 +95,8 @@ data_process <- function(
    }
    if(transform != 'none'){
        processed_abund <-  .transform(abundance, transform)
+   }else{
+       processed_abund <-  abundance
    }
 
 
