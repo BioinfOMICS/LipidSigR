@@ -19,7 +19,8 @@ Please note that only two-group data can conduct the "Network" and "Machine lear
 ## Installation
 We assume that you have already installed the R program (see the R project at 
 [http://www.r-project.org](http://www.r-project.org)  and are familiar with it. 
-You need to have R 4.3.0 or a later version installed for running LipidSigR. 
+You need to have R 4.3.0 or a later version installed for running LipidSigR.
+
 * NOTE: For Windows systems, LipidSigR is supported only on Windows 10 or later.
 
 Our package is available at the github 
@@ -60,7 +61,7 @@ BiocManager::install(
 
 install.packages(
     c('devtools', 'magrittr', 'plotly', 'tidyverse', 'factoextra', 'ggthemes', 
-      'ggforce', 'Hmisc', 'hwordcloud', 'iheatmapr', 'Rtsne', 'uwot', 
+      'ggforce', 'Hmisc', 'hwordcloud', 'heatmaply', 'iheatmapr', 'Rtsne', 'uwot', 
       'wordcloud', 'rsample', 'ranger', 'caret', 'yardstick', 'fastshap', 
       'SHAPforxgboost', 'visNetwork', 'tidygraph', 'ggraph'))
 
@@ -124,3 +125,8 @@ Tzu-Ya Huang, I-Chieh Chen, Yo-Liang Lai, Yu-De Wang, Mien-Chie Hung, Wei-Chung 
 LipidSig 2.0: integrating lipid characteristic insights into advanced lipidomics data analysis, 
 Nucleic Acids Research, Volume 52, Issue W1, 5 July 2024, Pages W390–W397, 
 doi: [10.1093/nar/gkae335](https://doi.org/10.1093/nar/gkae335); PMID: 38709887.
+
+> <font size=2> Chia-Hsin Liu, Pei-Chun Shen, Wen-Jen Lin, Hsiu-Cheng Liu, Meng-Hsin Tsai, Yo-Liang Lai, Yu-De Wang, Mien-Chie Hung, Wei-Chung Cheng, 
+LipidSigR: a R-based solution for integrated lipidomics data analysis and visualization, 
+Bioinformatics Advances, Volume 5, Issue 1, 2025, vbaf047, 
+doi: [10.1093/bioadv/vbaf047](https://doi.org/10.1093/bioadv/vbaf047); PMID: 40110562.
