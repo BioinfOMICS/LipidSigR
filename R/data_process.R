@@ -101,7 +101,8 @@ data_process <- function(
 
 
    abundance_mat <- abundance %>% dplyr::arrange(feature) %>%
-      tibble::column_to_rownames(var="feature")
+              tibble::remove_rownames() %>%
+              tibble::column_to_rownames(var="feature")
 
    lipid_char_table_trans <- as.data.frame(lipid_char_table[
       (lipid_char_table[[1]] %in% abundance[[1]]),]) %>% dplyr::arrange(feature)
