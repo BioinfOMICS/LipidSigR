@@ -1,0 +1,15 @@
+# LipidSigR 0.7.0
+- Released on Github
+
+# LipidSigR 0.9.0
+- Update Machine learning workflow
+
+# LipidSigR 1.0.0
+- Update Correlation workflow
+
+# LipidSigR 1.0.1
+
+## Minor bug fixes and improvements
+- `data_process` add parameter transform and add return metadata in SummarizedExperiment.
+- `convert_sp2char` The error that was appearing at times has now been fixed..
+- `heatmap_chain_db` The error that was appearing at times has now been fixed..
