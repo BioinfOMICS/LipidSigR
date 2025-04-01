@@ -138,8 +138,10 @@ dr_pca <- function(
     if (is.null(clustering) | isFALSE(clustering %in% c('kmeans', 'kmedoids', 'hclustering', 'dbscan', 'group_info')) ) {
         stop("clustering must be one of 'kmeans', 'kmedoids', 'hclustering', 'dbscan', or 'group_info'.")
     }
-    if(!is.numeric(cluster_num) | isFALSE(.check_numeric_range(cluster_num, 1, 10))){
-        stop('cluster_num must be a numeric value between 1 and 10.')
+    if(clustering != 'dbscan' ){
+        if(!is.numeric(cluster_num) | isFALSE(.check_numeric_range(cluster_num, 1, 10))){
+            stop('cluster_num must be a numeric value between 1 and 10.')
+        }
     }
     if (clustering=='kmedoids') {
         if(is.null(kmedoids_metric) | isFALSE(kmedoids_metric %in% c("euclidean","manhattan")) ){
