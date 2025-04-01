@@ -262,6 +262,8 @@ list_lipid_char <- function(processed_se){
     common_char <- data_info %>%
         dplyr::group_by(char, char_feature, sample_name) %>%
         dplyr::summarise(sum(values, na.rm=TRUE), .groups='drop') %>%
+        dplyr::group_by(char) %>%
+        dplyr::filter(dplyr::n_distinct(char_feature) > 1) %>%
         dplyr::distinct(char) %>%
         dplyr::left_join(lipidChar, by=c('char'='characteristic')) %>%
         dplyr::arrange(match(
