@@ -86,7 +86,7 @@ data_process <- function(
    if (nrow(abundance)==0){
       stop("All abundance data has been removed, please check and reset the parameter.")
    }
-   if(replace_na_method != 'none'){
+   if(replace_na_method != 'none' & any(is.na(abundance))){
       abundance <- .missing_impute(
          abundance, replace_na_method=replace_na_method, replace_na_method_ref=replace_na_method_ref)
    }
@@ -101,8 +101,7 @@ data_process <- function(
 
 
    abundance_mat <- abundance %>% dplyr::arrange(feature) %>%
-              tibble::remove_rownames() %>%
-              tibble::column_to_rownames(var="feature")
+      tibble::column_to_rownames(var="feature")
 
    lipid_char_table_trans <- as.data.frame(lipid_char_table[
       (lipid_char_table[[1]] %in% abundance[[1]]),]) %>% dplyr::arrange(feature)
