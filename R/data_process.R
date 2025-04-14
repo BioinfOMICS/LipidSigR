@@ -180,8 +180,20 @@ data_process <- function(
       }
    }else if(replace_na_method == 'PPCA'){
       if (.check_numeric_range(replace_na_method_ref, 1, 10)) {
-         abundance2 <- pcaMethods::completeObs(
-            pcaMethods::pca(abundance2, nPcs=replace_na_method_ref, method="ppca"))
+          success <- FALSE
+          attempt <- 0
+          while (!success && attempt < 20) {
+              attempt <- attempt + 1
+              try({
+                  abundance2 <- pcaMethods::completeObs(
+                      pcaMethods::pca(
+                          abundance2, nPcs=replace_na_method_ref, method="ppca"))
+                  success <- TRUE
+              }, silent=TRUE)
+          }
+          if (!success) {
+              stop("ppca failed after 20 attempts.")
+          }
       } else {
          stop("replace_na_method_ref must be a numeric value between 1 and 10.")
       }
