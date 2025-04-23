@@ -101,12 +101,12 @@
     return(list(auc_tab=auc_tab, plot_tab=plot_tab))
 }
 ###
-## lipid name replace ":" as "__", " " as "_", "|" as "___" or replace back
+## lipid name replace  ":" as "__", " " as "_", "|" as "___", ";" as "____" or replace back
 .lipid_name_replace <- function(list, type=c("replace", "revert")){
     if (type=="replace") {
-        list <- stringr::str_replace_all(list, c("\\|" = "___", ":" = "__", " " = "_"))
+        list <- stringr::str_replace_all(list, c(";" = "____", "\\|" = "___", ":" = "__", " " = "_"))
     } else if (type=="revert") {
-        list <- stringr::str_replace_all(list, c("___" = "\\|", "__" = ":", "_" = " "))
+        list <- stringr::str_replace_all(list, c("____" = ";", "___" = "\\|", "__" = ":", "_" = " "))
     } else {
         stop("type must be replace or revert.")
     }
