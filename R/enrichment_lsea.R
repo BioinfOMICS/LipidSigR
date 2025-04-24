@@ -136,6 +136,16 @@ enrichment_lsea <- function(deSp_se, char=NULL,
         fgsea::fgsea(pathways=lipidset, stats=lipidrank, eps=0, nPermSimple=5000)
     )
 
+    if(nrow(lsea.res) == 0){
+        warning('There was no enrichment in lipid characteristics.')
+        return(list(enrich_result=NULL,
+                    static_barPlot=NULL,
+                    interactive_barPlot=NULL,
+                    table_barPlot=NULL,
+                    lipid_set=lipidset,
+                    ranked_list=lipidrank))
+    }
+
     if(significant == 'pval') lsea.res %<>% dplyr::mutate(p=pval)
     if(significant == 'padj') lsea.res %<>% dplyr::mutate(p=padj)
     lsea.res %<>% dplyr::arrange(p) %>%
