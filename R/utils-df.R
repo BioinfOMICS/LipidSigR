@@ -229,7 +229,7 @@ extract_summarized_experiment <- function(se){
 #' \item chain_db_list: List of lipid characteristics for performing chain
 #' length-double bond correlation analysis.
 #' \item common_list: List of lipid characteristics for other analyses in
-#' LipidSigR, such as Profiling and Enrichment.
+#' LipidSigR, such as Profiling, Enrichment and subChar.
 #' \item ml_char_list: List of lipid characteristics for conducting machine learning analysis.
 #' }
 #' @export
