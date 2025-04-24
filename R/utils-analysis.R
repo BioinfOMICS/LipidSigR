@@ -452,7 +452,7 @@
             test.table <- broom::tidy(test.res)[1,]
             if(!'statistic' %in% colnames(test.table)) test.table$statistic <- NA
             if(!'p.value' %in% colnames(test.table)) test.table$p.value <- NA
-            if(test.table$p.value < 0.05){
+            if(!is.nan(test.table$p.value) && test.table$p.value < 0.05){
                 post.res <- tryCatch({
                     post.res <- rstatix::tukey_hsd(
                         sub_abund, abund ~ original_group_name, detailed=TRUE)
