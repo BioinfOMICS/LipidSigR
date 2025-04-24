@@ -70,6 +70,7 @@ nw_pathway_activity <- function(deSp_se, organism=c('human', 'mouse')){
         dplyr::select('from'='feature.x', 'to'='feature.y', 'network.from'='from',
                       'network.to'='to', dplyr::everything()) %>%
         dplyr::distinct()
+    if(nrow(data.edge) == 0) return(warning('There were no reactions in your dataset; therefore, the network could not be generated.'))
     if(organism == 'human') data.edge$gene <- data.edge$reaction_gene_h
     if(organism == 'mouse') data.edge$gene <- data.edge$reaction_gene_m
 
