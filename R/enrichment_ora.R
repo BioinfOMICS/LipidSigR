@@ -284,13 +284,16 @@ enrichment_ora <- function(deSp_se, char=NULL, significant=c('pval', 'padj'),
                        margin=list(l=70, r=20, b=60, t=40))
     for(i in 1:(length(bar.plotly$x$data)-1)){
         for(j in 1:length(bar.plotly$x$data[[i]]$text)){
-            logP <- stringr::str_split(
-                bar.plotly$x$data[[i]]$text[j], pattern='<br />', n=3)[[1]][1] %>%
-                stringr::str_remove_all('.* ') %>% as.numeric() %>% round(digits=3)
+            # logP <- stringr::str_split(
+            #     bar.plotly$x$data[[i]]$text[j], pattern='<br />', n=3)[[1]][1] %>%
+            #     stringr::str_remove_all('.* ') %>% as.numeric() %>% round(digits=3)
             feature <- stringr::str_split(
                 bar.plotly$x$data[[i]]$text[j], pattern='<br />', n=3)[[1]][2] %>%
                 stringr::str_remove('.*\\): ') %>% stringr::str_wrap(width=30)
-            bar.plotly$x$data[[i]]$text[j] <- plot.tab$hover[which(round(plot.tab$negLog10p, digits=3) == logP
+            colors <- stringr::str_split(
+                bar.plotly$x$data[[i]]$text[j], pattern='<br />', n=3)[[1]][3] %>%
+                stringr::str_remove('.*: ')
+            bar.plotly$x$data[[i]]$text[j] <- plot.tab$hover[which(plot.tab$color == colors
                                                                    & plot.tab$yText == feature)]
         }
     }
