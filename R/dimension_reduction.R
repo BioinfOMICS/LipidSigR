@@ -68,7 +68,6 @@ dr_pca <- function(
     if (!is.logical(centering)) {
         stop("centering must be a logical value.")
     }
-    .dr_check(clustering, cluster_num, kmedoids_metric, distfun, hclustfun, eps, minPts)
     # check feature_contrib_pc
     .check_inputSE(processed_se, metadata_list=NULL)
     #if (is.null(names(S4Vectors::metadata(processed_se))) ) {
@@ -81,6 +80,7 @@ dr_pca <- function(
         abundance <- de_data$abundance
         group_info <- de_data$group_info
     }
+    .dr_check(abundance, group_info, clustering, cluster_num, kmedoids_metric, distfun, hclustfun, eps, minPts)
 
     if(!is.numeric(plot_topN) | isFALSE(.check_numeric_range(plot_topN, 1, nrow(abundance)))){
         stop('plot_topN must be a numeric value less than the number of lipids.')
@@ -134,13 +134,31 @@ dr_pca <- function(
 }
 
 .dr_check <- function(
-        clustering, cluster_num, kmedoids_metric, distfun, hclustfun, eps, minPts) {
+        abundance, group_info=NULL, clustering, cluster_num, kmedoids_metric,
+        distfun, hclustfun, eps, minPts) {
     if (is.null(clustering) | isFALSE(clustering %in% c('kmeans', 'kmedoids', 'hclustering', 'dbscan', 'group_info')) ) {
         stop("clustering must be one of 'kmeans', 'kmedoids', 'hclustering', 'dbscan', or 'group_info'.")
     }
     if(clustering != 'dbscan' ){
-        if(!is.numeric(cluster_num) | isFALSE(.check_numeric_range(cluster_num, 1, 10))){
-            stop('cluster_num must be a numeric value between 1 and 10.')
+        if(clustering %in% c('kmeans', 'kmedoids')){
+            sample_num <- ncol(abundance)-1
+            if(!is.numeric(cluster_num) | isFALSE(.check_numeric_range(cluster_num, 2, sample_num-1))){
+                stop(sprintf("cluster_num must be a numeric value between 2 and %d.", sample_num-1))
+            }
+        }else if(clustering == 'hclustering'){
+            sample_num <- ncol(abundance)-1
+            if(!is.numeric(cluster_num) | isFALSE(.check_numeric_range(cluster_num, 2, sample_num))){
+                stop(sprintf("cluster_num must be a numeric value between 2 and %d.", sample_num))
+            }
+        }else if(clustering == 'group_info'){
+            if(!is.null(group_info)){
+                group_num <- length(unique(group_info$group))
+                if(!is.numeric(cluster_num) | cluster_num != group_num){
+                    stop('cluster_num must be the number of groups in group_info')
+                }
+            }else{
+                stop('clustering select "group_info" in processed_se must provide group_info')
+            }
         }
     }
     if (clustering=='kmedoids') {
@@ -166,7 +184,7 @@ dr_pca <- function(
     }
 }
 
-.deSig_data <- function(de_se) {
+.deSig_data <- function(de_se, sigN=2) {
     .check_de_outputSE(de_se, de_type="all")
     abundance <- .extract_df(de_se, type = "abundance")
     group_info <- .extract_df(de_se, type = "group")
@@ -181,7 +199,7 @@ dr_pca <- function(
         abundance <- abundance %>%
             dplyr::filter(eval(
                 parse(text=colnames(abundance)[1])) %in% sig_feature)
-        if (nrow(abundance) < 2) {
+        if (nrow(abundance) < sigN) {
             stop('Insufficient number of significant lipids.')
         }
     } else {
@@ -341,19 +359,37 @@ dr_pca <- function(
             "PC1 (", as.character(round(eig.val[1, 2], 1)), '%)'),
         ylab=stringr::str_c(
             "PC2 (", as.character(round(eig.val[2, 2], 1)), '%)'))
-    pca_variable$data <- dplyr::arrange(pca_variable$data,contrib)
+    #pca_variable$data <- dplyr::arrange(pca_variable$data, contrib)
     pca_variable_ggplotly <- plotly::ggplotly(pca_variable)
-    for (i in 1:nrow(pca_variable$data)) { #seq_len(plot_topN)
-        pca_variable_ggplotly <- pca_variable_ggplotly %>%
-            plotly::add_annotations(
-                data=pca_variable$data[i,], x=~x, y=~y, text="",
-                arrowcolor=pca_variable_ggplotly$x$data[[i+1]]$line$color,
-                showarrow=TRUE, axref='x', ayref='y', ax=0, ay=0)
-        pca_variable_ggplotly$x$data[[i+1]]$text <- paste(
-            "X :", round(pca_variable$data$x[i], 3), "\nY :",
-            round(pca_variable$data$y[i], 3), "\nName :",
-            pca_variable$data$name[i])
+    for(i in 1:length(pca_variable_ggplotly$x$data)){
+        if(!is.null(pca_variable_ggplotly$x$data[[i]]$text)){
+            if(any(grepl('contrib: ',pca_variable_ggplotly$x$data[[i]]$text))){
+                plotly_data <- pca_variable_ggplotly$x$data[[i]]
+                modify_result <- .modify_pca_variable_plot(plotly_data,pca_variable$data)
+                pca_variable_ggplotly$x$data[[i]] <- modify_result$plotly_data
+                if(!is.null(modify_result$annotation)){
+                    for(i in seq_len(nrow(modify_result$annotation))){
+                        pca_variable_ggplotly <- pca_variable_ggplotly %>%
+                            plotly::add_annotations(
+                                data=modify_result$annotation[i,], x=~x, y=~y, text="",
+                                arrowcolor=~arrowcolor,
+                                showarrow=TRUE, axref='x', ayref='y', ax=0, ay=0)
+                    }
+                }
+            }
+        }
     }
+    #for (i in 1:nrow(pca_variable$data)) { #seq_len(plot_topN)
+    #    pca_variable_ggplotly <- pca_variable_ggplotly %>%
+    #        plotly::add_annotations(
+    #            data=pca_variable$data[i,], x=~x, y=~y, text="",
+    #            arrowcolor=pca_variable_ggplotly$x$data[[i+1]]$line$color,
+    #            showarrow=TRUE, axref='x', ayref='y', ax=0, ay=0)
+    #    pca_variable_ggplotly$x$data[[i+1]]$text <- paste(
+    #        "X :", round(pca_variable$data$x[i], 3), "\nY :",
+    #        round(pca_variable$data$y[i], 3), "\nName :",
+    #        pca_variable$data$name[i])
+    #}
     #pca_variable_ggplotly$x$data[[plot_topN+2]]$hoverinfo <- "none"
 
     if(plot_topN > ncol(pca$rotation)){
@@ -427,7 +463,6 @@ dr_tsne <- function(
     if(!is.numeric(max_iter) | isFALSE(.check_numeric_range(max_iter, 0, NULL))){
         stop('max_iter cannot be a negative value.')
     }
-    .dr_check(clustering, cluster_num, kmedoids_metric, distfun, hclustfun, eps, minPts)
     # check SE
     .check_inputSE(processed_se, metadata_list=NULL)
     #if (is.null(names(S4Vectors::metadata(processed_se))) ) {
@@ -440,6 +475,7 @@ dr_tsne <- function(
         abundance <- de_data$abundance
         group_info <- de_data$group_info
     }
+    .dr_check(abundance, group_info, clustering, cluster_num, kmedoids_metric, distfun, hclustfun, eps, minPts)
     tsne_table <- .dim_process(abundance)
     color <- .dr_color()
     tsne <- Rtsne::Rtsne(
@@ -593,7 +629,6 @@ dr_umap <- function(
     if (is.null(umap_metric) | isFALSE(umap_metric %in% c('euclidean', 'cosine', 'manhattan', 'hamming', 'correlation')) ) {
         stop("umap_metric must be one of 'euclidean', 'cosine', 'manhattan', 'hamming', or 'correlation'.")
     }
-    .dr_check(clustering, cluster_num, kmedoids_metric, distfun, hclustfun, eps, minPts)
 
     # check SE
     .check_inputSE(processed_se, metadata_list=NULL)
@@ -607,6 +642,7 @@ dr_umap <- function(
         abundance <- de_data$abundance
         group_info <- de_data$group_info
     }
+    .dr_check(abundance, group_info, clustering, cluster_num, kmedoids_metric, distfun, hclustfun, eps, minPts)
     umap_table <- .dim_process(abundance)
     color <- .dr_color()
 
@@ -748,18 +784,16 @@ dr_plsda <- function(
     if (!is.logical(scaling)) {
         stop("scaling must be a logical value.")
     }
-    .dr_check(clustering, cluster_num, kmedoids_metric, distfun, hclustfun, eps, minPts)
-
     # must be de_se
     if (is.null(names(S4Vectors::metadata(de_se))) ){
         stop("Incorrect SummarizedExperiment structure. Please use the output from
              deSp_twoGroup, deSp_multiGroup, deChar_twoGroup, or deChar_multiGroup function.")
     }
     # SE
-    de_data <- .deSig_data(de_se)
+    de_data <- .deSig_data(de_se, sigN=3)
     abundance <- de_data$abundance
     group_info <- de_data$group_info
-
+    .dr_check(abundance, group_info, clustering, cluster_num, kmedoids_metric, distfun, hclustfun, eps, minPts)
     num <- apply(abundance[-1], 1, FUN=function(x){length(unique(x))})
     abundance <- abundance[(num!=1),]
     abundance <- abundance[!is.infinite(rowSums(abundance[-1], na.rm=TRUE)),]
@@ -901,4 +935,67 @@ dr_plsda <- function(
     circle.y <- c(sqrt(r^2-circle.x^2), -sqrt(r^2-circle.x^2))
     circle.x <- c(circle.x,seq(x+r, x-r, length.out =150))
     circle <- data.frame(circle.x, circle.y)
+}
+
+.modify_pca_variable_plot <- function(plotly_data, data){
+    hovertext <- plotly_data$text
+    .extract_val <- function(text, key) {
+        stringr::str_extract(text,
+                             paste0(key, ": *[-+]?\\d*\\.?\\d+(e[-+]?\\d+)?")) %>%
+            stringr::str_extract("[-+]?\\d*\\.?\\d+(e[-+]?\\d+)?") %>%
+            as.numeric()
+    }
+    x <- .extract_val(hovertext, 'x')
+    y <- .extract_val(hovertext, 'y')
+    contrib <- .extract_val(hovertext, 'contrib')
+    .get_position <- function(x, vector) {
+        if (x %% 1 == 0){
+            digit <- 0
+        }else{
+            x_str <- sub("0+$", "", format(x, scientific=FALSE, trim=TRUE))
+            parts <- strsplit(x_str, ".", fixed=TRUE)[[1]]
+            if (length(parts) == 2) {
+                digit <- nchar(parts[2])
+            } else {
+                digit <- 0
+            }
+        }
+        x <- round(x, digit)
+        vector <- round(vector, digit)
+        if(any(x == vector)){
+            return(which(x == vector))
+        }else{
+            return(NULL)
+        }
+    }
+    annotation <- NULL
+    for (j in seq_len(length(contrib))) {
+        if(!is.na(x[j]) & !is.na(y[j]) & !is.na(contrib[j])){
+            x_position <- .get_position(x[j],data$x)
+            y_position <- .get_position(y[j], data$y)
+            contrib_position <- .get_position(contrib[j], data$contrib)
+            position <- intersect(
+                intersect(x_position, y_position),contrib_position)
+            if(any(position)){
+                hovertext[j] <- paste(
+                    "X :", round(data$x[position], 3), "\nY :",
+                    round(data$y[position], 3), "\nName :", data$name[position])
+                if(is.null(annotation)){
+                    annotation <- data.frame(
+                        x=data$x[position], y=data$y[position],
+                        arrowcolor=plotly_data$line$color)
+                }else{
+                    annotation <- annotation %>%
+                        tibble::add_row(x=data$x[position], y=data$y[position],
+                                        arrowcolor=plotly_data$line$color)
+                }
+            }
+        }
+    }
+    if(!is.null(annotation)){
+        annotation <- dplyr::distinct(annotation)
+    }
+    plotly_data$text <- hovertext
+    return(list(plotly_data=plotly_data,
+                annotation=annotation))
 }
