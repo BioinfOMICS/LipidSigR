@@ -115,7 +115,22 @@ nw_gatom <- function(
     # Initialize an SMGWCS solver
     solver <- mwcsr::rnc_solver()
     # Finding a module
-    res <- mwcsr::solve_mwcsp(solver, gs)
+    res <- tryCatch(
+        {
+            mwcsr::solve_mwcsp(solver, gs)
+        },
+        error = function(e) {
+            message(
+                "[MWCSP solve failed]\n",
+                "Error message: ", e$message, "\n"
+            )
+            NULL
+        }
+    )
+    if (is.null(res)) {
+        return(NULL)
+    }
+
     m <- res$graph
     # node, edge table
     node.table <- data.table::data.table(igraph::as_data_frame(m, what="vertices"))
