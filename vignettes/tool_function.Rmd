@@ -1,0 +1,303 @@
+---
+title: "Tool function"
+output: rmarkdown::html_vignette
+bibliography: ref.bib 
+description: >
+  The tool function for LipidSigR
+vignette: >
+  %\VignetteIndexEntry{1. Tool function}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r load_package, message = FALSE, echo=FALSE}
+library(dplyr)
+library(utils)
+library(rgoslin)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+knitr::opts_chunk$set(warning=FALSE)
+knitr::opts_chunk$set(fig.width = 6, fig.height = 5)
+```
+
+LipidSigR offers several utility functions to enhance convenience in constructing 
+input SummarizedExperiment object, viewing output results, listing selectable 
+lipid characteristics, and more.
+
+```{r load LipidSigR, message = FALSE}
+library(LipidSigR)
+```
+
+# Construct SE object
+The input data for most functions must be a SummarizedExperiment object, 
+constructed by `LipidSigR::as_summarized_experiment` or generated from other 
+upstream analysis functions.
+
+To begin analyzing data, follow the instructions below to construct the input 
+SummarizedExperiment object. First, prepare the required input data frames: the 
+abundance data and the group information table. If you only intend to conduct 
+the profiling analysis, you only need to prepare the abundance data.
+
+## Prepare input data frames
+The input abundance data and group information table must be provided as data 
+frames and adhere to the following requirements.
+
+**Abundance data**: The lipid abundance data includes the abundance values 
+of each feature across all samples. 
+
+1. The first column of abundance data must contain a list of lipid names (features). 
+1. Each lipid name (feature) is unique.
+1. All abundance values are numeric.
+
+For example:
+```{r ex_abundance}
+rm(list = ls())
+data("abundance_twoGroup")
+head(abundance_twoGroup[, 1:6], 5)
+```
+
+**Group information table**: The group information table contains the grouping 
+details corresponding to the samples in lipid abundance data.
+
+1. For two-group data, column names must be arranged in order of `sample_name`, 
+`label_name`, `group`, and `pair`, and for multi-group data, column names must be arranged 
+in order of `sample_name`, `label_name`, and `group`.
+1. All sample names are unique.
+1. Sample names in `sample_name` column are as same as the sample names in lipid abundance data.
+1. Columns of `sample_name`, `label_name`, and `group` columns do not contain NA values.
+1. For two-group data, the column `group` contain 2 groups, and for multi-group 
+data the column `group` must contain more than 2 groups.
+1. In the 'pair' column for paired data, each pair must be sequentially numbered 
+from 1 to N, ensuring no missing, blank, or skipped numbers are missing; 
+otherwise, the value should be all marked as NA. 
+*(NOTE: The group information table of multi-group data should not contain this column.)*
+
+For example:
+```{r ex_groupInfo}
+data("group_info_twoGroup")
+head(group_info_twoGroup, 5)
+```
+
+## Mapping lipid characteristics {#lipid-map}
+The purpose of this step is to exclude lipid features not recognized 
+by `rgoslin::parseLipidNames`. 
+
+If you haven't install `rgoslin` package, install it by running the following codes.
+```{r install rgoslin, eval=FALSE}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("rgoslin")
+```
+
+Then, follow the instructions below before 
+constructing the input data as a SummarizedExperiment object.
+
+* In this step, an error message will be returned if `rgoslin::parseLipidNames` cannot 
+recognize a certain lipid. However, if your data contains at least two recognizable lipids, 
+it will be sufficient for analysis *(note that different analyses may have varying data requirements)*.
+
+```{r rgoslin_twoGroup}
+library(dplyr)
+library(rgoslin)
+# map lipid characteristics by rgoslin
+parse_lipid <- rgoslin::parseLipidNames(lipidNames=abundance_twoGroup$feature)
+
+# filter lipid recognized by rgoslin
+recognized_lipid <- parse_lipid$Original.Name[
+    which(parse_lipid$Grammar != 'NOT_PARSEABLE')]
+abundance <- abundance_twoGroup %>% 
+    dplyr::filter(feature %in% recognized_lipid)
+goslin_annotation <- parse_lipid %>% 
+    dplyr::filter(Original.Name %in% recognized_lipid)
+```
+
+After running the above code, two data frames, `abundance`, and 
+`goslin_annotation`, will be generated and used in the next step.
+```{r rgoslin_output}
+head(abundance[, 1:6], 5)
+head(goslin_annotation[, 1:6], 5)
+```
+
+## Construct SE object
+Use the data obtained from previous steps to construct SE object.
+```{r as_summarized_experiment}
+se <- as_summarized_experiment(
+    abundance, goslin_annotation, group_info=group_info_twoGroup, 
+    se_type='de_two', paired_sample=FALSE)
+```
+After running the above code, you are ready to begin the analysis with the 
+output `se`. After the code execution, a summary of the input data will be 
+displayed. 
+
+*(Note: If errors occur during execution, please revise the input data to resolve them.)*
+
+# Extract data in SE object
+Most of our statistical functions return results in a SummarizedExperiment object. 
+To enhance user accessibility, we provide a function to extract these results as 
+several data frames for easier viewing.
+
+For example, after conducting `LipidSigR::deSp_twoGroup`, it returns `deSp_se`. 
+You can view the data stored in the returned SummarizedExperiment object 
+using `LipidSigR::extract_summarized_experiment`.
+```{r conduct deSp}
+# data processing
+processed_se <- data_process(
+    se, exclude_missing=TRUE, exclude_missing_pct=70, 
+    replace_na_method='min', replace_na_method_ref=0.5, 
+    normalization='Percentage', transform='log10')
+# conduct differential expression analysis of lipid species
+deSp_se <- deSp_twoGroup(
+    processed_se, ref_group='ctrl', test='t-test',
+    significant='pval', p_cutoff=0.05, FC_cutoff=1, transform='log10')
+```
+```{r extract_se}
+# extract results in SE
+res_list <- extract_summarized_experiment(deSp_se)
+# summary of extract results
+summary(res_list)
+```
+
+The returned result list, extracted from the SummarizedExperiment object, 
+includes input data (abundance, lipid characteristics table, group information 
+table), various input settings (e.g., significance level, p-value cutoff), 
+and statistical results.
+
+
+# Data processsing {#data-processing}
+Most input data for `LipidSigR` must undergo data processing to ensure it is 
+normalized without missing values. The data processing function operates on the constructed 
+SummarizedExperiment object, processing the abundance table based on the user's settings. The 
+resulting SummarizedExperiment object can then be used directly in subsequent analysis functions.
+
+```{r data_processing}
+# abundance in input SE
+head(extract_summarized_experiment(se)$abundance[, 1:5], 10)
+
+# data processing
+processed_se <- data_process(
+    se, exclude_missing=TRUE, exclude_missing_pct=70,
+    replace_na_method='min', replace_na_method_ref=0.5,
+    normalization='Percentage', transform='log10')
+
+# abundance in processed SE
+head(extract_summarized_experiment(processed_se)$abundance[, 1:5], 10)
+```
+
+After data processing, you can further visualize the differences by plotting the 
+abundance before and after processing.
+```{r data_processing_plot}
+# plotting
+data_process_plots <- plot_data_process(se, processed_se)
+
+# result summary
+summary(data_process_plots)
+
+# view box plot before/after data processing
+data_process_plots$static_boxPlot_before
+data_process_plots$static_boxPlot_after
+
+# view density plot before/after data processing
+data_process_plots$static_densityPlot_before  
+data_process_plots$static_densityPlot_after  
+```
+
+
+# Obtain lipid characteristics
+In several functions, you must select a specific lipid characteristic as input 
+for analysis. To enhance accessibility, we provide the `LipidSigR::list_lipid_char` 
+function, which returns all available lipid characteristics. You can review these 
+options and choose one as your input.
+
+`LipidSigR::list_lipid_char` returns three types of lipid characteristic 
+lists: `deChar_list`, `chain_db_list`, and `common_list`, each used in different analyses.
+
+1. deChar_list: the selectable lipid characteristics for using `LipidSigR::deChar_twoGroup` and `LipidSigR::deChar_multiGroup`.
+
+1. chain_db_list: the selectable lipid characteristics for using `LipidSigR::heatmap_chain_db`.
+
+1. ml_char_list: the selectable lipid characteristics for using `LipidSigR::ml_model`.
+
+1. common_list: the selectable lipid characteristics for use in all functions not mentioned above.
+
+Take `LipidSigR::lipid_profiling` as an example.
+```{r list_char ex}
+# data processing
+processed_se <- data_process(
+    se, exclude_missing=TRUE, exclude_missing_pct=70,
+    replace_na_method='min', replace_na_method_ref=0.5,
+    normalization='Percentage', transform='log10')
+
+# get lipid characteristics
+list_lipid_char(processed_se)$common_list
+
+# conduct lipid profiling function
+result <- lipid_profiling(processed_se, char="class")
+```
+
+
+# Lipid annotation
+"Mapping lipid characteristics" is one of the steps in constructing the input 
+SummarizedExperiment object in `LipidSigR`, detailed in [previous section](#lipid-map).
+
+When the Goslin annotation table is provided to the `LipidSigR::as_summarized_experiment`, 
+it is extended into a lipid characteristic table by adding mappings between lipids, 
+the LION ontology, and other resource IDs. This extended lipid characteristic table 
+is then included in the returned SE object. If you only need the lipid characteristic table, 
+you can use this `LipidSigR::lipid_annotation` directly.
+
+```{r lipid_annotation}
+# the input lipid annotation table
+head(goslin_annotation[, 1:6], 5)
+
+# conduct lipid annotation
+lipid_annotation_table <- lipid_annotation(goslin_annotation)
+
+# view lipid annotation table
+head(lipid_annotation_table[, 1:5], 5)
+
+# columns of returned lipid annotation table
+colnames(lipid_annotation_table)
+```
+
+
+# Lipid species abundance conversion
+Two conversion types for lipid species are provided: summing lipid species 
+abundance by lipid characteristics or converting to ratio-based abundance.
+
+Both functions are integrated into the lipid characteristics analysis function, 
+so when you use `LipidSigR::deChar_twoGroup` or `LipidSigR::deChar_multiGroup`, 
+the abundance conversion is automatically performed within the function.
+
+If you only want to obtain the converted abundance, follow the commands below.
+
+* NOTE: The input data must be a SummarizedExperiment object constructed using 
+`LipidSigR::as_summarized_experiment` and then further processed with 
+` LipidSigR::data_process`. 
+Please read `vignette("tool_function")` before preparing the input data.
+
+## Convert from species to characteristics
+```{r conver2char}
+# view input abundance
+head(extract_summarized_experiment(processed_se)$abundance[, 1:5], 5)
+
+# convert species abundance to characteristic abundance
+char_abundance <- convert_sp2char(processed_se, transform='log10')
+
+# view abundance after conversion
+head(extract_summarized_experiment(char_abundance)$abundance[, 1:5], 5)
+```
+
+## Convert from species to ratio
+```{r conver2ratio}
+# view input abundance
+head(extract_summarized_experiment(processed_se)$abundance[, 1:3], 5)
+
+# convert species abundance to characteristic abundance
+ratio_abundance <- convert_sp2ratio(processed_se, transform='log2')
+
+# view abundance after conversion
+head(extract_summarized_experiment(ratio_abundance )$abundance[, 1:3], 5)
+```
