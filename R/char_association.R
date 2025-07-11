@@ -12,7 +12,7 @@
 #' \item interactive_barPlot & static_barPlot: a bar plot distinguishes
 #' significant groups (values) exhibiting a mean fold change greater than 1.
 #' (NOTE: The bar chart is not generate for multiple-group data.)
-#' \item interacitve_lollipop & static_lollipop: a lollipop plot compares all
+#' \item interactive_lollipop & static_lollipop: a lollipop plot compares all
 #' significant groups within the selected characteristic by log2(fold change)
 #' for two-group data and -log10(p-value) for multiple-group data.
 #' \item interactive_wordCloud & static_wordCloud: a word cloud visualizes the
@@ -86,7 +86,7 @@ char_association <- function(deSp_se, char){
     wc.res <- .sigDeSpeciesWordCloud(plot.tab)
     return(list(
         interactive_barPlot=interactive_barPlot,
-        interacitve_lollipop=lolli.res$lolli.plotly,
+        interactive_lollipop=lolli.res$lolli.plotly,
         interactive_wordCloud=wc.res$wc,
         static_barPlot=static_barPlot, static_lollipop=lolli.res$lolli.plot,
         static_wordCloud=wc.res$wcStatic,
