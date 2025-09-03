@@ -1,3 +1,9 @@
+# LipidSigR 1.0.3
+
+## Minor bug fixes and improvements
+- `char_2wayAnova()` Remove check imputation.
+- `dr_pca()`, `dr_tsne()`, `dr_umap()`, and `dr_plsda()` Modify the description of the clustering parameter.
+
 # LipidSigR 1.0.2
 
 ## Minor bug fixes and improvements
