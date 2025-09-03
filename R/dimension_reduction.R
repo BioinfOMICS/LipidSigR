@@ -15,6 +15,10 @@
 #' number of columns of x can be supplied. The value is passed to scale. Default is \code{TRUE}.
 #' @param clustering Character. The method to be used for clustering. Allowed method
 #' include "kmeans", "kmedoids", "hclustering", "dbscan", "group_info". Default is \code{"kmeans"}.
+#' The option \code{"group_info"} is currently available only when the input is a SummarizedExperiment
+#' object resulting from differential expression analysis (e.g., \code{deSp_twoGroup()},
+#' \code{deSp_multiGroup()}); in this case, dimensionality reduction is performed based on the
+#' significant features and group information derived from the DE results.
 #' @param cluster_num Numeric. The interpretation of \code{cluster_num} depends on the value of \code{clustering}:
 #' \itemize{
 #'   \item \code{"group_info"}: A positive integer equal to the number of groups.
@@ -422,6 +426,10 @@ dr_pca <- function(
 #' @param max_iter Integer. Number of iterations.
 #' @param clustering Character. The method to be used for clustering. Allowed method
 #' include "kmeans", "kmedoids", "hclustering", "dbscan", "group_info". Default is \code{"kmeans"}.
+#' The option \code{"group_info"} is currently available only when the input is a SummarizedExperiment
+#' object resulting from differential expression analysis (e.g., \code{deSp_twoGroup()},
+#' \code{deSp_multiGroup()}); in this case, dimensionality reduction is performed based on the
+#' significant features and group information derived from the DE results.
 #' @param cluster_num Numeric. The interpretation of \code{cluster_num} depends on the value of \code{clustering}:
 #' \itemize{
 #'   \item \code{"group_info"}: A positive integer equal to the number of groups.
@@ -592,6 +600,10 @@ dr_tsne <- function(
 #' One of "euclidean", "cosine", "manhattan", "hamming", "categorical". Default is \code{'euclidean'}.
 #' @param clustering Character. The method to be used for clustering. Allowed method
 #' include "kmeans", "kmedoids", "hclustering", "dbscan", "group_info". Default is \code{"kmeans"}.
+#' The option \code{"group_info"} is currently available only when the input is a SummarizedExperiment
+#' object resulting from differential expression analysis (e.g., \code{deSp_twoGroup()},
+#' \code{deSp_multiGroup()}); in this case, dimensionality reduction is performed based on the
+#' significant features and group information derived from the DE results.
 #' @param cluster_num Numeric. The interpretation of \code{cluster_num} depends on the value of \code{clustering}:
 #' \itemize{
 #'   \item \code{"group_info"}: A positive integer equal to the number of groups.
@@ -756,6 +768,10 @@ dr_umap <- function(
 #' standardized to zero means and unit variances. Default is \code{TRUE}.
 #' @param clustering Character. The method to be used for clustering. Allowed method
 #' include "kmeans", "kmedoids", "hclustering", "dbscan", "group_info". Default is \code{"kmeans"}.
+#' The option \code{"group_info"} is currently available only when the input is a SummarizedExperiment
+#' object resulting from differential expression analysis (e.g., \code{deSp_twoGroup()},
+#' \code{deSp_multiGroup()}); in this case, dimensionality reduction is performed based on the
+#' significant features and group information derived from the DE results.
 #' @param cluster_num Numeric. The interpretation of \code{cluster_num} depends on the value of \code{clustering}:
 #' \itemize{
 #'   \item \code{"group_info"}: A positive integer equal to the number of groups.
