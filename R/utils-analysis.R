@@ -290,7 +290,7 @@
         dplyr::select(characteristic, feature, significance, p, all_of(colName)) %>%
         tidyr::pivot_longer(
             cols=dplyr::all_of(colName), cols_vary='slowest',
-            names_to=c('.value', 'group'), names_pattern='(.*)_(.*)') %>%
+            names_to=c('.value', 'group'), names_pattern='([^_]+)_(.*)') %>%
         dplyr::group_by(feature) %>%
         dplyr::mutate(max_error_bar=max(mean+sd)) %>% dplyr::ungroup() %>%
         dplyr::mutate(
@@ -612,7 +612,7 @@
         dplyr::select(characteristic, feature, significance, p, all_of(colName)) %>%
         tidyr::pivot_longer(
             cols=dplyr::all_of(colName), cols_vary='slowest',
-            names_to=c('.value', 'group'), names_pattern='(.*)_(.*)') %>%
+            names_to=c('.value', 'group'), names_pattern='([^_]+)_(.*)') %>%
         dplyr::group_by(feature) %>%
         dplyr::mutate(max_error_bar=max(mean+sd)) %>% dplyr::ungroup() %>%
         dplyr::mutate(
