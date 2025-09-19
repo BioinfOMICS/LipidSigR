@@ -1,3 +1,8 @@
+# LipidSigR 1.0.3.002 (development)
+## Minor bug fixes and improvements
+- Fix tidyverse and ggplot2 deprecated syntax.
+- Fix unit test errors and warnings.
+
 # LipidSigR 1.0.3
 
 ## Minor bug fixes and improvements
