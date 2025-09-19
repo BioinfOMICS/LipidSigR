@@ -1,7 +1,7 @@
 Package: LipidSigR
 Type: Package
 Title: A comprehensive analysis for streamlined data mining of lipidomic data
-Version: 1.0.3
+Version: 1.0.3.0002
 Authors@R: c(
     person("Wei-Chung", "Cheng", email="chenglabomics@gmail.com", 
     role = c("aut","cre","cph"), comment = c(ORCID = "0000-0002-1229-4857")),
@@ -37,12 +37,12 @@ Description:
     regression to analyze continuous clinical features correlating with lipid 
     species or characteristics.
 License: MIT + file LICENSE
-URL: https://github.com/TMSWCChenglab/LipidSigR
-BugReports: https://github.com/TMSWCChenglab/LipidSigR/issues
+URL: https://github.com/BioinfOMICS/LipidSigR
+BugReports: https://github.com/BioinfOMICS/LipidSigR/issues
 LazyData: FALSE
 biocViews: Software, Lipidomics, GeneExpression, Classification, Clustering
 Depends:
-    R (>= 4.2.0)
+    R (>= 4.4.0)
 Imports: dplyr, factoextra, fgsea, ggforce, ggthemes, Hmisc, heatmaply, 
        hwordcloud, iheatmapr, magrittr, plotly (>= 4.9.4.1), Rtsne, visNetwork,
        stats, stringr, tibble, tidyr, uwot, wordcloud, rsample, ranger,
@@ -62,4 +62,4 @@ Config/testthat/edition: 3
 Config/testthat/parallel: true
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
