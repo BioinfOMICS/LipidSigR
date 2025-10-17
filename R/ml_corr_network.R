@@ -139,7 +139,9 @@ ml_corr_network <- function(
     } else {
         color_label <- grDevices::colorRampPalette(c("blue", "white", "red"))(n_color)
     }
-    node_table$color <- color_label
+    color_map <- setNames(color_label, unique_color)
+    node_table$color <- color_map[as.character(node_table$color)]
+    #node_table$color <- color_label
 
     edge_table <- edge_table %>%
         dplyr::mutate(width=abs(cor_coef)) %>%
