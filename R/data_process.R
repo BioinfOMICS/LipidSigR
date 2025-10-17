@@ -101,16 +101,18 @@ data_process <- function(
 
 
    abundance_mat <- abundance %>% dplyr::arrange(feature) %>%
-      tibble::column_to_rownames(var="feature")
-
+      tibble::column_to_rownames(var="feature") %>%
+       dplyr::select(dplyr::all_of(group_info$sample_name))
    lipid_char_table_trans <- as.data.frame(lipid_char_table[
       (lipid_char_table[[1]] %in% abundance[[1]]),]) %>% dplyr::arrange(feature)
    colnames(lipid_char_table_trans) <- colnames(lipid_char_table)
+   colData <- se %>% SummarizedExperiment::colData() %>% as.data.frame() %>%
+       tibble::remove_rownames()
 
    transform_SE <- SummarizedExperiment::SummarizedExperiment(
       assays=list(abundance=as.matrix(abundance_mat) ),
       rowData=S4Vectors::DataFrame(lipid_char_table_trans, row.names=lipid_char_table_trans$feature),
-      colData=SummarizedExperiment::colData(se),
+      colData=colData,
       metadata=list(processed_abund=processed_abund,
                     transform=transform))
 
