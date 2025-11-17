@@ -1,7 +1,11 @@
-# LipidSigR 1.0.3.002 (development)
+# LipidSigR 1.0.4
 ## Minor bug fixes and improvements
-- Fix tidyverse and ggplot2 deprecated syntax.
-- Fix unit test errors and warnings.
+- Fix the deprecated syntax in the tidyverse and ggplot2 packages.
+- Resolve unit test errors and warnings.
+- Change the static heatmap dependency package to ComplexHeatmap.
+- Fixed an issue in the `heatmap_clustering()` function where the `char` parameter selection did not provide a colour bar on the side of the heatmap. The hover information has also been fixed.
+- The clustering method in `heatmap_correlation()` has been corrected to ensure consistent sorting for interactive and static heatmaps.
+
 
 # LipidSigR 1.0.3
 
