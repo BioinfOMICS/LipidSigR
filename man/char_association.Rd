@@ -20,7 +20,7 @@ Return a list with 3 tables, 3 interactive plots, and 3 static plots.
 \item interactive_barPlot & static_barPlot: a bar plot distinguishes
 significant groups (values) exhibiting a mean fold change greater than 1.
 (NOTE: The bar chart is not generate for multiple-group data.)
-\item interacitve_lollipop & static_lollipop: a lollipop plot compares all
+\item interactive_lollipop & static_lollipop: a lollipop plot compares all
 significant groups within the selected characteristic by log2(fold change)
 for two-group data and -log10(p-value) for multiple-group data.
 \item interactive_wordCloud & static_wordCloud: a word cloud visualizes the
