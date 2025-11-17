@@ -1,7 +1,7 @@
 Package: LipidSigR
 Type: Package
 Title: A comprehensive analysis for streamlined data mining of lipidomic data
-Version: 1.0.3.0002
+Version: 1.0.4
 Authors@R: c(
     person("Wei-Chung", "Cheng", email="chenglabomics@gmail.com", 
     role = c("aut","cre","cph"), comment = c(ORCID = "0000-0002-1229-4857")),
@@ -46,7 +46,8 @@ Depends:
 Imports: dplyr, factoextra, fgsea, ggforce, ggthemes, Hmisc, heatmaply, 
        hwordcloud, iheatmapr, magrittr, plotly (>= 4.9.4.1), Rtsne, visNetwork,
        stats, stringr, tibble, tidyr, uwot, wordcloud, rsample, ranger,
-       caret, yardstick, fastshap, SHAPforxgboost, rgoslin, tidygraph, ggraph
+       caret, yardstick, fastshap, SHAPforxgboost, rgoslin, tidygraph, ggraph, 
+       ComplexHeatmap, randomcoloR, circlize
 Suggests: cluster, devtools, e1071, foreign, gatom, glmnet, knitr, methods, nnet, 
        purrr, qpdf, roxygen2, rmarkdown, rpart, testthat (>= 3.0.0), tidyselect, 
        Matrix (>= 1.6), irlba (>= 2.3.5.1), mixOmics, S4Vectors, BiocGenerics,
