@@ -134,7 +134,7 @@
     } else {
         ## have pair samples
         pair_num <- seq_len(nrow(group_info)/2)
-        if (isTRUE(identical(as.integer(unique(group_info$pair)), pair_num))) {
+        if (isTRUE(setequal(as.integer(unique(group_info$pair)), pair_num))) {
             pass <- TRUE
         } else {
             pass <- FALSE
