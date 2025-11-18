@@ -26,7 +26,7 @@ char_association_test <- function(res, nGroup){
     expect_true(is.data.frame(res$table_wordCloud))
     # Explicitly force the evaluation of the plot.
     expect_s3_class(res$static_lollipop, "ggplot")
-    expect_s3_class(res$interacitve_lollipop, "plotly")
+    expect_s3_class(res$interactive_lollipop, "plotly")
     expect_s3_class(res$static_wordCloud, "recordedplot")
     expect_s3_class(res$interactive_wordCloud, "htmlwidget")
     # Confirm the existence of required columns.
