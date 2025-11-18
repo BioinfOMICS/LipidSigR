@@ -63,15 +63,16 @@ boxPlot_feature_twoGroup <- function(
              'multiple groups, please use "boxPlot_feature_multiGroup"',
              ' for analysis.')
     }
+
+    group_info %<>% dplyr::mutate(
+        original_group_name=group, .before=group,
+        group=ifelse(original_group_name == ref_group, 'ctrl', 'exp')) %>%
+        dplyr::arrange(match(group, c('ctrl', 'exp')), pair)
     if(sum(group_info$group == 'ctrl') < 2 |
        sum(group_info$group == 'exp') < 2 ){
         stop("Comparing the means of two independent groups requires each group
              to have at least two samples.")
     }
-    group_info %<>% dplyr::mutate(
-        original_group_name=group, .before=group,
-        group=ifelse(original_group_name == ref_group, 'ctrl', 'exp')) %>%
-        dplyr::arrange(match(group, c('ctrl', 'exp')), pair)
     if(is.null(ref_group) |
        isFALSE(ref_group %in% unique(group_info$original_group_name))){
         stop("ref_group must be one of the group names in the 'group' column ",
