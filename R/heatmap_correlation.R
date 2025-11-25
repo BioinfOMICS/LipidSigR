@@ -82,6 +82,7 @@ heatmap_correlation <- function(
             res <- .sample_heatmap(corr_coef, sample_abundance, distfun, hclustfun)
             reorder_corr_coef <- res$reorder_corr_coef
             heatmap <- res$sample_hm
+            static_plot <- .static_heatmap(corr_coef, correlation, distfun, hclustfun)
         } else {
             stop("Not enough data for plotting the heatmap.")
         }
@@ -117,12 +118,11 @@ heatmap_correlation <- function(
             res <- .lipid_heatmap(corr_coef, lipids_abundance, distfun, hclustfun)
             reorder_corr_coef <- res$reorder_corr_coef
             heatmap <- res$lipids_hm
+            static_plot <- .static_heatmap(corr_coef, correlation, distfun, hclustfun)
         } else {
             stop("Not enough data for plotting the heatmap.")
         }
     }
-    static_plot <- suppressWarnings(.static_heatmap(corr_coef, correlation, distfun, hclustfun))
-
     return(list(
         interactive_heatmap=heatmap, static_heatmap=static_plot,
         corr_coef_matrix=reorder_corr_coef))
@@ -216,7 +216,7 @@ heatmap_correlation <- function(
 }
 
 .static_heatmap <- function(corr_coef, correlation, distfun, hclustfun){
-    ## create the column dendrogram
+
     col_dend <- if(distfun %in% c("pearson", "kendall", "spearman")) {
         stats::hclust(
             stats::as.dist(
@@ -225,29 +225,11 @@ heatmap_correlation <- function(
         stats::hclust(
             stats::dist(t(corr_coef), method=distfun), method=hclustfun)
     }
-    ## create heatmap plot
-    sample_col_dend <- function(x) col_dend
-    initial_dev <- grDevices::dev.cur()
-    if(min(corr_coef) > 0 | max(corr_coef) < 0) {
-        suppressWarnings(
-            stats::heatmap(
-                corr_coef, Rowv=TRUE, Colv=TRUE,
-                dendrogram='both', trace="none",
-                col=.heatmap_color_scale(corr_coef),
-                distfun=sample_col_dend, hclustfun=sample_col_dend,
-                main=NULL, margins=c(8,8), lwid=c(1, 9), scale='none'))
-    } else {
-        suppressWarnings(
-            stats::heatmap(
-                corr_coef, Rowv=TRUE, Colv=TRUE,
-                dendrogram='both', trace="none",
-                col=grDevices::colorRampPalette(c("blue", "white", "red"))(n=300),
-                distfun=sample_col_dend, hclustfun=sample_col_dend,
-                main=NULL, margins=c(8, 8), lwid=c(1, 9), scale='none'))
-    }
-    heatmap <- grDevices::recordPlot()
-    if(grDevices::dev.cur() > initial_dev && grDevices::dev.cur() > 1) {
-        try(grDevices::dev.off(), silent=TRUE)
-    }
-    return(heatmap=heatmap)
+    row_dend <- col_dend %>% stats::as.dendrogram() %>% rev()
+    heatmap <- ComplexHeatmap::Heatmap(
+        matrix=corr_coef, row_names_side="left", row_dend_side='right',
+        column_names_side="bottom",  col=.colorScale(corr_coef),
+        name='Signal', cluster_rows=row_dend,
+        cluster_columns=col_dend)
+    return(heatmap)
 }
