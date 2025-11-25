@@ -79,7 +79,7 @@ heatmap_correlation <- function(
         ## add not showing warnings
         corr_p <- suppressWarnings(.cor.test.p(x=sample_abundance, method=correlation))
         if(all(!is.na(corr_coef)) & nrow(corr_coef)>=2 & ncol(corr_coef)>=2){
-            res <- .sample_heatmap(corr_coef, sample_abundance, distfun, hclustfun)
+            res <- .sample_heatmap(corr_coef, distfun, hclustfun)
             reorder_corr_coef <- res$reorder_corr_coef
             heatmap <- res$sample_hm
             static_plot <- .static_heatmap(corr_coef, correlation, distfun, hclustfun)
@@ -115,7 +115,7 @@ heatmap_correlation <- function(
                                 use="pairwise.complete.obs")
         corr_p <- .cor.test.p(x=lipids_abundance, method=correlation)
         if(all(!is.na(lipids_abundance)) & nrow(lipids_abundance)>=2 & ncol(lipids_abundance)>=2){
-            res <- .lipid_heatmap(corr_coef, lipids_abundance, distfun, hclustfun)
+            res <- .lipid_heatmap(corr_coef, distfun, hclustfun)
             reorder_corr_coef <- res$reorder_corr_coef
             heatmap <- res$lipids_hm
             static_plot <- .static_heatmap(corr_coef, correlation, distfun, hclustfun)
@@ -137,15 +137,15 @@ heatmap_correlation <- function(
     z
 }
 
-.sample_heatmap <- function(corr_coef, sample_abundance, distfun, hclustfun){
+.sample_heatmap <- function(corr_coef, distfun, hclustfun){
     cb_grid <- iheatmapr::setup_colorbar_grid(
         y_length =0.6,x_start=1,y_start=0.5)
     if(distfun%in%c("pearson","kendall","spearman")){
         col_dend <- hclust(as.dist(
-            1-cor(sample_abundance, method=distfun)), method=hclustfun)
+            1-cor(corr_coef, method=distfun)), method=hclustfun)
     }else{
         col_dend <- hclust(dist(
-            t(sample_abundance), method=distfun),method=hclustfun)
+            t(corr_coef), method=distfun),method=hclustfun)
     }
     if(min(corr_coef)>=0 || max(corr_coef)<=0){
         sample_hm <- iheatmapr::iheatmap(
@@ -175,16 +175,16 @@ heatmap_correlation <- function(
     return(list(sample_hm=sample_hm, reorder_corr_coef=reorder_corr_coef))
 }
 
-.lipid_heatmap <- function(corr_coef, lipids_abundance, distfun, hclustfun) {
+.lipid_heatmap <- function(corr_coef, distfun, hclustfun) {
     cb_grid <- iheatmapr::setup_colorbar_grid(
         y_length =0.6,x_start=1,y_start=0.5)
     if(distfun%in%c("pearson","kendall","spearman")){
         col_dend <- hclust(
-            as.dist(1-cor(lipids_abundance, method=distfun)),
+            as.dist(1-cor(corr_coef, method=distfun)),
             method=hclustfun)
     }else{
         col_dend <- hclust(
-            dist(t(lipids_abundance), method=distfun),method=hclustfun)
+            dist(t(corr_coef), method=distfun),method=hclustfun)
     }
     if(min(corr_coef)>0 | max(corr_coef)<0){
         lipids_hm <- iheatmapr::iheatmap(
