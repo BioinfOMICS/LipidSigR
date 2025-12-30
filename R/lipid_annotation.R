@@ -551,8 +551,10 @@ lipid_annotation <- function(goslin_annotation){
         dplyr::mutate(GATOM.abbr=stringr::str_replace(GATOM.abbr, ' O-\\(', '\\(O-')) %>%
         dplyr::mutate(GATOM.abbr=stringr::str_replace(GATOM.abbr, ' P-\\(', '\\(P-'))
     #### GL OH ####
+    rm.lipid <- c(SP$feature, LPL$feature, FA$feature, GLO$feature)
     GLOH <- goslin.char %>%
         dplyr::filter(Lipid.Maps.Category == 'GL', Total.OH > 0) %>%
+        dplyr::filter(!feature %in% rm.lipid) %>%
         dplyr::mutate(GATOM.abbr=Species.Name)
     #### Other lipids ####
     rm.lipid <- c(SP$feature, LPL$feature, FA$feature, GLO$feature, GLOH$feature)
