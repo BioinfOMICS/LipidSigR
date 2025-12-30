@@ -541,11 +541,14 @@ lipid_annotation <- function(goslin_annotation){
         dplyr::mutate(GATOM.abbr=stringr::str_replace(GATOM.abbr, ' O-\\(', '\\(O-')) %>%
         dplyr::mutate(GATOM.abbr=stringr::str_replace(GATOM.abbr, ' P-\\(', '\\(P-'))
     #### FA ####
+    rm.lipid <- c(SP$feature, LPL$feature)
     FA <- goslin.char %>%
         dplyr::filter(class == 'FA') %>%
         dplyr::mutate(GATOM.abbr=Species.Name)
     #### MG O-, DG O-, TG O- ####
+    rm.lipid <- c(SP$feature, LPL$feature, FA$feature)
     GLO <- goslin.char %>%
+        dplyr::filter(!feature %in% rm.lipid) %>%
         dplyr::filter(class %in% c('MG O-', 'DG O-', 'TG O-')) %>%
         dplyr::mutate(GATOM.abbr=paste0(class, '(', Total.FA, ')')) %>%
         dplyr::mutate(GATOM.abbr=stringr::str_replace(GATOM.abbr, ' O-\\(', '\\(O-')) %>%
@@ -553,8 +556,8 @@ lipid_annotation <- function(goslin_annotation){
     #### GL OH ####
     rm.lipid <- c(SP$feature, LPL$feature, FA$feature, GLO$feature)
     GLOH <- goslin.char %>%
-        dplyr::filter(Lipid.Maps.Category == 'GL', Total.OH > 0) %>%
         dplyr::filter(!feature %in% rm.lipid) %>%
+        dplyr::filter(Lipid.Maps.Category == 'GL', Total.OH > 0) %>%
         dplyr::mutate(GATOM.abbr=Species.Name)
     #### Other lipids ####
     rm.lipid <- c(SP$feature, LPL$feature, FA$feature, GLO$feature, GLOH$feature)
