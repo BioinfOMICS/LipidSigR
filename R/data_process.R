@@ -244,10 +244,7 @@ data_process <- function(
                      colSums(abundance[-1], na.rm=TRUE), ~.x/.y) %>%
          as.data.frame()
    }else if(normalization == "Median"){
-      abundance[-1] <-
-         purrr::map2(abundance[-1],
-                     colMeans(abundance[-1], na.rm=TRUE), ~.x/.y) %>%
-         as.data.frame()
+      abundance[-1] %<>% sweep(2, apply(., 2, stats::median, na.rm=TRUE), "/")
    } else {
       stop("normalization must be one of 'Percentage', 'PQN', 'Quantile', 'Sum', or 'Median'")
    }
