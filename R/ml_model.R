@@ -309,16 +309,31 @@ ml_model <- function(
         varimp <- stats::coef(model,s='lambda.min') %>%
             as.matrix() %>% as.data.frame()%>% .[-1, ,drop=FALSE]
     }else if(ml_method=='xgboost'){
+        ### xgboost version 1.7.11.1 ###
+         cv_model <- xgboost::xgb.cv(
+             data=as.matrix(train_data[-1]), nrounds=100, max_depth=3,
+             label=train_data[[1]], nfold=5, verbose=FALSE, prediction=TRUE,
+             objective="binary:logistic", early_stopping_rounds=10)
+         cv_nround_min <- cv_model$best_iteration
+         model <- xgboost::xgboost(
+             data=as.matrix(train_data[-1]), label=train_data[[1]],
+             nrounds=cv_nround_min, max_depth=3, objective="binary:logistic", verbose=0)
+         pred_prob <- stats::predict(model, as.matrix(test_data[-1]))
+         varimp <- xgboost::xgb.importance(colnames(test_data[-1]), model)
+        ### xgboost version 3.1.3.1 ###
+        xgb.train <- xgboost::xgb.DMatrix(data=train_data[-1], label=train_data[[1]])
         cv_model <- xgboost::xgb.cv(
-            data=as.matrix(train_data[-1]), nrounds=100,max_depth=3,
-            label=train_data[[1]], nfold=5, verbose=FALSE, prediction=TRUE,
-            objective="binary:logistic", early_stopping_rounds=10)
-        cv_nround_min <- cv_model$best_iteration
-        model <- xgboost::xgboost(
-            data=as.matrix(train_data[-1]), label=train_data[[1]],
-            nrounds=cv_nround_min, max_depth=3, objective="binary:logistic", verbose=0)
+            data=xgb.train,
+            nrounds=100, nfold=5, verbose=FALSE, early_stopping_rounds=10,
+            params=xgboost::xgb.params(objective="binary:logistic", max_depth=3),
+            prediction=TRUE)
+        cv_nround_min <- cv_model$early_stop$best_iteration
+        model <- xgboost::xgb.train(
+            data=xgb.train, nrounds=cv_nround_min,
+            params=xgboost::xgb.params(objective="binary:logistic", max_depth=3),
+            verbose=0)
         pred_prob <- stats::predict(model, as.matrix(test_data[-1]))
-        varimp <- xgboost::xgb.importance(colnames(test_data[-1]), model)
+        varimp <- xgboost::xgb.importance(model, feature_names=colnames(test_data[-1]))
     }
 
     if (ml_method=='xgboost') {
