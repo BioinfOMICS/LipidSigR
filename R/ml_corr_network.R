@@ -67,7 +67,7 @@ ml_corr_network <- function(
             sig_feature <- rownames(varimp)
             node_col <- varimp[[1]]
         }else if(ml_method == 'xgboost'){
-            varimp <- xgboost::xgb.importance(best_model[[num]]$feature_names, best_model[[num]])
+            varimp <- xgboost::xgb.importance(best_model[[num]], feature_names=best_model[[num]]$feature_names)
             sig_feature <- varimp$Feature
             node_col <- varimp$Gain
         }
