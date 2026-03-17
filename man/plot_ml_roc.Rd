@@ -18,7 +18,7 @@ one of 2, 3, 5, 10, 20, 50, 100. Default is \code{10}.}
 Return 2 interactive plots, 2 static plots, and 2 data frames.
 \enumerate{
 \item interactive_mean_auc & static_mean_auc: ROC curve plots
-\item initeractive_roc & static_roc: ROC Curve of average CVs plots
+\item interactive_roc & static_roc: ROC Curve of average CVs plots
 \item table_mean_auc_plot: ROC data frame of n features
 \item table_roc: average ROC curve plot of n features
 }
