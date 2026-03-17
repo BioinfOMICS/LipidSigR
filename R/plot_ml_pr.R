@@ -10,7 +10,7 @@
 #' @return Return 2 interactive plots, 2 static plots, and 2 data frames.
 #' \enumerate{
 #' \item interactive_mean_auc & static_mean_auc: PR curve plots.
-#' \item initeractive_pr & static_pr: PR Curve of average CVs plots.
+#' \item interactive_pr & static_pr: PR Curve of average CVs plots.
 #' \item table_mean_auc_plot: data frame of the AUC, recall, and precision of PR of n features.
 #' \item table_pr: average PR curve plot of n feature.
 #' }
@@ -91,6 +91,6 @@ plot_ml_pr <- function(ml_se, feature_num){
 
     return(list(
         interactive_mean_auc=in_auc, static_mean_auc=static_auc,
-        initeractive_pr=in_pr, static_pr=static_pr,
+        interactive_pr=in_pr, static_pr=static_pr,
         table_mean_auc_plot=plotTab$auc_tab, table_pr=plotTab$plot_tab))
 }

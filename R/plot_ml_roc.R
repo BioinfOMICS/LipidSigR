@@ -10,7 +10,7 @@
 #' @return Return 2 interactive plots, 2 static plots, and 2 data frames.
 #' \enumerate{
 #' \item interactive_mean_auc & static_mean_auc: ROC curve plots
-#' \item initeractive_roc & static_roc: ROC Curve of average CVs plots
+#' \item interactive_roc & static_roc: ROC Curve of average CVs plots
 #' \item table_mean_auc_plot: ROC data frame of n features
 #' \item table_roc: average ROC curve plot of n features
 #' }
@@ -100,6 +100,6 @@ plot_ml_roc <- function(ml_se, feature_num=10){
 
     return(list(
         interactive_mean_auc=in_auc, static_mean_auc=static_auc,
-        initeractive_roc=in_roc, static_roc=static_roc,
+        interactive_roc=in_roc, static_roc=static_roc,
         table_mean_auc_plot=plotTab$auc_tab, table_roc=plotTab$plot_tab))
 }
