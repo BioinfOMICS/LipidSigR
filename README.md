@@ -66,6 +66,8 @@ install.packages(
       'SHAPforxgboost', 'visNetwork', 'tidygraph', 'ggraph'))
 
 devtools::install_github("ctlab/mwcsr")
+
+install.packages("fastshap", repos = c("https://bgreenwell.r-universe.dev", "https://cloud.r-project.org"))
 ```
 
 ## Introduction
