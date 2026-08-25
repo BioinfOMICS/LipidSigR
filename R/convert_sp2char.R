@@ -16,8 +16,7 @@
 #'     normalization='Percentage', transform='log10')
 #' char_data <- convert_sp2char(processed_se, transform='log10')
 
-convert_sp2char <- function(
-        processed_se, transform=c('none', 'log10', 'square', 'cube')){
+convert_sp2char <- function(processed_se, transform='log10'){
 
     # check input SE
     .check_inputSE(processed_se, metadata_list=NULL)
@@ -25,7 +24,6 @@ convert_sp2char <- function(
     abundance[-1] <- lapply(abundance[-1], as.numeric)
     lipid_char_table <- .extract_df(processed_se, type = "lipid")
     group_info <- .extract_df(processed_se, type = "group")
-
     char_var_list <- lipidChar$characteristic
 
     .check_imputation(abundance)
@@ -34,9 +32,7 @@ convert_sp2char <- function(
     }
 
     # check parameter
-    if (is.null(transform) | isFALSE(transform %in% c('none', 'log10', 'square', 'cube')) ) {
-      stop("transform must be one of 'none', 'log10', 'square' or 'cube'.")
-    }
+    match.arg(transform, c('log10', 'square', 'cube', 'none'))
 
     ## sum each char exp
     char_data_all <- data.frame()
@@ -91,8 +87,16 @@ convert_sp2char <- function(
 .sum_by_char <- function(abundance_ga, lipid_char_table, char, transform){
     ## process "|" characteristic
     if(isTRUE(any(stringr::str_detect(abundance_ga[, char], '\\|')) )){
-        transform_table <- tidyr::separate_rows(
-            abundance_ga, dplyr::all_of(char), sep = "\\|")
+        if(char %in% c("FA", "FA.C", "FA.DB", "FA.OH")){
+            n_split <- stringr::str_count(abundance_ga[[char]], "\\|") + 1
+            n_split[is.na(n_split)] <- 1
+            transform_table <- abundance_ga %>%
+                dplyr::mutate(dplyr::across(where(is.numeric), ~ .x / n_split)) %>%
+                tidyr::separate_rows(dplyr::all_of(char), sep = "\\|")
+        }else{
+            transform_table <- tidyr::separate_rows(
+                abundance_ga, dplyr::all_of(char), sep = "\\|")
+        }
     } else {
         transform_table <- abundance_ga
     }

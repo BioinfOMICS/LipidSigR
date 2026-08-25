@@ -40,12 +40,13 @@
 
 ## Two-groups analysis: Statistical calculations
 .stat_twoGroup <- function(abundance, group_info, paired_sample=FALSE,
-                           test=c('t-test', 'Wilcoxon test')){
+                           test=c('t-test', 'Wilcoxon test', 'limma')){
     colnames(abundance)[1] <- 'feature'
     ## gather the abundance data
     abund.ga <- abundance %>%
         tidyr::gather(sample_name, abund, -1) %>%
         dplyr::left_join(group_info, by='sample_name') %>%
+        dplyr::arrange(group, pair, feature) %>%
         dplyr::group_by(feature, group) %>%
         dplyr::summarise(value=list(abund), .groups='drop') %>%
         tidyr::spread(group, value) %>%
@@ -69,12 +70,25 @@
                 stats::wilcox.test(
                     unlist(exp), unlist(ctrl), paired=paired_sample)$p.value,
                 error=function(e){NA}))
+    }else if(test == 'limma'){
+        limmaExp <- abundance %>% tibble::remove_rownames() %>%
+            tibble::column_to_rownames(var="feature") %>% as.matrix()
+        group <- group_info$group[match(colnames(limmaExp), group_info$sample_name)]
+        design <- stats::model.matrix(~group)
+        res.table <- limma::lmFit(limmaExp, design=design) %>%
+            limma::eBayes() %>%
+            limma::topTable(coef=2, number=nrow(limmaExp), sort.by='P', adjust.method='BH') %>%
+            tibble::rownames_to_column('feature') %>%
+            dplyr::select(feature, statistic=t, pval=P.Value)
+    }
+    if(test %in% c('t-test', 'Wilcoxon test')){
+        res.table %<>% dplyr::select(-exp, -ctrl) %>% dplyr::ungroup()
     }
     res.table %<>% dplyr::mutate(method=test, .before='statistic') %>%
-        dplyr::mutate(negLog10pval=-log10(pval)) %>%
-        dplyr::select(-exp, -ctrl) %>% dplyr::ungroup()
-    res.table$padj <- stats::p.adjust(res.table$pval, method='BH')
-    res.table$negLog10padj <- -log10(res.table$padj)
+        dplyr::mutate(
+            negLog10pval=-log10(pval),
+            padj=stats::p.adjust(pval, method='BH'),
+            negLog10padj=-log10(padj))
     return(stat_res=res.table)
 }
 
@@ -783,7 +797,7 @@
                 linePlot_sqrt=linePlot_sqrt, in_linePlot_sqrt=in_linePlot_sqrt))
 }
 
-.boxPlot_deChar_twoGroup <- function(Combine_char_result_table, boxTab, char, split_class=NULL) {
+.boxPlot_deChar_twoGroup <- function(Combine_char_result_table, boxTab, char, significant, split_class=NULL) {
     if(isTRUE(Combine_char_result_table$sig == 'yes') ){
         group_name <- c(
             unique(boxTab$group)[1], paste0(unique(boxTab$group)[1], "0"),

@@ -13,9 +13,9 @@
 #' (an unambiguous abbreviation of) one of "ward.D", "ward.D2", "single", "complete",
 #' "average" (= UPGMA), "mcquitty" (= WPGMA), "median" (= WPGMC), or "centroid" (= UPGMC).
 #' Default is \code{'complete'}
-#' @param type Character. It must be 'all' or 'sig.' 'all' for output the results of all
+#' @param type Character. It must be 'all' or 'sig' 'all' for output the results of all
 #' lipid species or characteristics, and 'sig' for output the results of
-#' significant lipid species or characteristics.
+#' significant lipid species or characteristics. Default is \code{'sig'}
 #' @return Return a list with 1 figure and 1 matrix.
 #' \enumerate{
 #' \item interactive_heatmap & static_heatmap: a heatmap provides an overview of
@@ -35,9 +35,7 @@
 #'     hclustfun='complete', type='sig')
 
 heatmap_clustering <- function(
-        de_se, char, distfun=c('pearson', 'kendall', 'spearman'),
-        hclustfun=c('ward.D', 'ward.D2', 'single', 'complete', 'average', 'mcquitty', 'median', 'centroid'),
-        type=c('all', 'sig') ){
+        de_se, char, distfun='pearson', hclustfun='complete', type='sig'){
     ## check data
     .check_de_outputSE(de_se, de_type="all")
     if(!is.null(S4Vectors::metadata(de_se)[["char"]])) {
@@ -48,15 +46,9 @@ heatmap_clustering <- function(
             stop("Wrong char input, you can view the available char list by list_lipid_char function.")
         }
     }
-    if (is.null(distfun) | isFALSE(distfun %in% c('pearson', 'kendall', 'spearman')) ) {
-        stop("distfun must be one of 'pearson', 'kendall', or 'spearman'.")
-    }
-    if (is.null(hclustfun) | isFALSE(hclustfun %in% c('ward.D', 'ward.D2', 'single', 'complete', 'average', 'mcquitty', 'median', 'centroid')) ) {
-        stop("hclustfun must be one of 'ward.D', 'ward.D2', 'single', 'complete', 'average', 'mcquitty', 'median', or 'centroid'.")
-    }
-    if (is.null(type) | isFALSE(type %in% c('all', 'sig')) ) {
-        stop("type must be one of 'all' or 'sig'.")
-    }
+    match.arg(distfun, c('pearson', 'kendall', 'spearman'))
+    match.arg(hclustfun, c('complete', 'ward.D', 'ward.D2', 'single', 'average', 'mcquitty', 'median', 'centroid'))
+    match.arg(type, c('sig', 'all'))
 
     abundance_data <- .extract_df(de_se, type = "abundance")
     rownames(abundance_data) <- NULL
@@ -84,15 +76,15 @@ heatmap_clustering <- function(
         abundance.mat <- abundance.mat %>%
             dplyr::filter(feature %in% DE_result_table$feature)
     }
-    if (nrow(abundance.mat) <= 2)  {
-        stop("Insufficient number of lipids.")
-    }
     abundance.mat %<>% tibble::column_to_rownames(var='feature') %>% as.matrix()
     colnames(abundance.mat) <- group_info$label_name
     abundance.mat <- sweep(abundance.mat, 1, rowMeans(abundance.mat, na.rm=TRUE))
     abundance.mat <- sweep(abundance.mat, 1, apply(abundance.mat, 1, sd, na.rm=TRUE), "/")
-    if(sum(is.na(abundance.mat)) > 0){
-        abundance.mat <- abundance.mat[-which(is.na(abundance.mat[, 2])), ]
+    if (sum(is.na(abundance.mat)) > 0) {
+        abundance.mat <- abundance.mat[rowSums(is.na(abundance.mat)) == 0, , drop=FALSE]
+    }
+    if (nrow(abundance.mat) <= 2)  {
+        stop("Insufficient number of lipids.")
     }
     ## create colGroup data frame
     colGroup <- data.frame(Sample=group_info$group, stringsAsFactors=FALSE)
@@ -151,7 +143,7 @@ heatmap_clustering <- function(
     if(min(data) >= 0 || max(data) <= 0){
         heatmap <- iheatmapr::iheatmap(data, colors=.heatmap_color_scale(data),
                                        colorbar_grid=cb_grid, scale="rows")
-    }else{
+    }else {
         heatmap <- iheatmapr::iheatmap(data, colorbar_grid=cb_grid, scale="rows")
     }
     heatmap %<>% iheatmapr::add_col_annotation(

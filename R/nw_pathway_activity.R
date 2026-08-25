@@ -25,13 +25,11 @@
 #'     significant='pval', p_cutoff=0.05, FC_cutoff=1, transform='log10')
 #' network_table <- nw_pathway_activity(deSp_se, organism='mouse')
 
-nw_pathway_activity <- function(deSp_se, organism=c('human', 'mouse')){
+nw_pathway_activity <- function(deSp_se, organism='human'){
 
     ## Check parameter
     .check_de_outputSE(deSp_se, de_type="deSp")
-    if(is.null(organism) | isFALSE(organism %in% c('human', 'mouse'))){
-        stop("The 'organism' parameter must be either 'human' or 'mouse'.")
-    }
+    match.arg(organism, c('human', 'mouse'))
     ## Extract data from SE
     abundance <- S4Vectors::metadata(deSp_se)$processed_abundance
     lipid_char <- .extract_df(deSp_se, type = "lipid")
@@ -99,7 +97,8 @@ nw_pathway_activity <- function(deSp_se, organism=c('human', 'mouse')){
         dplyr::select(dplyr::everything(), 'from_abund'='abund.x', 'to_abund'='abund.y')
     ## T-test
     ttest <- FC %>%
-        dplyr::left_join(group_info[,c('sample_name', 'group')], by='sample_name') %>%
+        dplyr::left_join(group_info[,c('sample_name', 'group', 'pair')], by='sample_name') %>%
+        dplyr::arrange(group, pair, from, to) %>%
         dplyr::group_by(from, to, group) %>%
         dplyr::summarise(list.FC=list(FC)) %>%
         tidyr::spread(group, list.FC)
@@ -155,7 +154,7 @@ nw_pathway_activity <- function(deSp_se, organism=c('human', 'mouse')){
     ## Calculate pathway score
     path.score <- sub.path %>%
         dplyr::group_by(path_name) %>%
-        dplyr::summarise(pathway_score=sum(z, na.rm=TRUE)/sqrt(mean(path_length)),
+        dplyr::summarise(pathway_score=if(all(is.na(z))) NA_real_ else sum(z, na.rm=TRUE)/sqrt(mean(path_length)),
                          genes=paste0(gene, collapse=', ')) %>%
         tidyr::separate_rows(genes, sep=', ') %>%
         dplyr::group_by(path_name, pathway_score) %>%

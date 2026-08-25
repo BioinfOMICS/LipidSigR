@@ -35,34 +35,22 @@
 #'     replace_na_method='min', replace_na_method_ref=0.5,
 #'     normalization='Percentage', transform='log10')
 #' boxPlot_result <- boxPlot_feature_multiGroup(
-#'     processed_se, feature='PE O- 17:0;0_20:3;0', ref_group='ctrl',
+#'     processed_se, feature='PE O- 17:1;0_20:4;0', ref_group='ctrl',
 #'     test='One-way ANOVA', post_hoc_sig='padj', transform='log10')
 boxPlot_feature_multiGroup <- function(
-        processed_se, feature, ref_group,
-        test=c('One-way ANOVA', 'Kruskal-Wallis test'),
-        post_hoc_sig=c('pval', 'padj'),
-        transform=c('none', 'log10', 'square', 'cube')){
+        processed_se, feature, ref_group, test='One-way ANOVA', post_hoc_sig='pval', transform='log10'){
 
     ## check parameter
     .check_inputSE(processed_se, metadata_list=NULL)
-    if(is.null(test) |
-       isFALSE(test %in% c('One-way ANOVA', 'Kruskal-Wallis test'))){
-        stop("The 'test' parameter must be either 'One-way ANOVA' or 'Kruskal-Wallis test'.")
-    }
-    if(test == 'Kruskal-Wallis test' &
-       (is.null(post_hoc_sig) | isFALSE(post_hoc_sig %in% c('pval', 'padj')))){
-        stop("The 'post_hoc_sig' parameter must be either 'pval' or 'padj'.")
-    }
+    match.arg(test, c('One-way ANOVA', 'Kruskal-Wallis test'))
+    match.arg(post_hoc_sig, c('pval', 'padj'))
+    match.arg(transform, c('log10', 'square', 'cube', 'none'))
     if(test == 'One-way ANOVA' & post_hoc_sig == 'pval'){
         post_hoc_sig <- 'padj'
         warning("post_hoc_sig is only for the post hoc test after the ",
                 "Kruskal-Wallis test. For the post hoc test after the ",
                 "one-way ANOVA, the Tukey's HSD test is used, which only ",
                 "returns the adjusted p-value (padj).")
-    }
-    if(is.null(transform) |
-       isFALSE(transform %in% c('none', 'log10', 'square', 'cube'))){
-        stop("The transform parameter must be one of 'none', 'log10', 'square' or 'cube'.")
     }
 
     #### Extract data from SE ####
@@ -112,7 +100,7 @@ boxPlot_feature_multiGroup <- function(
         ## Label of y axis
         if(transform == 'log10'){
             Y <- 'Log10-transformed abundance'
-        }else if(transform %in% c('cube', 'sqare')){
+        }else if(transform %in% c('cube', 'square')){
             Y <- paste0(stringr::str_to_title(transform),
                         '-transformed abundance')
         }else{

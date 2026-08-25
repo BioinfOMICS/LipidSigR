@@ -8,8 +8,10 @@
 #' 'Algorithm-based' and 'SHAP'. Default is \code{'Algorithm-based'}.
 #' @param correlation Character. The method for computing correlation coefficient.
 #' Allowed methods includes 'pearson', 'kendall', and 'spearman'. Default is \code{'pearson'}.
-#' @param edge_cutoff Numeric. A value between 0 and 1. Only the correlation
-#' coefficient larger than it will be shown as a line in the plot.
+#' @param edge_cutoff Numeric. A value between 0 and 1. Only edges whose
+#' absolute correlation coefficient is greater than or equal to this value
+#' will be shown as a line in the plot (this applies to both positive and
+#' negative correlations).
 #' @param feature_num Numeric. The number of features to be shown in the plots.
 #' A feature number value selected from \code{feature_option} of the
 #' SummarizedExperiment object returned by \code{\link{ml_model}}. Usually be
@@ -74,9 +76,6 @@ ml_corr_network <- function(
     }else{
         shap_se <- ml_shap(ml_se, feature_num, nsim)
         varImp_result <- S4Vectors::metadata(shap_se)$shap_result
-        # varImp_result <- shap(
-        #     data=data, best_model=best_model, best_model_feature=best_model_feature,
-        #     ml_method=ml_method, feature_n=feature_num, nsim=nsim)$shap_long
         varImp_dir <- varImp_result %>%
             dplyr::mutate(dir=shapley_value*raw_value) %>%
             dplyr::group_by(variable) %>% dplyr::summarise(dir=sum(dir))
@@ -90,7 +89,6 @@ ml_corr_network <- function(
     sig_feature <- .lipid_name_replace(sig_feature, type="revert")
 
     ml_data <- .ml_process(ml_se, char, transform, type="normal")
-    #lipid_char_table <- .extract_df(ml_se, type="lipid")
     rownames(ml_data) <- ml_data$feature
 
     net_res <- .ml_net(ml_data, sig_feature, node_col, correlation, edge_cutoff)
@@ -111,27 +109,13 @@ ml_corr_network <- function(
     colnames(node_table)[which(colnames(node_table) == "node_col")] <- "color"
     colnames(node_table)[which(colnames(node_table) == "feature")] <- "id"
     node_table <- node_table %>%
-        dplyr::mutate(lebel=id, shpae="diamond", title=paste0("<p><b>", id))
+        dplyr::mutate(label=id, shape="diamond", title=paste0("<p><b>", id))
     node_table <- dplyr::arrange(node_table, color)
     nodes <- node_table
     n_color <- length(unique(node_table$color))
     unique_color <- unique(node_table$color)
     node_table$color_label <- node_table$color
 
-    #for (i in seq_len(nrow(node_table))) {
-    #    for (a in seq_len(n_color)) {
-    #        if (min(node_table$color) > 0) {
-    #            color_label <- grDevices::colorRampPalette(c("white", "red"))(n_color)[a]
-    #        } else if(max(node_table$color) < 0) {
-    #            color_label <- grDevices::colorRampPalette( c("blue", "white"))(n_color)[a]
-    #        } else {
-    #            color_label <- grDevices::colorRampPalette(c("blue", "white", "red"))(n_color)[a]
-    #        }
-    #        if (node_table$color[i] == unique_color[a]){
-    #            node_table$color[i] <- color_label
-    #        }
-    #    }
-    #}
     if (min(node_table$color) > 0) {
         color_label <- grDevices::colorRampPalette(c("white", "red"))(n_color)
     } else if(max(node_table$color) < 0) {
@@ -141,7 +125,6 @@ ml_corr_network <- function(
     }
     color_map <- stats::setNames(color_label, unique_color)
     node_table$color <- color_map[as.character(node_table$color)]
-    #node_table$color <- color_label
 
     edge_table <- edge_table %>%
         dplyr::mutate(width=abs(cor_coef)) %>%
@@ -159,15 +142,20 @@ ml_corr_network <- function(
 
 .ml_net_plot <- function(nodes, node_table, edge_table, unique_color){
     ## plotting
-    color_ledges_n <- c(
-        1, which(nodes$color==unique(nodes$color)[round(length(unique(nodes$color))/4)])[1],
-        which(nodes$color==unique(nodes$color)[round(2*length(unique(nodes$color))/4)])[1],
-        which(nodes$color==unique(nodes$color)[round(3*length(unique(nodes$color))/4)])[1],
-        which(nodes$color==unique(nodes$color)[length(unique(nodes$color))])[1])
+    n_color <- length(unique(nodes$color))
+    n_point <- min(5, n_color)
+    legend_idx <- unique(round(seq(1, n_color, length.out = n_point)))
+    color_ledges_n <- vapply(legend_idx, function(i) {
+        which(nodes$color == unique(nodes$color)[i])[1]
+    }, FUN.VALUE = integer(1))
+
     ledges <- data.frame(
-        color=c("white", node_table$color[color_ledges_n]),
-        label=c("Feature\nimportance", as.character(round(nodes$color[color_ledges_n], 3))),
-        shape=c("box", rep("dot", 5)), size=c(30, rep(20, 5)), font.size=c(35, rep(30, 5)))
+        color = c("white", node_table$color[color_ledges_n]),
+        label = c("Feature\nimportance",
+                  as.character(round(nodes$color[color_ledges_n], 3))),
+        shape = c("box", rep("dot", length(color_ledges_n))),
+        size = c(30, rep(20, length(color_ledges_n))),
+        font.size = c(35, rep(30, length(color_ledges_n))))
     in_net <- visNetwork::visNetwork(node_table, edge_table) %>%
         visNetwork::visLayout(randomSeed=12) %>%
         visNetwork::visOptions(
@@ -202,8 +190,8 @@ ml_corr_network <- function(
             point.padding=ggplot2::unit(0.2, "lines"), colour="gray10") +
         ggplot2::guides(edge_width="none", edge_alpha="none") +
         ggplot2::theme_bw(base_family="sans") +
-        ggplot2::theme(ggplot2::element_rect(fill='white',colour=NA))
-        #ggraph::theme_graph(base_family="sans", background="white")
+        ggplot2::theme(ggplot2::element_rect(fill='white', colour=NA))
+
     return(list(
         interactive_correlation_network=in_net,
         static_correlation_network=static_net,

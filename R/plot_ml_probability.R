@@ -22,7 +22,7 @@
 #' data("ml_se_sub")
 #' res <- plot_ml_probability(ml_se_sub, feature_num=10)
 #'
-plot_ml_probability <- function(ml_se, feature_num){
+plot_ml_probability <- function(ml_se, feature_num=10){
     .check_ml_outputSE(ml_se)
     if (!is.numeric(feature_num) | isFALSE(feature_num %in% S4Vectors::metadata(ml_se)$feature_option) ) {
         stop("feature_num must be a numeric value chosen from the following options: ", paste(S4Vectors::metadata(ml_se)$feature_option, collapse = ", "), " .")
@@ -32,7 +32,7 @@ plot_ml_probability <- function(ml_se, feature_num){
         dplyr::mutate(pred_prob=mean(pred_prob, na.rm=TRUE)) %>%
         dplyr::select(-cv_fold, -pred_label) %>% unique() %>%
         dplyr::mutate(pred_label=ifelse(pred_prob > 0.5, 1, 0)) %>%
-        dplyr::filter(feature_num==feature_num)
+        dplyr::filter(feature_num == .env$feature_num)
     plot_tab <- model_result %>%
         dplyr::mutate(true_label=as.factor(true_label)) %>% as.data.frame()
     ## plotting
@@ -58,7 +58,7 @@ plot_ml_probability <- function(ml_se, feature_num){
             title="Average sample probability in all CVs") +
         ggplot2::guides(color="none")
 
-    cm <- caret::confusionMatrix(as.factor(model_result$true_label), as.factor(model_result$pred_label))
+    cm <- caret::confusionMatrix(as.factor(model_result$pred_label), as.factor(model_result$true_label))
     cm_tab <- as.data.frame(cm$table) %>% dplyr::group_by(Reference) %>%
         dplyr::mutate(pct=round(Freq/sum(Freq), 2)) %>%
         dplyr::mutate(label=stringr::str_c(as.character(Freq), ' (', as.character(pct), ')'))

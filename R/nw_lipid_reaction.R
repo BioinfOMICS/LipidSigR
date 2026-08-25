@@ -43,25 +43,17 @@
 #'     class_significant='pval', class_p_cutoff=0.05, class_FC_cutoff=1)
 
 nw_lipid_reaction <- function(
-        deSp_se, organism=c('human', 'mouse'), show_sp=c('all', 'sigClass', 'none'),
-        show_all_reactions=FALSE, sp_significant=c('pval', 'padj'), sp_p_cutoff=0.05,
-        sp_FC_cutoff=1, class_significant=c('pval', 'padj'), class_p_cutoff=0.05,
+        deSp_se, organism='human', show_sp='sigClass',
+        show_all_reactions=FALSE, sp_significant='pval', sp_p_cutoff=0.05,
+        sp_FC_cutoff=1, class_significant='pval', class_p_cutoff=0.05,
         class_FC_cutoff=1){
 
     ## Check parameter
     .check_de_outputSE(deSp_se, de_type="deSp")
-    if(is.null(organism) | isFALSE(organism %in% c('human', 'mouse'))){
-        stop("The 'organism' parameter must be either 'human' or 'mouse'.")
-    }
-    if(is.null(show_sp) | isFALSE(show_sp %in% c('all', 'sigClass', 'none'))){
-        stop("The 'show_sp' parameter must be one of 'all', 'sigClass' or 'none'.")
-    }
-    if(is.null(sp_significant) | isFALSE(sp_significant %in% c('pval', 'padj'))){
-        stop("The 'sp_significant' parameter must be either 'pval' or 'padj'.")
-    }
-    if(is.null(class_significant) | isFALSE(class_significant %in% c('pval', 'padj'))){
-        stop("The 'class_significant' parameter must be either 'pval' or 'padj'.")
-    }
+    match.arg(organism, c('human', 'mouse'))
+    match.arg(show_sp, c('sigClass', 'all', 'none'))
+    match.arg(sp_significant, c('pval', 'padj'))
+    match.arg(class_significant, c('pval', 'padj'))
     if(!is.numeric(sp_p_cutoff) | isFALSE(.check_numeric_range(sp_p_cutoff, 0, 1))){
         stop("The 'sp_p_cutoff' parameter must be a numeric value between 0 and 1.")
     }
@@ -107,18 +99,14 @@ nw_lipid_reaction <- function(
     class_mean_sd <- .mean_sd_twoGroup(abundance=class_abund, group_info)
     ## Data transformation
     class_abund <- .transform(abundance=class_abund, transform)
-    if (length(group_info$group=="ctrl")==1 & length(group_info$group=="exp")==1) {
-        res_table <- class_mean_sd %>% dplyr::select(-c("sd_ctrl", "sd_exp"))
-        diff_table <- .sig_feature(res_table, significant='FC', p_cutoff=NULL, FC_cutoff)
-    } else {
-        ## statistic table
-        class_stat_table <- .stat_twoGroup(abundance=class_abund, group_info, paired_sample, test)
-        ## result table
-        res_table <- class_mean_sd %>% dplyr::left_join(class_stat_table, by='feature') %>%
-            as.data.frame()
-        diff_table <- .sig_feature(res_table, significant=class_significant,
-                                   p_cutoff=class_p_cutoff, FC_cutoff=class_FC_cutoff)
-    }
+    ## statistic table
+    class_stat_table <- .stat_twoGroup(abundance=class_abund, group_info, paired_sample, test)
+    ## result table
+    res_table <- class_mean_sd %>% dplyr::left_join(class_stat_table, by='feature') %>%
+        as.data.frame()
+    diff_table <- .sig_feature(res_table, significant=class_significant,
+                               p_cutoff=class_p_cutoff, FC_cutoff=class_FC_cutoff)
+
     deClass <- diff_table$all_table
     deClass %<>% dplyr::left_join(node_id, by='feature')
 
@@ -136,17 +124,17 @@ nw_lipid_reaction <- function(
     # gene_significant <- 'padj'
     # gene_p_cutoff <- 0.05
     # gene_FC_cutoff <- 2
-    if(!is.null(deGene)){
-        colnames(deGene)[which(colnames(deGene) == 'log2FoldChange')] <- 'log2FC'
-        colnames(deGene)[which(colnames(deGene) == 'pvalue')] <- 'pval'
-        sig_gene <- .sig_feature(stat_table=deGene, significant=gene_significant,
-                                 p_cutoff=gene_p_cutoff, FC_cutoff=gene_FC_cutoff)[[2]]
-        sig_gene %<>% filter(!is.na(gene_symbol))
-        if(nrow(sig_gene) == 0) sig_gene <- NULL
-    }else{
-        sig_gene <- NULL
-    }
-
+    # if(!is.null(deGene)){
+    #     colnames(deGene)[which(colnames(deGene) == 'log2FoldChange')] <- 'log2FC'
+    #     colnames(deGene)[which(colnames(deGene) == 'pvalue')] <- 'pval'
+    #     sig_gene <- .sig_feature(stat_table=deGene, significant=gene_significant,
+    #                              p_cutoff=gene_p_cutoff, FC_cutoff=gene_FC_cutoff)[[2]]
+    #     sig_gene %<>% filter(!is.na(gene_symbol))
+    #     if(nrow(sig_gene) == 0) sig_gene <- NULL
+    # }else{
+    #     sig_gene <- NULL
+    # }
+    sig_gene <- NULL
 
     if(!is.null(sig_class)){
         ## Data specific edges
@@ -264,42 +252,42 @@ nw_lipid_reaction <- function(
                          '</br>Gene: ', gene),
             dashes=FALSE, font.size=20, arrows='to', smooth=TRUE, shadow=FALSE)
 
-    if(!is.null(sig_gene)){
-        mapped.gene <- mapped.edge %>%
-            tidyr::separate_rows(gene, sep=', ') %>%
-            dplyr::filter(gene %in% sig_gene$gene_symbol)
-        if(nrow(mapped.gene) > 0){
-            mapped.gene %<>%
-                dplyr::left_join(sig_gene, by=c('gene'='gene_symbol')) %>%
-                dplyr::mutate(direction=ifelse(
-                    log2FC > 0, 'Up', ifelse(log2FC < 0, 'Down', 'NS'))) %>%
-                dplyr::group_by(id, Reactions, EC.numbers, direction) %>%
-                dplyr::summarise(gene=paste0(gene, collapse=', '), .groups='drop') %>%
-                tidyr::spread(direction, gene)
-            if(!'Up' %in% colnames(mapped.gene)) mapped.gene$Up <- NA
-            if(!'Down' %in% colnames(mapped.gene)) mapped.gene$Down <- NA
-
-            class.edge %<>%
-                dplyr::left_join(
-                    mapped.gene, by=c("id", "Reactions", "EC.numbers")) %>%
-                dplyr::mutate(
-                    title=paste0(title, '</br>Up-regulated gene: ',
-                                 ifelse(!is.na(Up), Up, NA),
-                                 '</br>Down-regulated gene: ',
-                                 ifelse(!is.na(Down), Down, NA)),
-                    color=ifelse(
-                        is.na(Up) & is.na(Down), '#888888',
-                        ifelse(!is.na(Up) & is.na(Down), '#FF4500',
-                               ifelse(is.na(Up) & !is.na(Down), '#4169E1', '#228B22'))),
-                    width=ifelse(is.na(Up) & is.na(Down), 4,
-                                 ifelse(!is.na(Up) & is.na(Down), 8,
-                                        ifelse(is.na(Up) & !is.na(Down), 8, 8))))
-        }else{
-            class.edge %<>% dplyr::mutate(color='#FF8800', width=8)
-        }
-    }else{
-        class.edge %<>% dplyr::mutate(color='#FF8800', width=8)
-    }
+    # if(!is.null(sig_gene)){
+    #     mapped.gene <- mapped.edge %>%
+    #         tidyr::separate_rows(gene, sep=', ') %>%
+    #         dplyr::filter(gene %in% sig_gene$gene_symbol)
+    #     if(nrow(mapped.gene) > 0){
+    #         mapped.gene %<>%
+    #             dplyr::left_join(sig_gene, by=c('gene'='gene_symbol')) %>%
+    #             dplyr::mutate(direction=ifelse(
+    #                 log2FC > 0, 'Up', ifelse(log2FC < 0, 'Down', 'NS'))) %>%
+    #             dplyr::group_by(id, Reactions, EC.numbers, direction) %>%
+    #             dplyr::summarise(gene=paste0(gene, collapse=', '), .groups='drop') %>%
+    #             tidyr::spread(direction, gene)
+    #         if(!'Up' %in% colnames(mapped.gene)) mapped.gene$Up <- NA
+    #         if(!'Down' %in% colnames(mapped.gene)) mapped.gene$Down <- NA
+    #         class.edge %<>%
+    #             dplyr::left_join(
+    #                 mapped.gene, by=c("id", "Reactions", "EC.numbers")) %>%
+    #             dplyr::mutate(
+    #                 title=paste0(title, '</br>Up-regulated gene: ',
+    #                              ifelse(!is.na(Up), Up, NA),
+    #                              '</br>Down-regulated gene: ',
+    #                              ifelse(!is.na(Down), Down, NA)),
+    #                 color=ifelse(
+    #                     is.na(Up) & is.na(Down), '#888888',
+    #                     ifelse(!is.na(Up) & is.na(Down), '#FF4500',
+    #                            ifelse(is.na(Up) & !is.na(Down), '#4169E1', '#228B22'))),
+    #                 width=ifelse(is.na(Up) & is.na(Down), 4,
+    #                              ifelse(!is.na(Up) & is.na(Down), 8,
+    #                                     ifelse(is.na(Up) & !is.na(Down), 8, 8))))
+    #     }else{
+    #         class.edge %<>% dplyr::mutate(color='#FF8800', width=8)
+    #     }
+    # }else{
+    #     class.edge %<>% dplyr::mutate(color='#FF8800', width=8)
+    # }
+    class.edge %<>% dplyr::mutate(color='#FF8800', width=8)
     class.edge %<>% dplyr::select(from, to, label, title, color, dashes,
                                   font.size, width, arrows, smooth, shadow)
     return(class.edge)
@@ -343,13 +331,11 @@ nw_lipid_reaction <- function(
 
     if('pval' %in% colnames(deLipid) | 'padj' %in% colnames(deLipid)){
         species.node %<>%
-            dplyr::group_by(feature) %>%
             dplyr::mutate(
-                p=ifelse(sp_significant == 'pval', pval, padj),
+                p= if (sp_significant == 'pval') pval else padj,
                 size=scales::rescale(-log10(p), to=c(8, 20)),
                 title=paste0(title, '</br>', sp_significant, ': ',
-                             format(p, digits=3, scientific=TRUE))) %>%
-            dplyr::ungroup()
+                             format(p, digits=3, scientific=TRUE)))
     }
 
     species.node.color <- .speciesNodeColor(species.node)

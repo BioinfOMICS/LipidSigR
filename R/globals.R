@@ -51,4 +51,8 @@ utils::globalVariables(c(
     "sub_feature", "sum_composition", "sym", "term", "threshold", "title", "tibble", "tmp", "to", "to.sig",
     "to_label", "true_label", "truth", 'type', "upper",
     "variable", "value", "values", "width", "weight", "x", "x.x", "x0",
-    "x.y", "y", "y0", "yOrder", "yText", "yes", "z", "adjusted_col",".data"))
+    "x.y", "y", "y0", "yOrder", "yText", "yes", "z", "adjusted_col",".data",
+    "rowid", "median", "median", "rnorm", "groupInfo", "P.Value",
+    ":=", "confint.default", "missing_pct", "roc_auc",
+    "sig_auc", "where", "Omics", "value.var", "replace_na_method"))
+

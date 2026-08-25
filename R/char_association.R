@@ -99,7 +99,7 @@ char_association <- function(deSp_se, char){
     bar.tab <- plot.tab %>% dplyr::group_by(characteristic) %>%
         dplyr::summarise(log2FC.mean=mean(log2FC, na.rm=TRUE),
                   log2FC.sd=sd(log2FC, na.rm=TRUE),
-                  log2FC.direction=log2FC.mean/abs(log2FC.mean)) %>%
+                  log2FC.direction=sign(log2FC.mean)) %>%
         dplyr::ungroup() %>%
         dplyr::mutate(significant=ifelse(abs(log2FC.mean) > log2(FC_cutoff), 'Yes', 'No'),
                log2FC.sd=ifelse(is.na(log2FC.sd), 0, log2FC.sd),
@@ -116,8 +116,8 @@ char_association <- function(deSp_se, char){
                            ggplot2::aes(x=x, y=log2FC.mean, fill=significant)) +
         ggplot2::geom_col() +
         ggplot2::geom_errorbar(
-            ggplot2::aes(min=log2FC.mean,
-                         max=log2FC.mean+(log2FC.sd*log2FC.direction))) +
+            ggplot2::aes(ymin=log2FC.mean,
+                         ymax=log2FC.mean+(log2FC.sd*log2FC.direction))) +
         ggthemes::theme_hc() +
         ggplot2::scale_fill_manual(breaks=c('Yes', 'No'),
                                    values=c('#FF4500', '#666666')) +
@@ -196,7 +196,7 @@ char_association <- function(deSp_se, char){
         lolli.tab <- plot.tab %>%
             dplyr::mutate(
                 y=negLog10padj,
-                hover=paste0("Characteristic: ", char, '<br />Feature: ', characteristic,
+                hover=paste0("Characteristic: ", char, '<br />Feature: ', feature,
                                '<br />Adjusted p-value : ', format(padj, digits=3, scientific=TRUE),
                                '<br />-log10padj : ', format(negLog10padj, digits=3)),
                           x=stringr::str_wrap(characteristic, width=10)) %>%

@@ -17,7 +17,7 @@
 #' by \code{\link{list_lipid_char}}.
 #' @param significant Character. The p-value to be used for the statistically
 #' significant. Must be one of "pval" or "padj". Default is \code{'pval'}.
-#' @param p_cutoff Numeric. Significant level. Default is \code{1}.
+#' @param p_cutoff Numeric. Significant level. Default is \code{0.05}.
 #' @param adjust_p_method Character. The correction method of p-value. Allowed
 #' methods include "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr",
 #' and "none". Default is \code{'BH'}.
@@ -27,14 +27,14 @@
 #' @param hclustfun Character. The agglomeration method. This should be
 #' (an unambiguous abbreviation of) one of "ward.D", "ward.D2",
 #' "single", "complete", "average" (= UPGMA), "mcquitty" (= WPGMA),
-#' "median" (= WPGMC) or "centroid" (= UPGMC). Default is \code{'centroid'}.
+#' "median" (= WPGMC) or "centroid" (= UPGMC). Default is \code{'average'}.
 #' @param heatmap_col Character. The value for clustering. Allow method are
 #' "beta_coef" and "t_statistic". Default is \code{'t_statistic'}.
 #' @param transform Character. Method for data transformation. Allowed methods
 #' include "none", "log10", "square", "cube". Select 'none' to skip data transformation.
 #' Default is \code{'log10'}.
 #' @param type Character. Specifies the correlation type: 'Sp' for lipid species
-#' correlation and 'Char' for lipid characteristic correlation.
+#' correlation and 'Char' for lipid characteristic correlation. Default is \code{'Sp'}.
 #' @return Return a SummarizedExperiment object containing analysis results.
 #' @export
 #' @examples
@@ -51,41 +51,27 @@
 
 corr_lr_heatmap <- function(
         processed_se, char=NULL, condition_col, adjusted_col, side_color_char,
-        significant=c('padj', 'pval'), p_cutoff=0.05,
-        adjust_p_method=c('holm', 'hochberg', 'hommel', 'bonferroni', 'BH', 'BY', 'fdr', 'none'),
-        distfun=c('pearson', 'spearman', 'kendall'),
-        hclustfun=c('ward.D', 'ward.D2', 'single', 'complete', 'average', 'mcquitty', 'median', 'centroid'),
-        heatmap_col=c('beta_coef', 't_statistic'),
-        transform=c('none', 'log10', 'square', 'cube'), type=c('Sp', 'Char')){
+        significant='pval', p_cutoff=0.05, adjust_p_method='BH', distfun='spearman',
+        hclustfun='average', heatmap_col='t_statistic', transform='log10', type='Sp'){
 
     .check_inputSE(processed_se, metadata_list=NULL)
     ## check for condition_col & adjusted_col
     group_info <- .extract_df(processed_se, type='group')
     .check_df_corrCol(group_info, condition_col, adjusted_col, cor_type='lr')
     ######
-    if (is.null(significant) | isFALSE(significant %in% c('pval', 'padj')) ) {
-        stop("significant must be one of 'pval' or 'padj'.")
-    }
+    match.arg(significant, c('pval', 'padj'))
+    match.arg(adjust_p_method, c('BH', 'holm', 'hochberg', 'hommel', 'bonferroni', 'BY', 'fdr', 'none'))
     if (!is.numeric(p_cutoff) | isFALSE(.check_numeric_range(p_cutoff, 0, 1)) ) {
         stop("p_cutoff must be a numeric value between 0 and 1.")
     }
-    if (is.null(adjust_p_method) | isFALSE(adjust_p_method %in% c('holm', 'hochberg', 'hommel', 'bonferroni', 'BH', 'BY', 'fdr', 'none')) ) {
-        stop("adjust_p_method must be one of 'holm', 'hochberg', 'hommel', 'bonferroni', 'BH', 'BY', 'fdr', or 'none'.")
-    }
-    if (is.null(distfun) | isFALSE(distfun %in% c('pearson', 'spearman', 'kendall')) ) {
-        stop("distfun must be one of 'pearson', 'spearman', or 'kendall'.")
-    }
-    if (is.null(hclustfun) | isFALSE(hclustfun %in% c('ward.D', 'ward.D2', 'single', 'complete', 'average', 'mcquitty', 'median', 'centroid')) ) {
-        stop("hclustfun must be one of 'ward.D', 'ward.D2', 'single', 'complete', 'average', 'mcquitty', 'median', or 'centroid'.")
-    }
-    if (is.null(heatmap_col) | isFALSE(heatmap_col %in% c('beta_coef', 't_statistic')) ) {
-        stop("heatmap_col must be 'beta_coef' or 't_statistic'.")
-    }
-    if (is.null(transform) | isFALSE(transform %in% c('none', 'log10', 'square', 'cube')) ) {
-        stop("transform must be one of 'none', 'log10', 'square', or 'cube'.")
-    }
+    match.arg(distfun, c('spearman', 'pearson', 'kendall'))
+    match.arg(hclustfun, c('average', 'ward.D', 'ward.D2', 'single', 'complete', 'mcquitty', 'median', 'centroid'))
+    match.arg(heatmap_col, c('t_statistic', 'beta_coef'))
+    match.arg(transform, c('log10', 'square', 'cube', 'none'))
+    match.arg(type, c('Sp', 'Char'))
+
     ## check for type
-    if (!is.null(type) && type=="Sp") {
+    if (type == "Sp") {
         if (!is.null(char)) {
             stop("If type is set to 'Sp' for running lipid species correlation analysis, char must be set to NULL.")
         }
@@ -94,7 +80,7 @@ corr_lr_heatmap <- function(
         }
         abundance_raw <- .extract_df(processed_se, type = "abundance")
         lipid_char_table <- .extract_df(processed_se,type='lipid')
-    } else if (!is.null(type) && type=="Char") {
+    } else if (type == "Char") {
         if (!is.null(side_color_char)) {
             stop("If type is set to 'Char' for running lipid characteristics correlation analysis, side_color_char must be set to NULL.")
         }
@@ -109,8 +95,6 @@ corr_lr_heatmap <- function(
             lipid_char_table, char_data, by.x='row.names', by.y='feature') %>%
             dplyr::filter(characteristic == char) %>%
             dplyr::select(-Row.names, -characteristic)
-    } else {
-        stop("type must be one of 'Sp' or 'Char'.")
     }
 
     abundance <- .transform(abundance_raw, transform)

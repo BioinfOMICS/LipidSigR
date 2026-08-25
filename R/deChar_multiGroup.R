@@ -31,10 +31,8 @@
 
 
 deChar_multiGroup <- function(
-        processed_se, char, ref_group,
-        post_hoc=c('One-way ANOVA', 'Kruskal-Wallis test'),
-        post_hoc_sig=c('pval', 'padj'), post_hoc_p_cutoff=0.05,
-        transform=c('none', 'log10', 'square', 'cube', 'log2')){
+        processed_se, char, ref_group, post_hoc='One-way ANOVA',
+        post_hoc_sig='pval', post_hoc_p_cutoff=0.05, transform='log10'){
 
     #data('lipidChar')
     ## Check parameter
@@ -46,23 +44,20 @@ deChar_multiGroup <- function(
              "characteristics. Please execute list_lipid_char function to view ",
              "the valid lipid characteristics you can input.")
     }
-    if(is.null(post_hoc) | isFALSE(post_hoc %in% c('One-way ANOVA', 'Kruskal-Wallis test'))){
-        stop("The 'post_hoc' parameter must be either 'One-way ANOVA' or 'Kruskal-Wallis test'.")
-    }
-    if(is.null(post_hoc_sig) | isFALSE(post_hoc_sig %in% c('pval', 'padj'))){
-        stop("The 'post_hoc_sig' parameter must be either 'pval' or 'padj'.")
-    }
+    match.arg(post_hoc, c('One-way ANOVA', 'Kruskal-Wallis test'))
+    match.arg(post_hoc_sig, c('pval', 'padj'))
     if(!is.numeric(post_hoc_p_cutoff) | isFALSE(.check_numeric_range(post_hoc_p_cutoff, 0, 1))){
         stop("The 'post_hoc_p_cutoff' parameter must be a numeric value between 0 and 1.")
     }
+    match.arg(transform, c('log10', 'log2', 'square', 'cube', 'none'))
     if(char %in% lipidChar$characteristic &
-       (is.null(transform) | !transform %in% c('none', 'log10', 'square', 'cube'))){
+       (!transform %in% c('none', 'log10', 'square', 'cube'))){
         stop("The 'char' is not a ratio-based characteristic. The ",
              "'transform' parameter must be one of 'none', 'log10', ",
              "'square', or 'cube'.")
     }
     if(!char %in% lipidChar$characteristic &
-       (is.null(transform) | !transform %in% c('none', 'log2'))){
+       (!transform %in% c('none', 'log2'))){
         stop("The 'char' is a ratio-based characteristic. The ",
              "'transform' parameter must be either 'none' or 'log2'.")
     }

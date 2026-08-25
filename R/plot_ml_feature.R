@@ -43,7 +43,8 @@ plot_ml_feature <- function(ml_se, feature_num=10){
         dplyr::mutate(ml_method=unique(varimp_result$ml_method), .before=feature_num) %>%
         dplyr::mutate(ranking_method=unique(varimp_result$ranking_method), .before=ml_method) %>%
         dplyr::arrange(dplyr::desc(sele_freq))
-    imp_data <- varimp_result %>% dplyr::filter(feature_num==feature_num) %>%
+    imp_data <- varimp_result %>%
+        dplyr::filter(feature_num == .env$feature_num) %>%
         dplyr::group_by(feature) %>%
         dplyr::mutate(importance=mean(importance, na.rm=TRUE)) %>%
         dplyr::select(-cv_fold) %>% dplyr::distinct() %>%
@@ -61,7 +62,7 @@ plot_ml_feature <- function(ml_se, feature_num=10){
             x=~(sele_freq*100), y=~stats::reorder(feature, sele_freq), type="bar",
             orientation="h", marker=list(color=~-sele_freq, colorscale="Blues"),
             text=~paste("Feature :", feature, "<br>Selected frequency :", sele_freq*100, "%"),
-            hoverinfo="text") %>%
+            hoverinfo="text", textposition="none") %>%
         plotly::layout(
             xaxis=list(title="Selected frequency (%)", showgrid=TRUE, nticks=20,
                 showline=TRUE, mirror='all'),
@@ -78,13 +79,13 @@ plot_ml_feature <- function(ml_se, feature_num=10){
         x=~importance,y=~stats::reorder(feature, importance), type="bar",
         orientation="h", marker=list(color=~-importance, colorscale="Blues"),
         text=~paste("Feature :", feature, "<br>Average importance :",
-                    round(importance, 2)), hoverinfo="text") %>%
+                    round(importance, 2)), hoverinfo="text", textposition="none") %>%
         plotly::layout(
             xaxis=list(title='Average importance', showgrid=TRUE, nticks=20,
                        showline=TRUE, mirror='all'),
             yaxis=list(title=""),
             title =list(size=15, y=0.99, x=0.1, text=stringr::str_c(
-                'Feature importance for ', as.character(feature_num), ' feature model')) )
+                'Feature importance for ', as.character(feature_num), ' feature model')))
     static_imp <- plot_imp %>% ggplot2::ggplot(
         ggplot2::aes(x=importance, y=stats::reorder(feature, importance), fill=-importance)) +
         ggplot2::geom_col() + ggplot2::labs(y='', x="Average importance") +

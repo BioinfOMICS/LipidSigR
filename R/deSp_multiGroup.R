@@ -25,23 +25,17 @@
 #'     significant='pval', p_cutoff=0.05, transform='log10')
 
 
-deSp_multiGroup <- function(processed_se, ref_group,
-                            test=c('One-way ANOVA', 'Kruskal-Wallis test'),
-                            significant=c('pval', 'padj'), p_cutoff=0.05,
-                            transform=c('none', 'log10', 'square', 'cube')){
+deSp_multiGroup <- function(
+        processed_se, ref_group, test='One-way ANOVA', significant='pval',
+        p_cutoff=0.05,transform='log10'){
     ## Check parameter
     .check_inputSE(processed_se, metadata_list=NULL)
-    if(is.null(test) | isFALSE(test %in% c('One-way ANOVA', 'Kruskal-Wallis test'))){
-        stop("The 'test' parameter must be either 'One-way ANOVA' or 'Kruskal-Wallis test'.")
-    }
-    if(is.null(significant) | isFALSE(significant %in% c('pval', 'padj'))){
-        stop("The 'significant' parameter must be either 'pval' or 'padj'.")
-    }
+
+    match.arg(test, c('One-way ANOVA', 'Kruskal-Wallis test'))
+    match.arg(significant, c('pval', 'padj'))
+    match.arg(transform, c('log10', 'square', 'cube', 'none'))
     if(!is.numeric(p_cutoff) | isFALSE(.check_numeric_range(p_cutoff, 0, 1))){
         stop("The 'p_cutoff' parameter must be a numeric value between 0 and 1.")
-    }
-    if(is.null(transform) | isFALSE(transform %in% c('none', 'log10', 'square', 'cube'))){
-        stop("The 'transform' parameter must be one of 'none', 'log10', 'square' or 'cube'.")
     }
     ## Extract data from SE
     # Lipid abundance

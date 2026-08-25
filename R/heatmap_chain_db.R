@@ -62,10 +62,8 @@
 #'     transform='log10')
 
 heatmap_chain_db <- function(
-        processed_se, char, char_feature=NULL, ref_group,
-        test=c('t-test', 'Wilcoxon test', 'One-way ANOVA', 'Kruskal-Wallis test'),
-        significant=c('pval', 'padj'), p_cutoff=0.05, FC_cutoff=1,
-        transform=c('none', 'log10', 'square', 'cube')){
+        processed_se, char, char_feature=NULL, ref_group, test='t-test',
+        significant='pval', p_cutoff=0.05, FC_cutoff=1, transform='log10'){
 
     #### check parameter ####
     .check_inputSE(processed_se, metadata_list=NULL)
@@ -74,14 +72,13 @@ heatmap_chain_db <- function(
              "characteristics. Please execute list_lipid_char() to view",
              "the valid lipid characteristics you can input.")
     }
-    if(is.null(significant) | isFALSE(significant %in% c('pval', 'padj'))){
-        stop("The 'significant' parameter must be either 'pval' or 'padj'.")
-    }
+    match.arg(test, c('t-test', 'Wilcoxon test', 'One-way ANOVA', 'Kruskal-Wallis test'))
+    match.arg(significant, c('pval', 'padj'))
+    match.arg(transform, c('log10', 'square', 'cube', 'none'))
+
+
     if(!is.numeric(p_cutoff) | isFALSE(.check_numeric_range(p_cutoff, 0, 1))){
         stop("The 'p_cutoff' parameter must be a numeric value between 0 and 1.")
-    }
-    if(is.null(transform) | isFALSE(transform %in% c('none', 'log10', 'square', 'cube'))){
-        stop("The transform parameter must be one of 'none', 'log10', 'square' or 'cube'.")
     }
 
     #### Extract data from SE ####
@@ -101,14 +98,13 @@ heatmap_chain_db <- function(
     if(n_group == 'two' && (!is.numeric(FC_cutoff) | isFALSE(FC_cutoff >= 1))){
         stop("The minimum value for the 'FC_cutoff' parameter is 1.")
     }
-    if(n_group == 'two'
-       & any((is.null(test) | !test %in% c('t-test', 'Wilcoxon test'))) ){
+    if(n_group == 'two' & any(!test %in% c('t-test', 'Wilcoxon test'))){
         stop("'One-way ANOVA' and 'Kruskal-Wallis test' are for multiple ",
              "group comparisons. Please choose either 't-test' or ",
              "'Wilcoxon test' for two group analysis.")
     }
     if(n_group == 'multiple'
-       & (is.null(test) | !test %in% c('One-way ANOVA', 'Kruskal-Wallis test'))){
+       & (!test %in% c('One-way ANOVA', 'Kruskal-Wallis test'))){
         stop("'t-test' and 'Wilcoxon test' are for two group comparisons. ",
              "Please choose either 'One-way ANOVA' or 'Kruskal-Wallis test' ",
              "for multiple group analysis.")

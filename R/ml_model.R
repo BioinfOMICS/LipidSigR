@@ -12,13 +12,14 @@
 #' Allowed methods include 'Random_forest', 'SVM', 'Lasso', 'Ridge',
 #' 'ElasticNet', 'xgboost'. Default is \code{'Random_forest'}.
 #' @param split_prop Numeric. The proportion of data to be retained for modeling/analysis.
-#' The range is 0.1 to 0.5. Default is \code{0.3}.
+#' The range is 0.5 to 1. Default is \code{0.7}.
 #' @param nfold Numeric. The number of fold that the original dataset is randomly
 #' partitioned into equal-sized subsamples. Must be a positive interger.
 #' Default is \code{10}.
 #' @param alpha Numeric. The alpha value between 0 and 1 when choosing
-#' \code{"ElasticNet"} as ml_method. 0 is for Ridge and 1 is for Lasso.
-#' If "ElasticNet" is not selected as the ml_method, set the value to NULL.
+#' \code{"ElasticNet"} as ranking_method or ml_method. 0 is for Ridge and 1
+#' is for Lasso. If "ElasticNet" is not selected as either ranking_method or
+#' ml_method, set the value to NULL.
 #' @param transform Character. Method for data transformation. Allowed methods
 #' include "none", "log10", "square", "cube". Select 'none' to skip data transformation.
 #' Default is \code{'log10'}.
@@ -33,42 +34,31 @@
 #' char_list <- list_lipid_char(processed_se)
 #' ml_se <- ml_model(
 #'     processed_se, char=c("class","Total.DB"), transform='log10',
-#'     ranking_method='Random_forest', ml_method='Random_forest', split_prop=0.3,
+#'     ranking_method='Random_forest', ml_method='Random_forest', split_prop=0.7,
 #'     nfold=5, alpha=NULL)
 ml_model <- function(
-        processed_se, char='none',
-        transform=c('none', 'log10', 'square', 'cube'),
-        ranking_method=c('p_value', 'pvalue_FC', 'ROC', 'Random_forest', 'SVM', 'Lasso', 'Ridge', 'ElasticNet'),
-        ml_method=c('Random_forest', 'SVM', 'Lasso', 'Ridge', 'ElasticNet', 'xgboost'),
-        split_prop=0.3, nfold=10, alpha=NULL){
+        processed_se, char='none', transform='log10',
+        ranking_method='Random_forest', ml_method='Random_forest',
+        split_prop=0.7, nfold=10, alpha=NULL){
     ## check parameter
     .check_inputSE(processed_se, metadata_list=NULL)
     if (is.null(char) | isFALSE(all(.check_char(processed_se, char, type='ml'))) ) {
         stop("Wrong char input, you can view the available char list by list_lipid_char function.")
     }
-    if (is.null(ranking_method) | isFALSE(ranking_method %in% c('p_value', 'pvalue_FC', 'ROC', 'Random_forest', 'SVM', 'Lasso', 'Ridge', 'ElasticNet')) ){
-        stop("ranking_method must be one of 'p_value', 'pvalue_FC', 'ROC', 'Random_forest', 'SVM', 'Lasso', 'Ridge', 'ElasticNet'.")
-    } else if (ranking_method=='ElasticNet'){
+    match.arg(ranking_method, c('Random_forest', 'p_value', 'pvalue_FC', 'ROC', 'SVM', 'Lasso', 'Ridge', 'ElasticNet'))
+    match.arg(ml_method, c('Random_forest', 'SVM', 'Lasso', 'Ridge', 'ElasticNet', 'xgboost'))
+    if (ranking_method=='ElasticNet' | ml_method == 'ElasticNet'){
         if (!is.numeric(alpha) | isFALSE(.check_numeric_range(alpha, 0, 1)) ) {
             stop("alpha must be a numeric value between 0 and 1.")
         }
     }
-    if (is.null(ml_method) | isFALSE(ml_method %in% c('Random_forest', 'SVM', 'Lasso', 'Ridge', 'ElasticNet', 'xgboost')) ){
-        stop("ml_method must be one of 'Random_forest', 'SVM', 'Lasso', 'Ridge', 'ElasticNet', 'xgboost'.")
-    } else if (ml_method=='ElasticNet'){
-        if (!is.numeric(alpha) | isFALSE(.check_numeric_range(alpha, 0, 1)) ) {
-            stop("alpha must be a numeric value between 0 and 1.")
-        }
-    }
-    if (!is.numeric(split_prop) | isFALSE(.check_numeric_range(split_prop, 0.1, 0.5)) ) {
-        stop("split_prop must be a numeric value between 0.1 and 0.5.")
+    if (!is.numeric(split_prop) | isFALSE(.check_numeric_range(split_prop, 0.5, 1)) ) {
+        stop("split_prop must be a numeric value between 0.5 and 1.")
     }
     if (!is.numeric(nfold) | isFALSE(.check_numeric_range(nfold, 1, NULL)) ) {
         stop("nfold must be a numeric value >= 1.")
     }
-    if (is.null(transform) | isFALSE(transform %in% c('none', 'log10', 'square', 'cube')) ) {
-        stop("transform must be one of 'none', 'log10', 'square', or 'cube'.")
-    }
+    match.arg(transform, c('log10', 'cube', 'square', 'none'))
     ## process
     ml_data <- .ml_process(processed_se, char, transform=transform, type="transpose")
 
@@ -90,8 +80,10 @@ ml_model <- function(
     for (fold in seq_len(nfold)) {
         message("Processing CV fold", fold)
         # Split data into train and test sets
-        train_data <- rsample::assessment(cv$splits[[fold]])
-        test_data <- rsample::analysis(cv$splits[[fold]])
+        # train_data <- rsample::assessment(cv$splits[[fold]])
+        # test_data <- rsample::analysis(cv$splits[[fold]])
+        train_data <- rsample::analysis(cv$splits[[fold]])
+        test_data <- rsample::assessment(cv$splits[[fold]])
         fold_results <- .ml_fold(
             train_data, test_data, ranking_method, ml_method, sele_feature_num,
             fold, n_ROC, alpha)
@@ -320,20 +312,20 @@ ml_model <- function(
              nrounds=cv_nround_min, max_depth=3, objective="binary:logistic", verbose=0)
          pred_prob <- stats::predict(model, as.matrix(test_data[-1]))
          varimp <- xgboost::xgb.importance(colnames(test_data[-1]), model)
-        ### xgboost version 3.1.3.1 ###
-        xgb.train <- xgboost::xgb.DMatrix(data=train_data[-1], label=train_data[[1]])
-        cv_model <- xgboost::xgb.cv(
-            data=xgb.train,
-            nrounds=100, nfold=5, verbose=FALSE, early_stopping_rounds=10,
-            params=xgboost::xgb.params(objective="binary:logistic", max_depth=3),
-            prediction=TRUE)
-        cv_nround_min <- cv_model$early_stop$best_iteration
-        model <- xgboost::xgb.train(
-            data=xgb.train, nrounds=cv_nround_min,
-            params=xgboost::xgb.params(objective="binary:logistic", max_depth=3),
-            verbose=0)
-        pred_prob <- stats::predict(model, as.matrix(test_data[-1]))
-        varimp <- xgboost::xgb.importance(model, feature_names=colnames(test_data[-1]))
+        # ### xgboost version 3.1.3.1 ###
+        # xgb.train <- xgboost::xgb.DMatrix(data=train_data[-1], label=train_data[[1]])
+        # cv_model <- xgboost::xgb.cv(
+        #     data=xgb.train,
+        #     nrounds=100, nfold=5, verbose=FALSE, early_stopping_rounds=10,
+        #     params=xgboost::xgb.params(objective="binary:logistic", max_depth=3),
+        #     prediction=TRUE)
+        # cv_nround_min <- cv_model$early_stop$best_iteration
+        # model <- xgboost::xgb.train(
+        #     data=xgb.train, nrounds=cv_nround_min,
+        #     params=xgboost::xgb.params(objective="binary:logistic", max_depth=3),
+        #     verbose=0)
+        # pred_prob <- stats::predict(model, as.matrix(test_data[-1]))
+        # varimp <- xgboost::xgb.importance(model, feature_names=colnames(test_data[-1]))
     }
 
     if (ml_method=='xgboost') {
@@ -350,8 +342,8 @@ ml_model <- function(
     model_result <- model_varImp$model
     varImp_result <- model_varImp$varImp
     cm <- caret::confusionMatrix(
-        as.factor(model_result$true_label),
-        factor(model_result$pred_label, levels=c(0, 1)), positive='1')
+        factor(model_result$pred_label, levels=c(0, 1)),
+        as.factor(model_result$true_label), positive='1')
     two_class_roc <- data.frame(
         truth=model_result$true_label, Class1=model_result$pred_prob) %>%
         dplyr::mutate(truth=ifelse(truth == 1, 'Class1', 'Class2')) %>%

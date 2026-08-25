@@ -64,10 +64,9 @@
 #'     deSp_se_multiGroup, char='class', rank_by='statistic',
 #'     significant='pval', p_cutoff=0.05)
 
-enrichment_lsea <- function(deSp_se, char=NULL,
-                            rank_by=c('log2FC', 'pval', 'padj', 'statistic'),
-                            significant=c('pval', 'padj'), p_cutoff=0.05,
-                            n_lipid=2){
+enrichment_lsea <- function(
+        deSp_se, char=NULL, rank_by='statistic', significant='pval',
+        p_cutoff=0.05, n_lipid=2){
     ## Check parameter
     .check_inputSE(deSp_se, metadata_list=c(
         'all_deSp_result', 'sig_deSp_result', 'significant', 'p_cutoff'))
@@ -76,12 +75,8 @@ enrichment_lsea <- function(deSp_se, char=NULL,
              "characteristics. Please use the list_lipid_char function to ",
              "view which lipid characteristics can be analyzed.")
     }
-    if(is.null(rank_by) | isFALSE(rank_by %in% c('log2FC', 'pval', 'padj', 'statistic'))){
-        stop("The 'rank_by' parameter must be one of 'log2FC', 'pval', 'padj' or 'statictic'.")
-    }
-    if(is.null(significant) | isFALSE(significant %in% c('pval', 'padj'))){
-        stop("The 'significant' parameter must be either 'pval' or 'padj'.")
-    }
+    match.arg(rank_by, c('statistic','log2FC', 'pval', 'padj'))
+    match.arg(significant, c('pval', 'padj'))
     if(!is.numeric(p_cutoff) | isFALSE(.check_numeric_range(p_cutoff, 0, 1))){
         stop("The 'p_cutoff' parameter must be a numeric value between 0 and 1.")
     }

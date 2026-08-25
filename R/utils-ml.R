@@ -96,7 +96,7 @@
             feature_num_label = auc_label[match(feature_num, total_feature)],
             feature_num_label1 = auc_chr[match(feature_num, total_feature)])
     plot_tab <- rbind(data1[auc_col], data2[c(auc_col)]) %>%
-        dplyr::filter(feature_num==feature_num) %>%
+        dplyr::filter(feature_num == .env$feature_num) %>%
         dplyr::mutate(cv=ifelse(cv_fold == 'mean', '1', '0'))
     return(list(auc_tab=auc_tab, plot_tab=plot_tab))
 }

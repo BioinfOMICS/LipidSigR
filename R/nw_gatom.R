@@ -34,21 +34,17 @@
 #'     sp_p_cutoff=0.05, sp_FC_cutoff=1)
 
 nw_gatom <- function(
-        deSp_se, organism=c('human', 'mouse'), n_lipid=50,
-        sp_significant=c('pval', 'padj'), sp_p_cutoff=0.05, sp_FC_cutoff=1){
+        deSp_se, organism='human', n_lipid=50, sp_significant='pval',
+        sp_p_cutoff=0.05, sp_FC_cutoff=1){
 
     ## Check de SE
     .check_de_outputSE(deSp_se, de_type="deSp")
 
     ## Check parameter
-    if(is.null(organism) | isFALSE(organism %in% c('human', 'mouse'))){
-        stop("The 'organism' parameter must be either 'human' or 'mouse'.")
-    }
+    match.arg(organism, c('human', 'mouse'))
+    match.arg(sp_significant, c('pval', 'padj'))
     if(!is.numeric(n_lipid) | isFALSE(n_lipid >= 1)){
         stop("The minimum value for the 'n_lipid' parameter is 1.")
-    }
-    if(is.null(sp_significant) | isFALSE(sp_significant %in% c('pval', 'padj'))){
-        stop("The 'sp_significant' parameter must be either 'pval' or 'padj'.")
     }
     if(!is.numeric(sp_p_cutoff) | isFALSE(.check_numeric_range(sp_p_cutoff, 0, 1))){
         stop("The 'sp_p_cutoff' parameter must be a numeric value between 0 and 1.")
@@ -90,19 +86,19 @@ nw_gatom <- function(
     if(nrow(deLipid) == 0) return(warning('No lipid species meet these significant cutoffs; please adjust the thresholds you have set.'))
     ## Significant genes
     deGene <- n_gene <- NULL
-    if(!is.null(deGene)){
-        if(gene_significant == 'pval') deGene %<>% dplyr::mutate(p=pvalue)
-        if(gene_significant == 'padj') deGene %<>% dplyr::mutate(p=padj)
-        deGene %<>%
-            dplyr::filter(
-                abs(log2FoldChange) > log2(gene_FC_cutoff), p < gene_p_cutoff) %>%
-            dplyr::select('ID'='gene_symbol', 'pval'='pvalue',
-                          'log2FC'='log2FoldChange', baseMean)
-        if(nrow(deGene) == 0){
-            deGene <- NULL
-            return(warning('No genes meet these significant cutoffs; please adjust the thresholds you have set.'))
-        }
-    }
+    # if(!is.null(deGene)){
+    #     if(gene_significant == 'pval') deGene %<>% dplyr::mutate(p=pvalue)
+    #     if(gene_significant == 'padj') deGene %<>% dplyr::mutate(p=padj)
+    #     deGene %<>%
+    #         dplyr::filter(
+    #             abs(log2FoldChange) > log2(gene_FC_cutoff), p < gene_p_cutoff) %>%
+    #         dplyr::select('ID'='gene_symbol', 'pval'='pvalue',
+    #                       'log2FC'='log2FoldChange', baseMean)
+    #     if(nrow(deGene) == 0){
+    #         deGene <- NULL
+    #         return(warning('No genes meet these significant cutoffs; please adjust the thresholds you have set.'))
+    #     }
+    # }
 
 
     ## Getting atom graph
@@ -250,18 +246,17 @@ nw_gatom <- function(
         dplyr::select(from, to, 'from_label'='lipid.x', 'to_label'='lipid.y',
                       label, everything())
 
-    if(!is.null(deGene)){
-        edge.table %<>%
-            dplyr::mutate(color=ifelse(is.na(log2FC), '#DDDDDD',
-                                       ifelse(log2FC > 0, '#FF4500', '#4169E1')),
-                          width=ifelse(is.na(log2FC), 2, 5),
-                          title=paste0(title, '</br>Log2FC: ',
-                                       format(log2FC, digits=3),
-                                       '</br>pval: ', format(pval, digits =3,
-                                                             scientific=TRUE)))
-    }else{
-        edge.table %<>% dplyr::mutate(log2FC=NA)
-    }
+    # if(!is.null(deGene)){
+    #     edge.table %<>%
+    #         dplyr::mutate(color=ifelse(is.na(log2FC), '#DDDDDD',
+    #                                    ifelse(log2FC > 0, '#FF4500', '#4169E1')),
+    #                       width=ifelse(is.na(log2FC), 2, 5),
+    #                       title=paste0(title, '</br>Log2FC: ',
+    #                                    format(log2FC, digits=3),
+    #                                    '</br>pval: ', format(pval, digits =3,
+    #                                                          scientific=TRUE)))
+    # }
+    edge.table %<>% dplyr::mutate(log2FC=NA)
 
     edges <- edge.table %>%
         dplyr::select(from, to, from_label, to_label, label, dashes, font.size,

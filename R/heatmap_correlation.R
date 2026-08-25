@@ -20,7 +20,7 @@
 #' "median" (= WPGMC) or "centroid" (= UPGMC). Default is \code{'average'}.
 #' @param type Character. It must be 'sample' or 'class'. 'sample' outputs the
 #' correlation results of samples, and 'class' outputs output the correlation
-#' results of lipid class.
+#' results of lipid class. Default is \code{'sample'}.
 #' @return Return a list of 1 interactive plot, 1 static plot, and 1 table.
 #' \enumerate{
 #' \item interactive_heatmap & static_heatmap: heatmaps illustrate the correlation between samples or lipid class
@@ -37,10 +37,8 @@
 #'     correlation='pearson', distfun='maximum', hclustfun='average', type='sample')
 
 heatmap_correlation <- function(
-        processed_se, char, transform=c('none', 'log10', 'square', 'cube'),
-        correlation=c('pearson', 'spearman'),
-        distfun=c('pearson', 'spearman', 'kendall', 'euclidean', 'maximum', 'manhattan', 'canberra', 'binary', 'minkowski'),
-        hclustfun=c('ward.D', 'ward.D2', 'single', 'complete', 'average', 'mcquitty', 'median', 'centroid'),
+        processed_se, char, transform='log10', correlation='pearson',
+        distfun='maximum', hclustfun='average',
         type=c('sample', 'class')){
 
     ## check parameter
@@ -50,21 +48,12 @@ heatmap_correlation <- function(
     } else if (isFALSE(.check_char(processed_se, char, type='common'))) {
         stop("Wrong char input, you can view the available char list by list_lipid_char function.")
     }
-    if (is.null(transform) | isFALSE(transform %in% c('none', 'log10', 'square', 'cube')) ) {
-        stop("transform must be one of 'none', 'log10', 'square', or 'cube'.")
-    }
-    if (is.null(correlation) | isFALSE(correlation %in% c('pearson', 'spearman')) ) {
-        stop("correlation must be one of 'pearson' or 'spearman'.")
-    }
-    if (is.null(distfun) | isFALSE(distfun %in% c('pearson', 'spearman', 'kendall', 'euclidean', 'maximum', 'manhattan', 'canberra', 'binary', 'minkowski')) ) {
-        stop("distfun must be one of 'pearson', 'spearman', 'kendall', 'euclidean', 'maximum', 'manhattan', 'canberra', 'binary', or 'minkowski'.")
-    }
-    if (is.null(hclustfun) | isFALSE(hclustfun %in% c('ward.D', 'ward.D2', 'single', 'complete', 'average', 'mcquitty', 'median', 'centroid')) ) {
-        stop("hclustfun must be one of 'ward.D', 'ward.D2', 'single', 'complete', 'average', 'mcquitty', 'median', or 'centroid'.")
-    }
-    if (is.null(type) | isFALSE(type %in% c('sample', 'class')) ) {
-        stop("type must be one of 'sample' or 'class'.")
-    }
+
+    match.arg(transform, c('log10', 'cube', 'square', 'none'))
+    match.arg(correlation, c('pearson', 'spearman'))
+    match.arg(distfun, c('maximum', 'pearson', 'spearman', 'kendall', 'euclidean', 'manhattan', 'canberra', 'binary', 'minkowski'))
+    match.arg(hclustfun, c('average', 'ward.D', 'ward.D2', 'single', 'complete', 'mcquitty', 'median', 'centroid'))
+    match.arg(type, c('sample', 'class'))
 
     abundance_raw <- .extract_df(processed_se, type="abundance")
     lipid_char_table <- .extract_df(processed_se,type='lipid')
@@ -114,7 +103,7 @@ heatmap_correlation <- function(
         corr_coef <- stats::cor(lipids_abundance, method=correlation,
                                 use="pairwise.complete.obs")
         corr_p <- .cor.test.p(x=lipids_abundance, method=correlation)
-        if(all(!is.na(lipids_abundance)) & nrow(lipids_abundance)>=2 & ncol(lipids_abundance)>=2){
+        if(all(!is.na(corr_coef)) & nrow(corr_coef)>=2 & ncol(corr_coef)>=2){
             res <- .lipid_heatmap(corr_coef, distfun, hclustfun)
             reorder_corr_coef <- res$reorder_corr_coef
             heatmap <- res$lipids_hm
@@ -147,7 +136,7 @@ heatmap_correlation <- function(
         col_dend <- hclust(dist(
             t(corr_coef), method=distfun),method=hclustfun)
     }
-    if(min(corr_coef)>=0 || max(corr_coef)<=0){
+    if(min(corr_coef) >= 0 || max(corr_coef) <= 0){
         sample_hm <- iheatmapr::iheatmap(
             corr_coef, colors=.heatmap_color_scale(corr_coef), colorbar_grid=cb_grid) %>%
             iheatmapr::add_col_dendro(
@@ -186,7 +175,7 @@ heatmap_correlation <- function(
         col_dend <- hclust(
             dist(t(corr_coef), method=distfun),method=hclustfun)
     }
-    if(min(corr_coef)>0 | max(corr_coef)<0){
+    if(min(corr_coef) >= 0 | max(corr_coef) <= 0){
         lipids_hm <- iheatmapr::iheatmap(
             corr_coef,colors=.heatmap_color_scale(corr_coef),
             colorbar_grid=cb_grid) %>%

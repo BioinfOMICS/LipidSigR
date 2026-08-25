@@ -49,8 +49,8 @@
 #' ora_one_multiGroup <- enrichment_ora(
 #'     deSp_se_multiGroup, char='class', significant='pval', p_cutoff=0.05)
 
-enrichment_ora <- function(deSp_se, char=NULL, significant=c('pval', 'padj'),
-                           p_cutoff=0.05){
+enrichment_ora <- function(
+        deSp_se, char=NULL, significant='pval', p_cutoff=0.05){
     ## Check parameter
     .check_de_outputSE(deSp_se, de_type="deSp")
     if(!is.null(char) & isFALSE(char %in% lipidChar$characteristic)){
@@ -58,9 +58,7 @@ enrichment_ora <- function(deSp_se, char=NULL, significant=c('pval', 'padj'),
              "characteristics. Please use the list_lipid_char function to ",
              "view which lipid characteristics can be analyzed.")
     }
-    if(is.null(significant) | isFALSE(significant %in% c('pval', 'padj'))){
-        stop("The 'significant' parameter must be either 'pval' or 'padj'.")
-    }
+    match.arg(significant, c('pval', 'padj'))
     if(!is.numeric(p_cutoff) | isFALSE(.check_numeric_range(p_cutoff, 0, 1))){
         stop("The 'p_cutoff' parameter must be a numeric value between 0 and 1.")
     }
@@ -137,11 +135,19 @@ enrichment_ora <- function(deSp_se, char=NULL, significant=c('pval', 'padj'),
         dplyr::summarise(InCharDeLipid=dplyr::n(),
                          Lipids=paste0(feature, collapse=','), .groups='drop')%>%
         dplyr::left_join(all.class, by=c('characteristic', 'charFeature', 'direction'))
-    # Number of all significant lipids & all lipids
-    n.lipid <- sig.class %>%
+
+    # Number of all significant lipids (per characteristic) -- unchanged, this part was already correct
+    n.sig <- sig.class %>%
         dplyr::group_by(characteristic) %>%
-        dplyr::summarise(all.sig = sum(InCharDeLipid, na.rm=TRUE),
-                         all.lipid = sum(nLipid, na.rm=TRUE), .groups='drop')
+        dplyr::summarise(all.sig = sum(InCharDeLipid, na.rm=TRUE), .groups='drop')
+
+    # Number of all lipids in the universe (per characteristic) -- FIX: sum over all.class
+    # (every charFeature, including ones with zero significant hits), not over sig.class
+    n.lipid <- all.class %>%
+        dplyr::group_by(characteristic) %>%
+        dplyr::summarise(all.lipid = sum(nLipid, na.rm=TRUE), .groups='drop') %>%
+        dplyr::left_join(n.sig, by='characteristic')
+
     # Calculate the 2*2 contingency table
     sig.class %<>% dplyr::left_join(n.lipid, by='characteristic') %>%
         dplyr::mutate(notInCharDeLipid=all.sig-InCharDeLipid,

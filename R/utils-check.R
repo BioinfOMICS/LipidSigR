@@ -2,8 +2,13 @@
         abundance, goslin_lipid_char, group_info, se_type, paired_sample) {
     # input data not null & 0*0 data frame
     .check_df_null_0(abundance, data_name="Abundance data" )
-    .check_df_null_0(goslin_lipid_char,
-                     data_name="Goslin lipid characteristics table" )
+    # goslin_annotation only applies to lipidomics data (defines lipid
+    # characteristics); for non-lipidomics omics (e.g. se_type='rna') this
+    # table does not exist and is expected to be NULL.
+    if (se_type != "rna") {
+        .check_df_null_0(goslin_lipid_char,
+                         data_name="Goslin lipid characteristics table" )
+    }
     # if (isFALSE(.check_dataType(abundance, "data.frame", type="partial")) ){
     #     stop("Abundance data must be a data frame.")
     # }
@@ -17,7 +22,7 @@
             if (all(dim(group_info) == c(0, 0)) ) {
                 stop("Group information table must be a data frame and cannot be data frame with 0 columns and 0 rows.")
             }
-            if (se_type=="de_two" && !is.logical(paired_sample)) {
+            if (se_type=="de_two" && (!is.logical(paired_sample) || is.na(paired_sample))) {
                 stop("paired_sample must be logical value for two group data of differential analysis.")
             } else if (se_type!="de_two" && !is.null(paired_sample)){
                 stop("paired_sample should be NULL.")
@@ -27,8 +32,25 @@
         if (!is.null(group_info)) {
             warning("Detect group information data, which is optional for profiling analysis.")
         }
+    } else if (se_type=="rna") {
+        # 'rna' signals a non-lipidomics SE with no goslin annotation. It
+        # carries no de_two/de_multiple/ml/corr analysis design of its own
+        # (the resulting SE is meant to feed Multi-Omics analysis), but
+        # group_info is still required - its column layout (de_two or
+        # de_multiple style), group count, and pairing are structurally
+        # checked later by .check_rna_group_info() once we're past this
+        # generic sanity check.
+        if (!is.null(goslin_lipid_char)) {
+            stop("goslin_annotation must be NULL when se_type = 'rna', as non-lipidomics abundance data has no lipid structural annotation.")
+        }
+        if (is.null(group_info)) {
+            stop("Group information table cannot be NULL when se_type = 'rna'.")
+        }
+        if (all(dim(group_info) == c(0, 0)) ) {
+            stop("Group information table must be a data frame and cannot be data frame with 0 columns and 0 rows.")
+        }
     } else {
-        stop("se_type must be 'profiling', 'de_two', 'de_multiple', 'ml', or 'corr'." )
+        stop("se_type must be 'profiling', 'de_two', 'de_multiple', 'ml', 'corr', or 'rna'." )
     }
 }
 
@@ -118,9 +140,78 @@
         if (isFALSE(all(
             .check_rowNum(group_info[group_info$group==0, ], 30),
             .check_rowNum(group_info[group_info$group==1, ], 30)  ))) {
-
+            stop("Each group must have more than 30 samples for machine learning analysis.")
         }
     }
+}
+
+## group_info check for se_type='rna'. 'rna' has no downstream analysis
+## design of its own (the SE is meant to feed Multi-Omics analysis), but the
+## group_info table format is still expected to follow one of the
+## de_two/de_multiple lipidomics layouts, auto-detected by column
+## count/names and cross-checked against the actual data:
+##   - 4 columns (sample_name, label_name, group, pair) -> de_two-style,
+##     must contain exactly 2 groups; paired design is inferred directly
+##     from the 'pair' column instead of a separate paired_sample argument.
+##   - 3 columns (sample_name, label_name, group) -> de_multiple-style,
+##     must contain more than 2 groups, each with more than 2 samples.
+## ml/corr layouts are intentionally NOT supported here - an 'rna' SE can
+## therefore only be combined via as_MultiAssayExperiment() with a lipidSE
+## built with se_type = "de_two" or "de_multiple" (whose colData structure
+## must then match exactly, per .check_mae_colData()).
+## Returns the detected format string ("de_two"/"de_multiple") so callers
+## can size sample number requirements consistently with the matching
+## lipidomics se_type.
+.check_rna_group_info <- function(abundance, group_info){
+    if (ncol(group_info)==4 &&
+        isTRUE(.check_colName(
+            group_info, c("sample_name", "label_name", "group", "pair"),
+            type="identical"))) {
+        detected_format <- "de_two"
+    } else if (ncol(group_info)==3 &&
+               isTRUE(.check_colName(
+                   group_info, c("sample_name", "label_name", "group"),
+                   type="identical"))) {
+        detected_format <- "de_multiple"
+    } else {
+        stop("Group information table for se_type = 'rna' must follow ",
+             "either the de_two format (columns: sample_name, label_name, ",
+             "group, pair) or the de_multiple format (columns: ",
+             "sample_name, label_name, group).")
+    }
+
+    ## abundance colnames match group_info sample_name
+    if (isFALSE(.check_colName(
+        abundance[-1], group_info$sample_name, type="identical"))) {
+        stop("Sample names in group information table 'sample_name' column must be the same as the sample names in the abundance data.")
+    }
+    ## group_info sample names no duplicate
+    if (isFALSE(.check_no_duplicates(group_info$sample_name))) {
+        stop("Sample names in group information table must be unique.")
+    }
+    ## no NA in sample_name/label_name/group
+    if (isFALSE(
+        .check_no_NA(group_info, c("sample_name", "label_name", "group")))) {
+        stop("NA values are not allowed in the 'sample_name', 'label_name', and 'group' columns.")
+    }
+
+    n_group <- length(unique(group_info$group))
+    if (detected_format=="de_two") {
+        if (n_group!=2) {
+            stop("The column 'group' in group information table must contain 2 groups when a 'pair' column is provided (de_two format).")
+        }
+        ## infer paired design directly from the 'pair' column content
+        inferred_paired <- isFALSE(isTRUE(all(is.na(group_info$pair))))
+        .check_pair_sample(group_info, inferred_paired)
+    } else {
+        if (n_group<=2) {
+            stop("The column 'group' in group information table must contain more than 2 groups when no 'pair' column is provided (de_multiple format).")
+        }
+        if (isFALSE(.check_multiGroup_sample(group_info))) {
+            stop("In Group information table of multiple groups, each group must contain more than 2 samples.")
+        }
+    }
+    return(detected_format)
 }
 
 .check_pair_sample <- function(group_info, paired_sample){
@@ -142,7 +233,7 @@
     }
     if (isFALSE(pass)) {
         stop(
-        "Incorrect values in group information table 'pair' column. Each pair
+            "Incorrect values in group information table 'pair' column. Each pair
         should be sequentially numbered from 1 to N without any missing, blank,
         or skipped numbers; otherwise, the value must be marked as NA.")
     }
@@ -173,7 +264,7 @@
     ## Check column name
     if (isFALSE(.check_colName(goslin_annotation, goslin.colname, type="partial"))) {
         stop('The `goslin_annotation` table needs to include the following ',
-            'columns: ', paste0(goslin.colname, collapse=', '), '.')
+             'columns: ', paste0(goslin.colname, collapse=', '), '.')
     }
     ## Check lipid name
     if (isFALSE(.check_no_duplicates(goslin_annotation$Original.Name))) {
@@ -225,7 +316,8 @@
 
         sample_limit <- switch(
             se_type,
-            "profiling"=2, "de_two"=2, "de_multiple"=2, "ml"=60, "corr"=10)
+            "profiling"=2, "de_two"=2, "de_multiple"=2, "ml"=60, "corr"=10,
+            "rna"=2)
         ## at least over sample limit
         if (isTRUE(.check_colNum(abundance_rmC, sample_limit))) {
             warning("Remove ", rm_colNum, "/", nrow(abundance), " samples with constant values (including all NAs and all zeros). Remove sample: ", rm_colName, ".")
@@ -591,5 +683,42 @@
     }
     if (length(S4Vectors::metadata(ml_se)[["feature_option"]])!=7) {
         stop("Incorrect SummarizedExperiment structure. Please use output from ml_model function.")
+    }
+}
+
+## Shared structural check for the `mae` consumed by multiOmics_* functions
+## (multiOmics_mofa(), multiOmics_DIABLO()): must be a MultiAssayExperiment
+## built by as_MultiAssayExperiment(), containing exactly the
+## "lipidomics"/"rna" experiments, with a "group" column in colData (used
+## as the outcome/covariate by both downstream methods). Returns the
+## subject-level colData as a data frame, invisibly, so callers that also
+## need it (e.g. to pull out the "group" column) don't have to re-fetch it.
+.check_multiOmics_mae <- function(mae){
+    if (isFALSE(inherits(mae, "MultiAssayExperiment"))) {
+        stop(
+            "mae must be a MultiAssayExperiment object constructed by ",
+            "as_MultiAssayExperiment().")
+    }
+    if (isFALSE(setequal(names(mae), c("lipidomics", "rna")))) {
+        stop(
+            "mae must contain exactly two experiments named 'lipidomics' ",
+            "and 'rna', as produced by as_MultiAssayExperiment().")
+    }
+    mae_group_info <- as.data.frame(MultiAssayExperiment::colData(mae))
+    if (isFALSE("group" %in% colnames(mae_group_info))) {
+        stop(
+            "colData(mae) must contain a 'group' column, as produced when ",
+            "lipidSE was built with se_type = 'de_two' or 'de_multiple'.")
+    }
+    invisible(mae_group_info)
+}
+
+## Checks that x is a single positive integer-valued number (accepts e.g.
+## 10 or 10L, rejects non-numeric, length != 1, NA, non-whole, or
+## non-positive values).
+.check_positive_int <- function(x, arg_name){
+    if (isFALSE(is.numeric(x)) || length(x) != 1 || is.na(x) ||
+        x != round(x) || x < 1) {
+        stop(arg_name, " must be a single positive integer.")
     }
 }

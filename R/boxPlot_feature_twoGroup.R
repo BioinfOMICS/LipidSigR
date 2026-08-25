@@ -30,19 +30,12 @@
 #'     processed_se, feature='Cer 38:1;2', ref_group='ctrl', test='t-test',
 #'     transform='log10')
 boxPlot_feature_twoGroup <- function(
-        processed_se, feature, ref_group, test=c('t-test', 'Wilcoxon test'),
-        transform=c('none', 'log10', 'square', 'cube')){
+        processed_se, feature, ref_group, test='t-test', transform='log10'){
 
     ## check parameter
     .check_inputSE(processed_se, metadata_list=NULL)
-    if (is.null(test) | isFALSE(test %in% c('t-test', 'Wilcoxon test')) ) {
-        stop("The 'test' parameter must be either 't-test' or 'Wilcoxon test'.")
-    }
-    if (is.null(transform) |
-        isFALSE(transform %in% c('none', 'log10', 'square', 'cube')) ) {
-        stop("The 'transform' parameter must be one of 'none', 'log10',",
-             " 'square' or 'cube'.")
-    }
+    match.arg(test, c('t-test', 'Wilcoxon test'))
+    match.arg(transform, c('log10', 'square', 'cube', 'none'))
     #### Extract data from SE ####
     ## Lipid abundance
     abundance <- .extract_df(processed_se, type="abundance")
@@ -97,7 +90,7 @@ boxPlot_feature_twoGroup <- function(
         ## Label of y axis
         if(transform == 'log10'){
             Y <- 'Log10-transformed abundance'
-        }else if(transform %in% c('cube', 'sqare')){
+        }else if(transform %in% c('cube', 'square')){
             Y <- paste0(stringr::str_to_title(transform),
                         '-transformed abundance')
         }else{
@@ -127,7 +120,7 @@ boxPlot_feature_twoGroup <- function(
     }else if(test == 'Wilcoxon test'){
         test_res <- tryCatch({
             test_res <- rstatix::wilcox_test(
-                sub_abund, exp ~ original_group_name, paired=paired_sample,
+                sub_abund, abund ~ original_group_name, paired=paired_sample,
                 ref.group=rstatix.ref.group)
         }, error=function(e){
             test_res <- NULL

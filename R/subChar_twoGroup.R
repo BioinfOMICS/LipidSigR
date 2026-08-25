@@ -35,9 +35,8 @@
 #'     FC_cutoff=1, transform='log10')
 
 subChar_twoGroup <- function(
-    processed_se, char, subChar, ref_group, test=c('t-test', 'Wilcoxon test'),
-    significant=c("pval", "padj"), p_cutoff=0.05, FC_cutoff=1,
-    transform=c('none', 'log10', 'square', 'cube')) {
+    processed_se, char, subChar, ref_group, test='t-test',
+    significant='pval', p_cutoff=0.05, FC_cutoff=1, transform='log10') {
 
     #data('lipidChar')
     ## Check parameter
@@ -54,18 +53,15 @@ subChar_twoGroup <- function(
     if(is.null(subChar) | isFALSE(subChar %in% char_list)){
         stop("The 'subChar' parameter is not in the list of lipid characteristics. Please execute list_lipid_char function to view the valid lipid characteristics you can input.")
     }
-    if(is.null(test) | isFALSE(test %in% c('t-test', 'Wilcoxon test'))){
-        stop("The 'test' parameter must be either 't-test', or 'Wilcoxon test'.")
-    }
-    if(is.null(significant) | isFALSE(significant %in% c('pval', 'padj'))){
-        stop("The 'significant' parameter must be either 'pval' or 'padj'.")
-    }
+    match.arg(test, c('t-test', 'Wilcoxon test'))
+    match.arg(significant, c('pval', 'padj'))
     if(!is.numeric(p_cutoff) | isFALSE(.check_numeric_range(p_cutoff, 0, 1))){
         stop("The 'p_cutoff' parameter must be a numeric value between 0 and 1.")
     }
-    if(is.null(transform) | !transform %in% c('none', 'log10', 'square', 'cube')){
-        stop("The 'transform' parameter must be one of 'none', 'log10', 'square', or 'cube'.")
+    if (!is.numeric(FC_cutoff) | isFALSE(.check_numeric_range(FC_cutoff, 1, NULL)) ) {
+        stop("FC_cutoff must be a numeric value >= 1.")
     }
+    match.arg(transform, c('log10', 'cube', 'square', 'none'))
 
     #### Extract data from SE ####
     abundance <- .extract_df(processed_se, type="abundance")
@@ -79,7 +75,7 @@ subChar_twoGroup <- function(
     }
     ## Group information
     if (.check_nGroup(group_info_raw) != 'two') {
-        stop('This function is used for two groups. If your data consists of multi groups, please use deChar_multiGroup functionfor analysis.')
+        stop('This function is used for two groups. If your data consists of multi groups, please use subChar_multiGroup function for analysis.')
     }
     ## add original group names
     group_info <- group_info_raw %>%
@@ -243,7 +239,7 @@ plot_subChar_twoGroup <- function(subChar_se, subChar_feature){
     ## Group information
     group_info <- .extract_df(subChar_se, type="group")
     if(.check_nGroup(group_info) != 'two'){
-        stop("This function is used for two groups. If your data", "consists of two groups, please use plot_deChar_multiGroup function", "for analysis.")
+        stop("This function is used for two groups. If your data", "consists of multi groups, please use plot_deChar_multiGroup function", "for analysis.")
     }
     ref_group <- unique(group_info$original_group_name[which(group_info$group == 'ctrl')])
     paired_sample <- ifelse(isFALSE(all(is.na(group_info$pair))), TRUE, FALSE)
@@ -282,13 +278,13 @@ plot_subChar_twoGroup <- function(subChar_se, subChar_feature){
     index_stat <- .stat_twoGroup(abundance=index_abund, group_info, paired_sample, test=post_hoc_test)
     index_stat_tab <- index_mean %>% dplyr::left_join(index_stat, by='feature')
     Combine_char_result_table <- index_stat_tab
-    Combine_char_result_table <- Combine_char_result_table %>% dplyr::mutate(sig=ifelse((significant < p_cutoff) & (abs(log2FC) > log2(FC_cutoff)),'yes', 'no'))
+    Combine_char_result_table <- Combine_char_result_table %>% dplyr::mutate(sig=ifelse((get(significant) < p_cutoff) & (abs(log2FC) > log2(FC_cutoff)),'yes', 'no'))
     Combine_char_result_table <- Combine_char_result_table %>% dplyr::mutate(sig=ifelse(is.na(sig), 'no', sig ))
     ## Gather the abundance data
     sub_abund <- index_abund %>%
         tidyr::gather(sample_name, abund, -1) %>%
         dplyr::left_join(group_info, by='sample_name')
-    box_res <- .boxPlot_deChar_twoGroup(Combine_char_result_table, boxTab=sub_abund, char, split_class=subChar_feature)
+    box_res <- .boxPlot_deChar_twoGroup(Combine_char_result_table, boxTab=sub_abund, char, significant, split_class=subChar_feature)
 
     return(list(static_barPlot=bar_res$barPlot,
                 static_barPlot_sqrt=bar_res$barPlot_sqrt,

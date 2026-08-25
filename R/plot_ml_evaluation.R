@@ -19,18 +19,13 @@
 #' @examples
 #' data("ml_se_sub")
 #' res <- plot_ml_evaluation(ml_se_sub, eval_method='Accuracy')
-plot_ml_evaluation <- function(ml_se, eval_method){
+plot_ml_evaluation <- function(ml_se, eval_method='Accuracy'){
     .check_ml_outputSE(ml_se)
-    eval_method_option <- c(
-        'Accuracy', 'Sensitivity', 'Specificity', 'Pos Pred Value',
-        'Neg Pred Value', 'Precision', 'Recall', 'F1', 'Prevalence',
-        'Detection Rate', 'Detection Prevalence', 'Balanced Accuracy')
-    if(is.null(eval_method) | isFALSE(eval_method %in% eval_method_option)){
-        stop('eval_method must be one of the strings "Accuracy", "Sensitivity",
-         "Specificity", "Pos Pred Value", "Neg Pred Value", "Precision",
-         "Recall", "F1", "Prevalence", "Detection Rate",
-         "Detection Prevalence", or "Balanced Accuracy".')
-    }
+
+    match.arg(eval_method,
+              c('Accuracy', 'Sensitivity', 'Specificity', 'Pos Pred Value',
+                'Neg Pred Value', 'Precision', 'Recall', 'F1', 'Prevalence',
+                'Detection Rate', 'Detection Prevalence', 'Balanced Accuracy'))
     cm <- S4Vectors::metadata(ml_se)$confusion_matrix %>% as.data.frame()
     fil_data <- cm %>% dplyr::filter(index==eval_method)
     # evaluation data

@@ -10,9 +10,8 @@
 #'  \code{\link{deChar_multiGroup}} is also allowed.)
 #' @param scaling Logical. If scaling=TRUE, each block is
 #' standardized to zero means and unit variances. Default is \code{TRUE}.
-#' @param centering Logical. If centering=TRUE, the variables should be
-#' shifted to be zero centered. Alternately, a vector of length equal the
-#' number of columns of x can be supplied. The value is passed to scale. Default is \code{TRUE}.
+#' @param centering Logical. If centering=TRUE, the variables should be shifted
+#' to be zero centered. Default is \code{TRUE}.
 #' @param clustering Character. The method to be used for clustering. Allowed method
 #' include "kmeans", "kmedoids", "hclustering", "dbscan", "group_info". Default is \code{"kmeans"}.
 #' The option \code{"group_info"} is currently available only when the input is a SummarizedExperiment
@@ -22,8 +21,8 @@
 #' @param cluster_num Numeric. The interpretation of \code{cluster_num} depends on the value of \code{clustering}:
 #' \itemize{
 #'   \item \code{"group_info"}: A positive integer equal to the number of groups.
-#'   \item \code{"kmeans"} or \code{"kmedoids"}: A positive integer between 1 and (number of samples - 1).
-#'   \item \code{"hclustering"}: A positive integer between 1 and the number of samples.
+#'   \item \code{"kmeans"} or \code{"kmedoids"}: A positive integer between 2 and (number of samples - 1).
+#'   \item \code{"hclustering"}: A positive integer between 2 and the number of samples.
 #'   \item \code{"dbscan"}: Should be \code{NULL}.
 #' }
 #' Default is \code{2}.
@@ -66,8 +65,7 @@
 #' clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
 #' hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)
 dr_pca <- function(
-        processed_se, scaling=TRUE, centering=TRUE,
-        clustering=c('kmeans', 'kmedoids', 'hclustering', 'dbscan', 'group_info'),
+        processed_se, scaling=TRUE, centering=TRUE, clustering='kmeans',
         cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
         eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10){
 
@@ -78,6 +76,7 @@ dr_pca <- function(
     if (!is.logical(centering)) {
         stop("centering must be a logical value.")
     }
+    match.arg(clustering, c('kmeans', 'kmedoids', 'hclustering', 'dbscan', 'group_info'))
     # check feature_contrib_pc
     .check_inputSE(processed_se, metadata_list=NULL)
     #if (is.null(names(S4Vectors::metadata(processed_se))) ) {
@@ -196,8 +195,8 @@ dr_pca <- function(
 
 .deSig_data <- function(de_se, sigN=2) {
     .check_de_outputSE(de_se, de_type="all")
-    abundance <- .extract_df(de_se, type = "abundance")
-    group_info <- .extract_df(de_se, type = "group")
+    abundance <- .extract_df(de_se, type="abundance")
+    group_info <- .extract_df(de_se, type="group")
     if(!is.null(S4Vectors::metadata(de_se)[["sig_deChar_result"]])) {
         sig_table <- S4Vectors::metadata(de_se)[["sig_deChar_result"]]
     } else {
@@ -369,7 +368,6 @@ dr_pca <- function(
             "PC1 (", as.character(round(eig.val[1, 2], 1)), '%)'),
         ylab=stringr::str_c(
             "PC2 (", as.character(round(eig.val[2, 2], 1)), '%)'))
-    #pca_variable$data <- dplyr::arrange(pca_variable$data, contrib)
     pca_variable_ggplotly <- plotly::ggplotly(pca_variable)
     for(i in seq_len(length(pca_variable_ggplotly$x$data))){
         if(!is.null(pca_variable_ggplotly$x$data[[i]]$text)){
@@ -389,28 +387,180 @@ dr_pca <- function(
             }
         }
     }
-    #for (i in 1:nrow(pca_variable$data)) { #seq_len(plot_topN)
-    #    pca_variable_ggplotly <- pca_variable_ggplotly %>%
-    #        plotly::add_annotations(
-    #            data=pca_variable$data[i,], x=~x, y=~y, text="",
-    #            arrowcolor=pca_variable_ggplotly$x$data[[i+1]]$line$color,
-    #            showarrow=TRUE, axref='x', ayref='y', ax=0, ay=0)
-    #    pca_variable_ggplotly$x$data[[i+1]]$text <- paste(
-    #        "X :", round(pca_variable$data$x[i], 3), "\nY :",
-    #        round(pca_variable$data$y[i], 3), "\nName :",
-    #        pca_variable$data$name[i])
-    #}
-    #pca_variable_ggplotly$x$data[[plot_topN+2]]$hoverinfo <- "none"
 
-    if(plot_topN > ncol(pca$rotation)){
-        plot_topN <- ncol(pca$rotation)
-        warning_message <- paste0(
-            "plot_topN will only show ", ncol(pca$rotation))
-        warning(warning_message)
-    }
     return(list(pca_variable_ggplotly=pca_variable_ggplotly,
                 pca_variable=pca_variable))
 }
+
+#' @title dr_pcoa
+#' @description Principal Coordinates Analysis (PCoA) is a dimensionality reduction
+#' method that transforms a distance matrix from a high-dimensional space into a
+#' low-dimensional space while retaining the original data's essential properties.
+#' @param processed_se A SummarizedExperiment object constructed by
+#' \code{\link{as_summarized_experiment}} and processed by \code{\link{data_process}}.
+#' @param dist_method Character. The distance measure to be used for constructing
+#' the distance matrix. One of ""euclidean", "manhattan", "mahalanobis", "gower",
+#' "chord", and "canberra". Default is \code{"euclidean"}.
+#' @param correction Character. Correction methods for negative eigenvalues.
+#' One of "none", "lingoes", "cailliez". Default is \code{"cailliez"}.
+#' @param clustering Character. The method to be used for clustering. Allowed method
+#' include "kmeans", "kmedoids", "hclustering", "dbscan", "group_info". Default is \code{"kmeans"}.
+#' The option \code{"group_info"} is currently available only when the input is a SummarizedExperiment
+#' object resulting from differential expression analysis (e.g., \code{deSp_twoGroup()},
+#' \code{deSp_multiGroup()}); in this case, dimensionality reduction is performed based on the
+#' significant features and group information derived from the DE results.
+#' @param cluster_num Numeric. The interpretation of \code{cluster_num} depends on the value of \code{clustering}:
+#' \itemize{
+#'   \item \code{"group_info"}: A positive integer equal to the number of groups.
+#'   \item \code{"kmeans"} or \code{"kmedoids"}: A positive integer between 2 and (number of samples - 1).
+#'   \item \code{"hclustering"}: A positive integer between 2 and the number of samples.
+#'   \item \code{"dbscan"}: Should be \code{NULL}.
+#' }
+#' Default is \code{2}.
+#' @param kmedoids_metric Character. The metric to be used for calculating
+#' dissimilarities between observations when choosing \code{"kmedoids"} as clustering method.
+#' Must be one of "euclidean" and "manhattan". If "kmedoids" is not selected as
+#' the clustering method, set the value to NULL.
+#' @param distfun Character. The distance measure to be used when choosing \code{"hclustering"}
+#' as clustering method. Allow method include "pearson", "kendall", "spearman",
+#' "euclidean", "manhattan", "maximum", "canberra", "binary", and "minkowski".
+#' If "hclustering" is not selected as the clustering method, set the value to NULL.
+#' @param hclustfun Character. The agglomeration method to be used when choosing
+#' \code{"hclustering"} as clustering method. This should be (an unambiguous abbreviation of)
+#' one of "ward.D", "ward.D2", "single", "complete", "average" (=UPGMA),
+#' "mcquitty" (= WPGMA), "median" (= WPGMC), or "centroid" (= UPGMC).
+#' If "hclustering" is not selected as the clustering method, set the value to NULL.
+#' @param eps Numeric. The size of the epsilon neighborhood when choosing \code{"dbscan"} as clustering method.
+#' If "dbscan" is not selected as the clustering method, set the value to NULL.
+#' @param minPts Numeric. The number of minimum points in the eps region (for core points)
+#' when choosing \code{"dbscan"} as clustering method.
+#' If "dbscan" is not selected as the clustering method, set the value to NULL.
+#' @return Return a list with 2 tables, 1 interactive plot, and 1 static plot.
+#' \enumerate{
+#' \item pcoa_rotated_data: a data frame of PCoA coordinates
+#' \item table_pcoa_contribution: a data frame, variance explained by each axis
+#' \item interactive_pcoa & static_pcoa: PCoA plot
+#' }
+#' @export
+#' @examples
+#' data("profiling_data")
+#' processed_se <- data_process(profiling_data, exclude_missing=TRUE, exclude_missing_pct=70,
+#' replace_na_method='min', replace_na_method_ref=0.5, normalization='Percentage', transform='log10')
+#' result_pca <- dr_pcoa(processed_se, dist_method='euclidean', correction='cailliez',
+#' clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
+#' hclustfun=NULL, eps=NULL, minPts=NULL)
+dr_pcoa <- function(
+        processed_se, dist_method='euclidean', correction='cailliez',
+        clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
+        hclustfun=NULL, eps=NULL, minPts=NULL){
+
+    match.arg(dist_method, c("euclidean", "manhattan", "mahalanobis", "gower", "chord", "canberra"))
+    match.arg(correction, c('cailliez', 'lingoes', 'none'))
+    match.arg(clustering, c('kmeans', 'kmedoids', 'hclustering', 'dbscan', 'group_info'))
+    .check_inputSE(processed_se, metadata_list=NULL)
+    if (all(names(S4Vectors::metadata(processed_se)) %in% c("processed_abund","transform")) &&
+        length(names(S4Vectors::metadata(processed_se))) == 2) {
+        abundance <- S4Vectors::metadata(processed_se)$processed_abund
+        group_info <- NULL
+    } else {
+        de_data <- .deSig_data(de_se=processed_se)
+        abundance <- de_data$abundance
+        group_info <- de_data$group_info
+    }
+    .dr_check(abundance, group_info, clustering, cluster_num, kmedoids_metric, distfun, hclustfun, eps, minPts)
+
+    pcoa_table <- .dim_process(abundance)
+    color <- .dr_color()
+    dist_matrix <- vegan::vegdist(pcoa_table, method=dist_method)
+    pcoa_res <- ape::pcoa(dist_matrix, correction=correction)
+
+    if (!is.null(pcoa_res$vectors.cor)) {
+        coords <- pcoa_res$vectors.cor[, 1:2]
+        eig_percent <- pcoa_res$values$Rel_corr_eig[1:2] * 100
+    } else {
+        coords <- pcoa_res$vectors[, 1:2]
+        eig_percent <- pcoa_res$values$Relative_eig[1:2] * 100
+    }
+    colnames(coords) <- c('PCo1', 'PCo2')
+    grouping <- .dim_grouping(
+        coords, pcoa_table, group_info, clustering, cluster_num,
+        kmedoids_metric, distfun, hclustfun, eps, minPts)
+    cluster_group <- as.character(grouping$cluster_group)
+    cluster_num <- grouping$cluster_num
+    pcoa_rotated_data <- as.data.frame(coords) %>%
+        dplyr::mutate(sample_name=rownames(pcoa_table)) %>%
+        dplyr::mutate(group=cluster_group) %>%
+        dplyr::select(sample_name, group, dplyr::everything())
+    contrib_table <- data.frame(
+        axis=c('PCo1', 'PCo2'),
+        variance_explained=round(eig_percent, 1))
+    pcoaPlot <- .pcoa_plotting(
+        coords, pcoa_rotated_data, clustering, cluster_group, cluster_num, color, eig_percent)
+
+    return(list(
+        pcoa_rotated_data=pcoa_rotated_data,
+        table_pcoa_contribution=contrib_table,
+        interactive_pcoa=pcoaPlot$in_pcoa,
+        static_pcoa=pcoaPlot$pcoa_plot))
+}
+
+.pcoa_plotting <- function(
+        coords, pcoa_data, clustering, cluster_group, cluster_num, color, eig_percent){
+    xlab <- paste0('PCo1 (', round(eig_percent[1], 2), '%)')
+    ylab <- paste0('PCo2 (', round(eig_percent[2], 2), '%)')
+
+    if(clustering %in% c('dbscan')){
+        pcoa_plot <- factoextra::fviz_cluster(
+            list(data=as.data.frame(coords), cluster=cluster_group),
+            palette=color[seq_len(length(unique(cluster_group)))],
+            geom="point", stand=FALSE, ellipse=FALSE,
+            ggtheme=ggplot2::theme_bw(), show.clust.cent=FALSE,
+            xlab=xlab, ylab=ylab, main="PCoA", legend.title="Groups")
+        in_pcoa <- plotly::ggplotly(pcoa_plot)
+        for (i in seq_len(length(in_pcoa$x$data))){
+            if (!is.null(in_pcoa$x$data[[i]]$name)){
+                in_pcoa$x$data[[i]]$name <-  gsub("\\(", "", stringr::str_split(in_pcoa$x$data[[i]]$name, ",")[[1]][1])
+            }
+            if(i<=length(unique(cluster_group))){
+                in_pcoa$x$data[[i]]$text <- paste(
+                    "x :", round(in_pcoa$x$data[[i]]$x, 3), "\ny :",
+                    round(in_pcoa$x$data[[i]]$y, 3), "\nGroups :",
+                    in_pcoa$x$data[[i]]$name, "\nSample name :",
+                    pcoa_data[which(pcoa_data$group == in_pcoa$x$data[[i]]$name),]$sample_name)
+            }
+        }
+    }else{
+        pcoa_plot <- factoextra::fviz_cluster(
+            list(data=as.data.frame(coords), cluster=cluster_group),
+            palette=color[seq_len(cluster_num)], geom="point", stand=FALSE,
+            ellipse=TRUE, ellipse.type='norm', ggtheme=ggplot2::theme_bw(),
+            show.clust.cent=FALSE, xlab=xlab, ylab=ylab, main="PCoA",
+            legend.title="Groups")
+        in_pcoa <- plotly::ggplotly(pcoa_plot)
+        for (i in seq_len(length(in_pcoa$x$data))){
+            if (!is.null(in_pcoa$x$data[[i]]$name)){
+                in_pcoa$x$data[[i]]$name <- gsub("\\(", "", stringr::str_split(in_pcoa$x$data[[i]]$name, ",")[[1]][1])
+            }
+            if(i <= cluster_num){
+                in_pcoa$x$data[[i]]$text <- paste(
+                    "x :", round(in_pcoa$x$data[[i]]$x, 3), "\ny :",
+                    round(in_pcoa$x$data[[i]]$y, 3), "\nGroups :",
+                    in_pcoa$x$data[[i]]$name, "\nSample name :",
+                    pcoa_data[which(pcoa_data$group == in_pcoa$x$data[[i]]$name),]$sample_name)
+            }else if(i >= cluster_num+1 & i <= 2*cluster_num){
+                in_pcoa$x$data[[i]]$text <- paste("\nGroups :", in_pcoa$x$data[[i]]$name)
+            }
+        }
+        for (i in seq_len((2*cluster_num))) {
+            rev_n <- rev(seq_len((2*cluster_num)))
+            if(i == 1){rev_list <- list(in_pcoa$x$data[[rev_n[i]]])}
+            else{rev_list<-c(rev_list, list(in_pcoa$x$data[[rev_n[i]]]))}
+        }
+        in_pcoa$x$data <- rev_list
+    }
+    return(list(in_pcoa=in_pcoa, pcoa_plot=pcoa_plot))
+}
+
 
 #' @title dr_tsne
 #' @description t-distributed stochastic neighbor embedding (t-SNE) is a dimensionality reduction
@@ -433,8 +583,8 @@ dr_pca <- function(
 #' @param cluster_num Numeric. The interpretation of \code{cluster_num} depends on the value of \code{clustering}:
 #' \itemize{
 #'   \item \code{"group_info"}: A positive integer equal to the number of groups.
-#'   \item \code{"kmeans"} or \code{"kmedoids"}: A positive integer between 1 and (number of samples - 1).
-#'   \item \code{"hclustering"}: A positive integer between 1 and the number of samples.
+#'   \item \code{"kmeans"} or \code{"kmedoids"}: A positive integer between 2 and (number of samples - 1).
+#'   \item \code{"hclustering"}: A positive integer between 2 and the number of samples.
 #'   \item \code{"dbscan"}: Should be \code{NULL}.
 #' }
 #' Default is \code{2}.
@@ -470,9 +620,9 @@ dr_pca <- function(
 #' result_tsne <- dr_tsne(processed_se, pca=TRUE, perplexity=5, max_iter=500, clustering='kmeans',
 #'     cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL)
 dr_tsne <- function(
-        processed_se, pca=TRUE, perplexity=5, max_iter=500,
-        clustering=c('kmeans', 'kmedoids', 'hclustering', 'dbscan', 'group_info'),
-        cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL){
+        processed_se, pca=TRUE, perplexity=5, max_iter=500, clustering='kmeans',
+        cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
+        eps=NULL, minPts=NULL){
 
 
     if (!is.logical(pca)) {
@@ -484,6 +634,8 @@ dr_tsne <- function(
     if(!is.numeric(max_iter) | isFALSE(.check_numeric_range(max_iter, 0, NULL))){
         stop('max_iter cannot be a negative value.')
     }
+    match.arg(clustering, c('kmeans', 'kmedoids', 'hclustering', 'dbscan', 'group_info'))
+
     # check SE
     .check_inputSE(processed_se, metadata_list=NULL)
     #if (is.null(names(S4Vectors::metadata(processed_se))) ) {
@@ -597,7 +749,7 @@ dr_tsne <- function(
 #' }
 #' Default is \code{TRUE}.
 #' @param umap_metric Character. Type of distance metric to use to find nearest neighbors.
-#' One of "euclidean", "cosine", "manhattan", "hamming", "categorical". Default is \code{'euclidean'}.
+#' One of "euclidean", "cosine", "manhattan", "hamming", "correlation". Default is \code{'euclidean'}.
 #' @param clustering Character. The method to be used for clustering. Allowed method
 #' include "kmeans", "kmedoids", "hclustering", "dbscan", "group_info". Default is \code{"kmeans"}.
 #' The option \code{"group_info"} is currently available only when the input is a SummarizedExperiment
@@ -607,8 +759,8 @@ dr_tsne <- function(
 #' @param cluster_num Numeric. The interpretation of \code{cluster_num} depends on the value of \code{clustering}:
 #' \itemize{
 #'   \item \code{"group_info"}: A positive integer equal to the number of groups.
-#'   \item \code{"kmeans"} or \code{"kmedoids"}: A positive integer between 1 and (number of samples - 1).
-#'   \item \code{"hclustering"}: A positive integer between 1 and the number of samples.
+#'   \item \code{"kmeans"} or \code{"kmedoids"}: A positive integer between 2 and (number of samples - 1).
+#'   \item \code{"hclustering"}: A positive integer between 2 and the number of samples.
 #'   \item \code{"dbscan"}: Should be \code{NULL}.
 #' }
 #' Default is \code{2}.
@@ -645,22 +797,22 @@ dr_tsne <- function(
 #'     clustering='kmeans', cluster_num=2, kmedoids_metric=NULL,
 #'     distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL)
 dr_umap <- function(
-        processed_se, n_neighbors=15, scaling=c('none', FALSE, NULL, 'Z', 'scale', TRUE, 'maxabs', 'range', 'colrange'),
-        umap_metric=c('euclidean', 'cosine', 'manhattan', 'hamming', 'categorical'),
-        clustering=c('kmeans', 'kmedoids', 'hclustering', 'dbscan', 'group_info'),
-        cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL){
-
+        processed_se, n_neighbors=15, scaling=TRUE, umap_metric='euclidean',
+        clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
+        hclustfun=NULL, eps=NULL, minPts=NULL){
 
     if(!is.numeric(n_neighbors) | isFALSE(.check_numeric_range(n_neighbors, 2, NULL))){
         stop('n_neighbors must be >= 2.')
     }
-    valid_scaling <- c("none", FALSE, NULL, "Z", "scale", TRUE, "maxabs", "range", "colrange")
-    if (isFALSE(scaling %in% valid_scaling)) {
-        stop('scaling must be one of "none", FALSE, NULL, "Z", "scale", TRUE, "maxabs", "range", or "colrange".')
+    if(!is.logical(scaling)){
+        if(is.null(scaling)){
+            scaling <- TRUE
+        }else{
+            match.arg(scaling, c("Z", "scale", "maxabs", "range", "colrange", "none"))
+        }
     }
-    if (is.null(umap_metric) | isFALSE(umap_metric %in% c('euclidean', 'cosine', 'manhattan', 'hamming', 'correlation')) ) {
-        stop("umap_metric must be one of 'euclidean', 'cosine', 'manhattan', 'hamming', or 'correlation'.")
-    }
+    match.arg(umap_metric, c('euclidean', 'cosine', 'manhattan', 'hamming', 'correlation'))
+    match.arg(clustering, c('kmeans', 'kmedoids', 'hclustering', 'dbscan', 'group_info'))
 
     # check SE
     .check_inputSE(processed_se, metadata_list=NULL)
@@ -764,7 +916,7 @@ dr_umap <- function(
 #' \code{\link{deChar_twoGroup}}, and \code{\link{deChar_multiGroup}}.
 #' @param ncomp Numeric. The number of components to include in
 #' the model. Default is \code{2}.
-#' @param scaling Logical. If scaling = TRUE, each block is
+#' @param scaling Logical. If scaling=TRUE, each block is
 #' standardized to zero means and unit variances. Default is \code{TRUE}.
 #' @param clustering Character. The method to be used for clustering. Allowed method
 #' include "kmeans", "kmedoids", "hclustering", "dbscan", "group_info". Default is \code{"kmeans"}.
@@ -775,8 +927,8 @@ dr_umap <- function(
 #' @param cluster_num Numeric. The interpretation of \code{cluster_num} depends on the value of \code{clustering}:
 #' \itemize{
 #'   \item \code{"group_info"}: A positive integer equal to the number of groups.
-#'   \item \code{"kmeans"} or \code{"kmedoids"}: A positive integer between 1 and (number of samples - 1).
-#'   \item \code{"hclustering"}: A positive integer between 1 and the number of samples.
+#'   \item \code{"kmeans"} or \code{"kmedoids"}: A positive integer between 2 and (number of samples - 1).
+#'   \item \code{"hclustering"}: A positive integer between 2 and the number of samples.
 #'   \item \code{"dbscan"}: Should be \code{NULL}.
 #' }
 #' Default is \code{2}.
@@ -815,10 +967,8 @@ dr_umap <- function(
 #' result_plsda <- dr_plsda(deSp_se, ncomp=2, scaling=TRUE, clustering='group_info',
 #'     cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL)
 dr_plsda <- function(
-    de_se, ncomp=2, scaling=TRUE,
-    clustering=c('kmeans', 'kmedoids', 'hclustering', 'dbscan', 'group_info'),
-    cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL){
-
+    de_se, ncomp=2, scaling=TRUE, clustering='kmeans', cluster_num=2,
+    kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL){
 
     if(is.null(ncomp) | !is.numeric(ncomp) | isFALSE(.check_numeric_range(ncomp, 0, NULL))){
         stop('ncomp cannot be a negative value or NULL.')
@@ -826,8 +976,10 @@ dr_plsda <- function(
     if (!is.logical(scaling)) {
         stop("scaling must be a logical value.")
     }
+    match.arg(clustering, c('kmeans', 'kmedoids', 'hclustering', 'dbscan', 'group_info'))
+
     # must be de_se
-    if (is.null(names(S4Vectors::metadata(de_se))) ){
+    if ( !any(c('sig_deChar_result', 'sig_deSp_result') %in% names(S4Vectors::metadata(de_se))) ){
         stop("Incorrect SummarizedExperiment structure. Please use the output from
              deSp_twoGroup, deSp_multiGroup, deChar_twoGroup, or deChar_multiGroup function.")
     }
@@ -857,14 +1009,14 @@ dr_plsda <- function(
     cluster_group <- as.character(cluster_group)
     ## sample plot
     samplePlot <- .plsdaSample(X.variate, clustering, cluster_group, cluster_num)
+    colnames(X.variate) <- paste0("PLS-DA-", seq_len(ncol(X.variate)))
+    colnames(X.loading) <- paste0("PLS-DA-", seq_len(ncol(X.loading)))
     rown <- rownames(X.variate)
     X.variate <- X.variate %>% as.data.frame() %>%
         dplyr::mutate(sample_name=rown) %>%
         dplyr::mutate(group=cluster_group) %>%
         dplyr::select(sample_name, group, dplyr::everything())
-    colnames(X.variate)[3:4] <- c('PLSDA1', 'PLSDA2')
     X.loading <- X.loading %>% as.data.frame()
-    colnames(X.loading) <- c('PLSDA1', 'PLSDA2')
     ## loading plot
     variatePlot <- .plsdaVariate(plsda.res)
     return(list(
@@ -875,15 +1027,327 @@ dr_plsda <- function(
         static_loadingPlot=variatePlot$variablePlot))
 }
 
+#' @title dr_oplsda
+#' @description Orthogonal Partial Least Squares Discriminant Analysis (OPLS-DA) is a
+#' dimensionality reduction and classification method that extends PLS-DA by
+#' separating predictive variation (correlated to the response) from orthogonal
+#' variation (uncorrelated to the response). This improves model interpretability
+#' by isolating the variation related to class discrimination.
+#' @param de_se The resulting SummarizedExperiment object from the differential
+#' expression analysis function, such as \code{\link{deSp_twoGroup}}, \code{\link{deSp_multiGroup}},
+#' \code{\link{deChar_twoGroup}}, and \code{\link{deChar_multiGroup}}.
+#' @param ncomp Numeric. The number of predictive components to include in the model.
+#' Default is \code{2}. Note: OPLS-DA uses one predictive component by design
+#' (\code{predI=1}), and the number of orthogonal components is determined
+#' automatically by cross-validation (\code{orthoI=NA}).
+#' @param scaling Logical. If scaling=TRUE, each block is
+#' standardized to zero means and unit variances. Default is \code{TRUE}.
+#' @param clustering Character. The method to be used for clustering. Allowed method
+#' include "kmeans", "kmedoids", "hclustering", "dbscan", "group_info". Default is \code{"kmeans"}.
+#' The option \code{"group_info"} is currently available only when the input is a SummarizedExperiment
+#' object resulting from differential expression analysis (e.g., \code{deSp_twoGroup()},
+#' \code{deSp_multiGroup()}); in this case, dimensionality reduction is performed based on the
+#' significant features and group information derived from the DE results.
+#' @param cluster_num Numeric. The interpretation of \code{cluster_num} depends on the value of \code{clustering}:
+#' \itemize{
+#'   \item \code{"group_info"}: A positive integer equal to the number of groups.
+#'   \item \code{"kmeans"} or \code{"kmedoids"}: A positive integer between 2 and (number of samples - 1).
+#'   \item \code{"hclustering"}: A positive integer between 2 and the number of samples.
+#'   \item \code{"dbscan"}: Should be \code{NULL}.
+#' }
+#' Default is \code{2}.
+#' @param kmedoids_metric Character. The metric to be used for calculating
+#' dissimilarities between observations when choosing \code{"kmedoids"} as clustering method.
+#' Must be one of "euclidean" and "manhattan". If "kmedoids" is not selected as
+#' the clustering method, set the value to NULL.
+#' @param distfun Character. The distance measure to be used when choosing \code{"hclustering"}
+#' as clustering method. Allow method include "pearson", "kendall", "spearman",
+#' "euclidean", "manhattan", "maximum", "canberra", "binary", and "minkowski".
+#' If "hclustering" is not selected as the clustering method, set the value to NULL.
+#' @param hclustfun Character. The agglomeration method to be used when choosing
+#' \code{"hclustering"} as clustering method. This should be (an unambiguous abbreviation of)
+#' one of "ward.D", "ward.D2", "single", "complete", "average" (=UPGMA),
+#' "mcquitty" (= WPGMA), "median" (= WPGMC), or "centroid" (= UPGMC).
+#' If "hclustering" is not selected as the clustering method, set the value to NULL.
+#' @param eps Numeric. The size of the epsilon neighborhood when choosing \code{"dbscan"} as clustering method.
+#' If "dbscan" is not selected as the clustering method, set the value to NULL.
+#' @param minPts number of minimum points in the eps region (for core points) when choosing dbscan as clustering method.
+#' @return Return a list with 1 data frame, 1 interactive plot, and 1 static plot.
+#' \enumerate{
+#' \item oplsda_result: A data frame of OPLS-DA data.
+#' \item table_oplsda_loading: table for plotting OPLS-DA loading plot.
+#' \item interacitve_oplsda & static_oplsda: OPLS-DA plot.
+#' }
+#' @export
+#' @examples
+#' data("de_data_twoGroup")
+#' processed_se <- data_process(
+#'     de_data_twoGroup, exclude_missing=TRUE, exclude_missing_pct=70,
+#'     replace_na_method='min', replace_na_method_ref=0.5,
+#'     normalization='Percentage', transform='log10')
+#' deSp_se <- deSp_twoGroup(processed_se, ref_group='ctrl', test='t-test',
+#'     significant='pval', p_cutoff=0.05, FC_cutoff=1, transform='log10')
+#' result_oplsda <- dr_oplsda(deSp_se, ncomp=2, scaling=TRUE,
+#'     clustering='group_info', cluster_num=2, kmedoids_metric=NULL,
+#'     distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL)
+
+dr_oplsda <- function(
+        de_se, ncomp=2, scaling=TRUE, clustering='kmeans', cluster_num=2,
+        kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL){
+
+    if(is.null(ncomp) | !is.numeric(ncomp) | isFALSE(.check_numeric_range(ncomp, 0, NULL))){
+        stop('ncomp cannot be a negative value or NULL.')
+    }
+    if (!is.logical(scaling)) {
+        stop("scaling must be a logical value.")
+    }
+    match.arg(clustering, c('kmeans', 'kmedoids', 'hclustering', 'dbscan', 'group_info'))
+
+    # must be de_se
+    if ( !any(c('sig_deChar_result', 'sig_deSp_result') %in% names(S4Vectors::metadata(de_se))) ){
+        stop("Incorrect SummarizedExperiment structure. Please use the output from
+             deSp_twoGroup, deSp_multiGroup, deChar_twoGroup, or deChar_multiGroup function.")
+    }
+    # SE
+    de_data <- .deSig_data(de_se, sigN=3)
+    abundance <- de_data$abundance
+    group_info <- de_data$group_info
+    if(length(unique(group_info$group)) > 2){ stop('OPLS-DA only available for binary classification.')}
+    .dr_check(abundance, group_info, clustering, cluster_num, kmedoids_metric, distfun, hclustfun, eps, minPts)
+    num <- apply(abundance[-1], 1, FUN=function(x){length(unique(x))})
+    abundance <- abundance[(num!=1),]
+    abundance <- abundance[!is.infinite(rowSums(abundance[-1], na.rm=TRUE)),]
+    group_info %<>% dplyr::filter(sample_name %in% colnames(abundance)[-1])
+    Y <- group_info$group
+    rownames(abundance) <- abundance$feature
+    plsda_table <- abundance[c(colnames(SummarizedExperiment::rowData(de_se))[[1]], group_info$sample_name)] %>%
+        dplyr::select(-1) %>% t()
+    plsda.res <- ropls::opls(plsda_table, Y, predI=1, orthoI=NA)
+    if (nrow(plsda.res@summaryDF) == 0) {
+        stop("Model was not built successfully, skipping downstream analysis")
+    }
+    X.variate <- cbind(plsda.res@scoreMN, plsda.res@orthoScoreMN[,1])
+    X.loading <- cbind(plsda.res@loadingMN, plsda.res@orthoLoadingMN[,1])
+    ## grouping
+    grouping <- .dim_grouping(
+        X.variate, X.variate, group_info, clustering, cluster_num,
+        kmedoids_metric, distfun, hclustfun, eps, minPts)
+    cluster_group <- grouping$cluster_group
+    cluster_num <- grouping$cluster_num
+    cluster_group <- as.character(cluster_group)
+    ## sample plot
+    samplePlot <- .plsdaSample(X.variate, clustering, cluster_group, cluster_num,
+                               xlab='t predictive', ylab='t orthogonal 1', Title='Variables - OPLS-DA')
+    colnames(X.variate) <- c('t predictive', 't orthogonal 1')
+    colnames(X.loading) <- c('t predictive', 't orthogonal 1')
+    rown <- rownames(X.variate)
+    X.variate <- X.variate %>% as.data.frame() %>%
+        dplyr::mutate(sample_name=rown) %>%
+        dplyr::mutate(group=cluster_group) %>%
+        dplyr::select(sample_name, group, dplyr::everything())
+    X.loading <- X.loading %>% as.data.frame()
+
+    return(list(
+        oplsda_result=X.variate, table_oplsda_loading=X.loading,
+        interacitve_oplsda=samplePlot$in_sample,
+        static_oplsda=samplePlot$sample_plot))
+}
+
+
+#' @title dr_splsda
+#' @description Sparse Partial Least Squares Discriminant Analysis (sPLS-DA) is a
+#' dimensionality reduction and classification method that extends PLS-DA by
+#' applying LASSO-based penalization to select a subset of the most discriminative
+#' variables on each component, in addition to transforming data from a
+#' high-dimensional space into a low-dimensional space while retaining the
+#' original data's essential properties.
+#' @param de_se The resulting SummarizedExperiment object from the differential
+#' expression analysis function, such as \code{\link{deSp_twoGroup}}, \code{\link{deSp_multiGroup}},
+#' \code{\link{deChar_twoGroup}}, and \code{\link{deChar_multiGroup}}.
+#' @param ncomp Numeric. The number of components to include in the model.
+#' When \code{optimize=FALSE}, this is the exact number of components used to
+#' fit the sPLS-DA model. When \code{optimize=TRUE}, this value instead sets the
+#' upper bound of components to be tested; the best-performing number of
+#' components (based on the balanced error rate from cross-validation) is
+#' selected automatically and used to fit the final model. Default is \code{2}.
+#' @param optimize Logical. Whether to perform automatic optimization of the sPLS-DA
+#' model using cross-validation. If \code{TRUE}, the function uses \code{mixOmics::tune.splsda()}
+#' to find the optimal number of components (\code{ncomp}) and the optimal number of
+#' features to keep per component (\code{keepX}) based on the balanced error rate (BER).
+#' If \code{FALSE} (default), the model is fitted with the specified \code{ncomp} and all
+#' features are used (no feature selection via keepX). Default is \code{FALSE}.
+#' @param scaling Logical. If scaling=TRUE, each block is
+#' standardized to zero means and unit variances. Default is \code{TRUE}.
+#' @param clustering Character. The method to be used for clustering. Allowed method
+#' include "kmeans", "kmedoids", "hclustering", "dbscan", "group_info". Default is \code{"kmeans"}.
+#' The option \code{"group_info"} is currently available only when the input is a SummarizedExperiment
+#' object resulting from differential expression analysis (e.g., \code{deSp_twoGroup()},
+#' \code{deSp_multiGroup()}); in this case, dimensionality reduction is performed based on the
+#' significant features and group information derived from the DE results.
+#' @param cluster_num Numeric. The interpretation of \code{cluster_num} depends on the value of \code{clustering}:
+#' \itemize{
+#'   \item \code{"group_info"}: A positive integer equal to the number of groups.
+#'   \item \code{"kmeans"} or \code{"kmedoids"}: A positive integer between 2 and (number of samples - 1).
+#'   \item \code{"hclustering"}: A positive integer between 2 and the number of samples.
+#'   \item \code{"dbscan"}: Should be \code{NULL}.
+#' }
+#' Default is \code{2}.
+#' @param kmedoids_metric Character. The metric to be used for calculating
+#' dissimilarities between observations when choosing \code{"kmedoids"} as clustering method.
+#' Must be one of "euclidean" and "manhattan". If "kmedoids" is not selected as
+#' the clustering method, set the value to NULL.
+#' @param distfun Character. The distance measure to be used when choosing \code{"hclustering"}
+#' as clustering method. Allow method include "pearson", "kendall", "spearman",
+#' "euclidean", "manhattan", "maximum", "canberra", "binary", and "minkowski".
+#' If "hclustering" is not selected as the clustering method, set the value to NULL.
+#' @param hclustfun Character. The agglomeration method to be used when choosing
+#' \code{"hclustering"} as clustering method. This should be (an unambiguous abbreviation of)
+#' one of "ward.D", "ward.D2", "single", "complete", "average" (=UPGMA),
+#' "mcquitty" (= WPGMA), "median" (= WPGMC), or "centroid" (= UPGMC).
+#' If "hclustering" is not selected as the clustering method, set the value to NULL.
+#' @param eps Numeric. The size of the epsilon neighborhood when choosing \code{"dbscan"} as clustering method.
+#' If "dbscan" is not selected as the clustering method, set the value to NULL.
+#' @param minPts number of minimum points in the eps region (for core points) when choosing dbscan as clustering method.
+#' @return Return a list with 1 data frame, 1 interactive plot, and 1 static plot.
+#' \enumerate{
+#' \item splsda_result: A data frame of sPLS-DA data.
+#' \item table_splsda_loading: table for plotting sPLS-DA loading plot.
+#' \item interacitve_splsda & static_splsda: sPLS-DA plot.
+#' \item interactive_loadingPlot & static_loadingPlot: sPLS-DA loading plot, display the variables that contribute to the definition of each component.
+#' }
+#' @export
+#' @examples
+#' data("de_data_twoGroup")
+#' processed_se <- data_process(
+#'     de_data_twoGroup, exclude_missing=TRUE, exclude_missing_pct=70,
+#'     replace_na_method='min', replace_na_method_ref=0.5,
+#'     normalization='Percentage', transform='log10')
+#' deSp_se <- deSp_twoGroup(processed_se, ref_group='ctrl', test='t-test',
+#'     significant='pval', p_cutoff=0.05, FC_cutoff=1, transform='log10')
+#' result_splsda <- dr_splsda(deSp_se, ncomp=2, scaling=TRUE, optimize=FALSE,
+#'     clustering='group_info', cluster_num=2, kmedoids_metric=NULL,
+#'     distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL)
+
+dr_splsda <- function(
+        de_se, ncomp=2, scaling=TRUE, optimize=FALSE, clustering='kmeans',
+        cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL){
+
+    if(is.null(ncomp) | !is.numeric(ncomp) | isFALSE(.check_numeric_range(ncomp, 0, NULL))){
+        stop('ncomp cannot be a negative value or NULL.')
+    }
+    if (!is.logical(scaling)) {
+        stop("scaling must be a logical value.")
+    }
+    match.arg(clustering, c('kmeans', 'kmedoids', 'hclustering', 'dbscan', 'group_info'))
+
+    # must be de_se
+    if ( !any(c('sig_deChar_result', 'sig_deSp_result') %in% names(S4Vectors::metadata(de_se))) ){
+        stop("Incorrect SummarizedExperiment structure. Please use the output from
+             deSp_twoGroup, deSp_multiGroup, deChar_twoGroup, or deChar_multiGroup function.")
+    }
+    # SE
+    de_data <- .deSig_data(de_se, sigN=3)
+    abundance <- de_data$abundance
+    group_info <- de_data$group_info
+    .dr_check(abundance, group_info, clustering, cluster_num, kmedoids_metric, distfun, hclustfun, eps, minPts)
+    num <- apply(abundance[-1], 1, FUN=function(x){length(unique(x))})
+    abundance <- abundance[(num!=1),]
+    abundance <- abundance[!is.infinite(rowSums(abundance[-1], na.rm=TRUE)),]
+    group_info %<>% dplyr::filter(sample_name %in% colnames(abundance)[-1])
+    Y <- group_info$group
+    rownames(abundance) <- abundance$feature
+    plsda_table <- abundance[c(colnames(SummarizedExperiment::rowData(de_se))[[1]], group_info$sample_name)] %>%
+        dplyr::select(-1) %>% t()
+    if(optimize){
+        success <- FALSE
+        attempt <- 0
+        while (!success && attempt < 20) {
+            attempt <- attempt + 1
+            try({
+                tune <- mixOmics::tune.splsda(plsda_table, Y, ncomp, dist='centroids.dist', nrepeat = 10)
+                success <- TRUE
+            }, silent=TRUE)
+        }
+        if (!success) {
+            stop("It failed after 20 attempts to select the best ncomp.")
+        }
+        bestNcomp <- tune$choice.ncomp$ncomp
+        if (bestNcomp < 2) { bestNcomp <- 2 }
+        keepX <- c(5, 20, 50, 100)
+        keepX <- unique(c(keepX[keepX < ncol(plsda_table)],  ncol(plsda_table)))
+        success <- FALSE
+        attempt <- 0
+        while (!success && attempt < 20) {
+            attempt <- attempt + 1
+            try({
+                tune <- mixOmics::tune.splsda(
+                    plsda_table, Y, ncomp=bestNcomp, test.keepX=keepX,
+                    dist='centroids.dist', nrepeat=10)
+                success <- TRUE
+            }, silent=TRUE)
+        }
+        if (!success) {
+            stop("It failed after 20 attempts to select the keepX.")
+        }
+        plsda.res <- mixOmics::splsda(plsda_table, Y, ncomp=bestNcomp,
+                                      keepX=tune$choice.keepX, scale=scaling)
+    }else{
+        plsda.res <- mixOmics::splsda(plsda_table, Y, ncomp, scale=scaling)
+    }
+
+    X.variate <- plsda.res$variates$X
+    X.loading <- plsda.res$loadings$X
+    ## grouping
+    grouping <- .dim_grouping(
+        X.variate, X.variate, group_info, clustering, cluster_num,
+        kmedoids_metric, distfun, hclustfun, eps, minPts)
+    cluster_group <- grouping$cluster_group
+    cluster_num <- grouping$cluster_num
+    cluster_group <- as.character(cluster_group)
+    ## sample plot
+    if(optimize){
+        samplePlot <- .plsdaSample(X.variate, clustering, cluster_group, cluster_num,
+                                   xlab='Optimize sPLSDA-1', ylab='Optimize sPLSDA-2', Title='Variables - Optimize sPLSDA')
+    }else{
+        samplePlot <- .plsdaSample(X.variate, clustering, cluster_group, cluster_num,
+                                   xlab='sPLSDA-1', ylab='sPLSDA-2', Title='Variables - sPLSDA')
+    }
+    colnames(X.variate) <- paste0("sPLSDA-", seq_len(ncol(X.variate)))
+    colnames(X.loading) <- paste0("sPLSDA-", seq_len(ncol(X.loading)))
+    rown <- rownames(X.variate)
+    X.variate <- X.variate %>% as.data.frame() %>%
+        dplyr::mutate(sample_name=rown) %>%
+        dplyr::mutate(group=cluster_group) %>%
+        dplyr::select(sample_name, group, dplyr::everything())
+    X.loading <- X.loading %>% as.data.frame()
+    ## loading plot
+    if(optimize){
+        variatePlot <- .plsdaVariate(
+            plsda.res, xlab='Optimize sPLSDA-1', ylab='Optimize sPLSDA-2', Title='Variables - Optimize sPLSDA')
+    }else{
+        variatePlot <- .plsdaVariate(
+            plsda.res, xlab='sPLSDA-1', ylab='sPLSDA-2', Title='Variables - sPLSDA')
+    }
+
+    return(list(
+        splsda_result=X.variate, table_splsda_loading=X.loading,
+        interacitve_splsda=samplePlot$in_sample,
+        interactive_loadingPlot=variatePlot$in_variable,
+        static_splsda=samplePlot$sample_plot,
+        static_loadingPlot=variatePlot$variablePlot))
+}
+
 .plsdaSample <- function(
-        X.variate, clustering, cluster_group, cluster_num){
+        X.variate, clustering, cluster_group, cluster_num,
+        xlab='PLSDA-1', ylab='PLSDA-2', Title='Variables - PLSDA'){
     color <- .dr_color()
+
     if(clustering %in% c('dbscan')){
         sample.plot <-  factoextra::fviz_cluster(
             list(data=as.data.frame(X.variate), cluster=cluster_group),
             palette=color[seq_len(length(unique(cluster_group)))], geom="point",
             stand=FALSE, ellipse=FALSE, ggtheme=ggplot2::theme_bw(),
-            show.clust.cent=FALSE, xlab='PLSDA-1', ylab='PLSDA-2', main="PLSDA",
+            show.clust.cent=FALSE, xlab=xlab, ylab=ylab, main=Title,
             legend.title='Groups')
         in_sample <- plotly::ggplotly(sample.plot)
         for (i in seq_len(length(in_sample$x$data))){
@@ -899,7 +1363,7 @@ dr_plsda <- function(
             list(data=as.data.frame(X.variate), cluster=cluster_group),
             palette=color[seq_len(cluster_num)], geom="point", stand=FALSE,
             ellipse=TRUE, ellipse.type='norm', ggtheme=ggplot2::theme_bw(),
-            show.clust.cent=FALSE, xlab='PLSDA-1', ylab='PLSDA-2', main="PLSDA",
+            show.clust.cent=FALSE, xlab=xlab, ylab=ylab, main=Title,
             legend.title='Groups')
         in_sample <- plotly::ggplotly(sample.plot)
         for (i in seq_len(length(in_sample$x$data))){
@@ -939,7 +1403,7 @@ dr_plsda <- function(
     return(data)
 }
 
-.plsdaVariate <- function(plsda.res){
+.plsdaVariate <- function(plsda.res, xlab='PLSDA-1', ylab='PLSDA-2', Title='Variables - PLSDA'){
     variable.tab <- mixOmics::plotVar(plsda.res, comp=seq_len(2), var.names=TRUE, plot=FALSE)
     circle_data_1 <- .creat_circle_data(1)
     circle_data_2 <- .creat_circle_data(0.5)
@@ -956,18 +1420,18 @@ dr_plsda <- function(
             marker=list(color="red", size=5), text=~paste(
                 "x :", round(x, 3), "\ny :", round(y, 3), "\nfeature :", variable.tab$names)) %>%
         plotly::layout(
-            xaxis=list(title="PLSDA-1"), yaxis=list(title="PLSDA-2"),
-            title='Variables - PLSDA')
+            xaxis=list(title=xlab), yaxis=list(title=ylab),
+            title=Title)
     circles <- data.frame(
-        x0 = rep(0, 2), y0 = rep(0, 2), r = c(0.5, 1),
-        stringsAsFactors = FALSE)
+        x0=rep(0, 2), y0=rep(0, 2), r=c(0.5, 1),
+        stringsAsFactors=FALSE)
     variablePlot <- ggplot2::ggplot() +
-        ggforce::geom_circle(data=circles, ggplot2::aes(x0=x0, y0=y0, r=r), show.legend = FALSE) +
+        ggforce::geom_circle(data=circles, ggplot2::aes(x0=x0, y0=y0, r=r), show.legend=FALSE) +
         ggplot2::geom_text(
             data=variable.tab, ggplot2::aes(x=x, y=y, label=names),
             colour='#8B0000', check_overlap=FALSE, size=4, show.legend=FALSE) +
         ggplot2::theme_bw() +
-        ggplot2::labs(x='PLSDA-1', y='PLSDA-2', title='Variables - PLSDA') +
+        ggplot2::labs(x=xlab, y=ylab, title=Title) +
         ggplot2::theme(plot.title=ggplot2::element_text(hjust=0.5))
     return(list(in_variable=in_variable, variablePlot=variablePlot))
 }

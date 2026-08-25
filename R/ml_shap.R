@@ -18,7 +18,7 @@ ml_shap <- function(ml_se, feature_num=10, nsim=5){
     if (!is.numeric(feature_num) | isFALSE(feature_num %in% S4Vectors::metadata(ml_se)$feature_option) ) {
         stop("feature_num must be a numeric value chosen from the following options: ", paste(S4Vectors::metadata(ml_se)$feature_option, collapse = ", "), " .")
     }
-    if (!is.numeric(nsim) | isFALSE(.check_numeric_range(nsim, 0, NULL)) ) {
+    if (!is.numeric(nsim) | isFALSE(.check_numeric_range(nsim, 1, NULL)) ) {
         stop("nsim must be a positive integer.")
     }
     best_model <- S4Vectors::metadata(ml_se)$best_model
@@ -150,7 +150,9 @@ plot_ml_shap <- function(shap_se){
 #' @title plot_shap_sample
 #' @description This function plots the SHAP feature importance results of user-selected sample.
 #' @param shap_se A SummarizedExperiment object with results computed by \code{\link{ml_shap}}.
-#' @param sample_id Numeric. The number of samples to display for each feature. Default is \code{10}.
+#' @param sample_id Numeric. The sample to plot, given as its ID number in
+#' the "ID" column of \code{shap_result}. Default is \code{10}, i.e. the
+#' sample whose ID equals 10.
 #' @return Return 1 interactive plot, 1 static plot, and 1 table.
 #' \enumerate{
 #' \item interactive_sample_feature_importance & static_sample_feature_importance:
@@ -304,15 +306,13 @@ plot_shap_force <- function(
 #' @description This function visualizes the SHAP values against the feature
 #' values for each variable.
 #' @param shap_se A SummarizedExperiment object with results computed by \code{\link{ml_shap}}.
-#' @param feature Character. A character string of the feature name the user selects
-#' from the "variable" column in \code{shap_result}. (Use \code{\link{extract_summarized_experiment}}
-#' to view \code{shap_result}.)
-#' @param shap_feature Character. A character string of the feature name the user selects from the
-#' "variable" column of \code{shap_result}. (Use \code{\link{extract_summarized_experiment}}
-#' to view \code{shap_result}.)
-#' @param interaction_index Character. A character string of the feature name the user selects
-#' from the "variable" column of \code{shap_result}. (Use \code{\link{extract_summarized_experiment}}
-#' to view \code{shap_result}.)
+#' @param feature Character. The feature name (from the "variable" column of
+#' \code{shap_result}) whose raw abundance value is plotted on the x-axis.
+#' @param shap_feature Character. The feature name (from the "variable" column
+#' of \code{shap_result}) whose SHAP value is plotted on the y-axis.
+#' @param interaction_index Character. The feature name (from the "variable"
+#' column of \code{shap_result}) whose raw abundance value is used to color
+#' the points, for visualizing interaction effects with \code{shap_feature}.
 #' @return Return 1 interactive plot, 1 static plot, 1 table.
 #' \enumerate{
 #' \item interactive_dependence_plot ＆ static_dependence_plot: SHAP dependence plot.

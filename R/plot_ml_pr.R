@@ -19,7 +19,7 @@
 #' data("ml_se_sub")
 #' res <- plot_ml_pr(ml_se_sub, feature_num=10)
 
-plot_ml_pr <- function(ml_se, feature_num){
+plot_ml_pr <- function(ml_se, feature_num=10){
     .check_ml_outputSE(ml_se)
     if (!is.numeric(feature_num) | isFALSE(feature_num %in% S4Vectors::metadata(ml_se)$feature_option) ) {
         stop("feature_num must be a numeric value chosen from the following options: ", paste(S4Vectors::metadata(ml_se)$feature_option, collapse = ", "), " .")

@@ -5,8 +5,8 @@
 #' \code{\link{as_summarized_experiment}} and processed by \code{\link{data_process}}.
 #' @param ref_group Character. Group name of the reference group. It must be one of the
 #' group names in the group information table's group column.
-#' @param test Character. The method to use for comparing means. Allowed method include "t-test" and
-#' "Wilcoxon test". Default is \code{'t-test'}.
+#' @param test Character. The method to use for comparing means. Allowed method
+#' include "t-test", "Wilcoxon test", and "limma". Default is \code{'t-test'}.
 #' @param significant Character. The p-value to be used for the statistically
 #' significant. Must be one of "pval" or "padj". Default is \code{'pval'}.
 #' @param p_cutoff Numeric. Significant level. Default is \code{0.05}.
@@ -26,25 +26,19 @@
 #'     significant='pval', p_cutoff=0.05, FC_cutoff=1, transform='log10')
 
 deSp_twoGroup <- function(
-        processed_se, ref_group, test=c('t-test', 'Wilcoxon test'),
-        significant=c('pval', 'padj'),
-        p_cutoff=0.05, FC_cutoff=1, transform=c('none', 'log10', 'square', 'cube')){
+        processed_se, ref_group, test='t-test', significant='pval',
+        p_cutoff=0.05, FC_cutoff=1, transform='log10'){
     ## check parameter
     .check_inputSE(processed_se, metadata_list=NULL)
-    if (is.null(test) | isFALSE(test %in% c('t-test', 'Wilcoxon test')) ) {
-        stop("test must be one of 't-test' or 'Wilcoxon test''.")
-    }
-    if (is.null(significant) | isFALSE(significant %in% c('pval', 'padj')) ) {
-        stop("significant must be one of 'pval' or 'padj'.")
-    }
+
+    match.arg(test, c('t-test', 'Wilcoxon test', 'limma'))
+    match.arg(significant, c('pval', 'padj'))
+    match.arg(transform, c('log10', 'square', 'cube', 'none'))
     if (!is.numeric(p_cutoff) | isFALSE(.check_numeric_range(p_cutoff, 0, 1)) ) {
         stop("p_cutoff must be a numeric value between 0 and 1.")
     }
     if (!is.numeric(FC_cutoff) | isFALSE(.check_numeric_range(FC_cutoff, 1, NULL)) ) {
         stop("FC_cutoff must be a numeric value >= 1.")
-    }
-    if (is.null(transform) | isFALSE(transform %in% c('none', 'log10', 'square', 'cube')) ) {
-        stop("transform must be one of 'none', 'log10', 'square', or 'cube'.")
     }
 
     abundance <- .extract_df(processed_se, type = "abundance")

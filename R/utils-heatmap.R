@@ -1,6 +1,8 @@
 .heatmap_color_scale <- function(data){
     data <- round(data, 3)
-    if(max(data) <= 0 & min(data) < 0){
+    if(all(data == 0, na.rm=TRUE)){
+        stop("All values in the data are 0; unable to generate a color scale for the heatmap.")
+    }else if(max(data) <= 0 & min(data) < 0){
         over_median <- min(data)/2
         if(max(data) < over_median){
             color <-  grDevices::colorRampPalette(c("#157AB5", "#92c5de"))(n=1000)
@@ -44,6 +46,10 @@
         Cor.mat[is.na(Cor.mat)] <- 0
 
         if(sum(is.na(Cor.mat))==0 & nrow(Cor.mat) >= 2 & ncol(Cor.mat) >= 2){
+            if (any(apply(Cor.mat, 1, sd) == 0)) {
+                stop("Clustering failed: one or more rows in the correlation matrix have zero standard deviation. ",
+                     "Please check if the selected normalization method in data_process() produces constant values across samples.")
+            }
             if (distfun %in% c("pearson","kendall","spearman")){
                 col_dend <- hclust(as.dist(1-stats::cor(Cor.mat, method=distfun)), method=hclustfun)
                 row_dend <- hclust(as.dist(1-stats::cor(t(Cor.mat), method=distfun)), method=hclustfun)

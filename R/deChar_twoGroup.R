@@ -7,8 +7,8 @@
 #' returned by \code{\link{list_lipid_char}}.
 #' @param ref_group Character. Group name of the reference group. It must be one of the
 #' group names in the group information table's group column.
-#' @param test Character. The method to use for comparing means.
-#' Allowed method include "t-test" and "Wilcoxon test". Default is \code{'t-test'}.
+#' @param test Character. The method to use for comparing means. Allowed method
+#' include "t-test", "Wilcoxon test", and "limma". Default is \code{'t-test'}.
 #' @param significant Character. The p-value to be used for the statistically
 #' significant. Must be one of "pval" or "padj". Default is \code{'pval'}.
 #' @param p_cutoff Numeric. Significant level. Default is \code{0.05}.
@@ -31,9 +31,8 @@
 #'     FC_cutoff=1, transform='log10')
 #'
 deChar_twoGroup <- function(
-        processed_se, char, ref_group, test=c('t-test', 'Wilcoxon test'),
-        significant=c("pval", "padj"),
-        p_cutoff=0.05, FC_cutoff=1, transform=c('none', 'log10', 'square', 'cube', 'log2')){
+        processed_se, char, ref_group, test='t-test', significant='pval',
+        p_cutoff=0.05, FC_cutoff=1, transform='log10'){
 
     ## Check parameter
     .check_inputSE(processed_se, metadata_list=NULL)
@@ -44,25 +43,19 @@ deChar_twoGroup <- function(
              "characteristics. Please execute list_lipid_char() to view ",
              "the valid lipid characteristics you can input.")
     }
-    if (is.null(test) | isFALSE(test %in% c('t-test', 'Wilcoxon test')) ) {
-        stop("test must be one of 't-test' or 'Wilcoxon test''.")
-    }
-    if (is.null(significant) | isFALSE(significant %in% c('pval', 'padj')) ) {
-        stop("significant must be one of 'pval' or 'padj'.")
-    }
+    match.arg(test, c('t-test', 'Wilcoxon test', 'limma'))
+    match.arg(significant, c('pval', 'padj'))
     if (!is.numeric(p_cutoff) | isFALSE(.check_numeric_range(p_cutoff, 0, 1)) ) {
         stop("p_cutoff must be a numeric value between 0 and 1.")
     }
     if (!is.numeric(FC_cutoff) | isFALSE(.check_numeric_range(FC_cutoff, 1, NULL)) ) {
         stop("FC_cutoff must be a numeric value >= 1.")
     }
-    if(char %in% lipidChar$characteristic &
-       (is.null(transform) | !transform %in% c('none', 'log10', 'square', 'cube'))){
-        stop("The 'char' is not a ratio-based characteristic. The 'transform' parameter must be one of 'none', 'log10', 'square', or 'cube'.")
+    if(char %in% lipidChar$characteristic){
+        match.arg(transform, c('log10', 'square', 'cube', 'none'))
     }
-    if(!char %in% lipidChar$characteristic &
-       (is.null(transform) | !transform %in% c('none', 'log2'))){
-        stop("The 'char' is a ratio-based characteristic. The 'transform' parameter must be either 'none' or 'log2'.")
+    if(!char %in% lipidChar$characteristic){
+        match.arg(transform, c('log2', 'none'))
     }
     if(char %in% lipidChar$characteristic){
         ## convert_sp2char
@@ -84,7 +77,7 @@ deChar_twoGroup <- function(
     }
     ## Group information
     if (.check_nGroup(group_info_raw) != 'two') {
-        stop('This function is used for two groups. If your data consists of multi groups, please use deChar_nultiGroup function for analysis.')
+        stop('This function is used for two groups. If your data consists of multi groups, please use deChar_multiGroup function for analysis.')
     }
     ## add original group names
     group_info <- group_info_raw %>%
@@ -125,8 +118,8 @@ deChar_twoGroup <- function(
         dplyr::left_join(test_res, by='characteristic') %>%
         dplyr::left_join(comp_res, by='feature') %>%
         dplyr::mutate(
-            post_hoc_sig_pval=ifelse(post_hoc_pval < p_cutoff, 'yes', 'no'),
-            post_hoc_sig_padj=ifelse(post_hoc_padj < p_cutoff, 'yes', 'no'))
+            post_hoc_sig_pval=ifelse(post_hoc_pval < p_cutoff & abs(log2FC) > log2(FC_cutoff), 'yes', 'no'),
+            post_hoc_sig_padj=ifelse(post_hoc_padj < p_cutoff & abs(log2FC) > log2(FC_cutoff), 'yes', 'no'))
     all_deChar_result <- table_stat %>%
         dplyr::select(dplyr::all_of(paste0('post_hoc_sig_', significant)),
                       dplyr::everything()) %>%
@@ -194,7 +187,7 @@ deChar_twoGroup <- function(
 #'     test='t-test', significant="padj", p_cutoff=0.05,
 #'     FC_cutoff=1, transform='log10')
 #' res_plot <- plot_deChar_twoGroup(deChar_se)
-plot_deChar_twoGroup<- function(deChar_se){
+plot_deChar_twoGroup <- function(deChar_se){
     #### Check parameter ####
     .check_de_outputSE(deChar_se, de_type="deChar")
     abundance <- S4Vectors::metadata(deChar_se)$processed_abundance
@@ -203,7 +196,7 @@ plot_deChar_twoGroup<- function(deChar_se){
     ## Group information
     group_info <- .extract_df(deChar_se, type="group")
     if(.check_nGroup(group_info) != 'two'){
-        stop("This function is used for two groups. If your data consists of two groups, please use plot_deChar_multiGroup function for analysis.")
+        stop("This function is used for two groups. If your data consists of multi groups, please use plot_deChar_multiGroup function for analysis.")
     }
     ref_group <- unique(group_info$original_group_name[which(group_info$group == 'ctrl')])
     paired_sample <- ifelse(isFALSE(all(is.na(group_info$pair))), TRUE, FALSE)
@@ -233,14 +226,14 @@ plot_deChar_twoGroup<- function(deChar_se){
         index_stat <- .stat_twoGroup(abundance=index_abund, group_info, paired_sample, test=post_hoc_test)
         index_stat_tab <- index_mean %>% dplyr::left_join(index_stat, by='feature')
         Combine_char_result_table <- index_stat_tab
-        Combine_char_result_table <- Combine_char_result_table %>% dplyr::mutate(sig=ifelse((significant < p_cutoff) & (abs(log2FC) > log2(FC_cutoff)),'yes', 'no'))
+        Combine_char_result_table <- Combine_char_result_table %>% dplyr::mutate(sig=ifelse((get(significant) < p_cutoff) & (abs(log2FC) > log2(FC_cutoff)),'yes', 'no'))
         Combine_char_result_table <- Combine_char_result_table %>% dplyr::mutate(sig=ifelse(is.na(sig), 'no', sig ))
         #### Box plot ####
         ## Gather the abundance data
         sub_abund <- index_abund %>%
             tidyr::gather(sample_name, abund, -1) %>%
             dplyr::left_join(group_info, by='sample_name')
-        box_plot <- .boxPlot_deChar_twoGroup(Combine_char_result_table, boxTab=sub_abund, char, split_class=NULL)
+        box_plot <- .boxPlot_deChar_twoGroup(Combine_char_result_table, boxTab=sub_abund, char, significant, split_class=NULL)
 
         return(list(static_barPlot=bar_plot$barPlot,
                     static_barPlot_sqrt=bar_plot$barPlot_sqrt,

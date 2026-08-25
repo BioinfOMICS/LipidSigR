@@ -5,12 +5,11 @@
 #' The two chosen characteristics should be either both continuous data or one continuous and one categorical data.
 #' @param processed_se A SummarizedExperiment object constructed by
 #' \code{\link{as_summarized_experiment}} and processed by \code{\link{data_process}}.
-#' @param char Character. A lipid characteristic selected from the common list
-#' returned by \code{\link{list_lipid_char}}. Allowed lipid characteristics include
+#' @param char Character. Allowed lipid characteristics include
 #' 'Total.C', 'Total.DB', 'Total.OH', 'FA.C', 'FA.DB', and 'FA.OH'.
-#' Selected characteristics must be one of 'Total.C', 'Total.DB', 'Total.OH', 'FA.C', 'FA.DB', or 'FA.OH'.
-#' @param subChar Character. A lipid characteristic selected from the common list
-#' returned by \code{\link{list_lipid_char}}. Must be differ from 'char'.
+#' @param subChar Character. A lipid characteristic selected from the
+#' \code{deChar_list} element of the list returned by
+#' \code{\link{list_lipid_char}}. Must be different from 'char'.
 #' @param ref_group Character. Group name of the reference group. It must be one of the
 #' group names in the group information table's group column.
 #' @param post_hoc Character. The method to statistic calculation. Allowed method
@@ -36,10 +35,8 @@
 
 
 subChar_multiGroup <- function(
-        processed_se, char, subChar, ref_group,
-        post_hoc=c('One-way ANOVA', 'Kruskal-Wallis test'),
-        post_hoc_sig=c('pval', 'padj'), post_hoc_p_cutoff=0.05,
-        transform=c('none', 'log10', 'square', 'cube')){
+        processed_se, char, subChar, ref_group, post_hoc='One-way ANOVA',
+        post_hoc_sig='pval', post_hoc_p_cutoff=0.05, transform='log10'){
 
     ## Check parameter
     .check_inputSE(processed_se, metadata_list=NULL)
@@ -60,19 +57,12 @@ subChar_multiGroup <- function(
              "characteristics. Please execute list_lipid_char function to view ",
              "the valid lipid characteristics you can input.")
     }
-    if(is.null(post_hoc) | isFALSE(post_hoc %in% c('One-way ANOVA', 'Kruskal-Wallis test'))){
-        stop("The 'post_hoc' parameter must be either 'One-way ANOVA' or 'Kruskal-Wallis test'.")
-    }
-    if(is.null(post_hoc_sig) | isFALSE(post_hoc_sig %in% c('pval', 'padj'))){
-        stop("The 'post_hoc_sig' parameter must be either 'pval' or 'padj'.")
-    }
+    match.arg(post_hoc, c('One-way ANOVA', 'Kruskal-Wallis test'))
+    match.arg(post_hoc_sig, c('pval', 'padj'))
     if(!is.numeric(post_hoc_p_cutoff) | isFALSE(.check_numeric_range(post_hoc_p_cutoff, 0, 1))){
         stop("The 'post_hoc_p_cutoff' parameter must be a numeric value between 0 and 1.")
     }
-    if(is.null(transform) | !transform %in% c('none', 'log10', 'square', 'cube')){
-        stop("The 'transform' parameter must be one of 'none', 'log10',",
-             "'square', or 'cube'.")
-    }
+    match.arg(transform, c('log10', 'cube', 'square', 'none'))
 
     #### Extract data from SE ####
     ## Lipid abundance
@@ -110,7 +100,9 @@ subChar_multiGroup <- function(
         tidyr::spread(sample_name, abund) %>%
         dplyr::mutate(feature=paste0(char2, '_', char1)) %>%
         dplyr::select(feature, everything(), -char1, -char2)
-    if(nrow(sub_abund) == 0) return(warning(''))
+    if(nrow(sub_abund) == 0) {
+        stop("No data remains after subsetting the selected lipid characteristics. Please check the char and subChar parameters.")
+    }
     processed_abund <- sub_abund
     ## Calculate mean and sd of abundance by groups
     mean_abund <- .mean_sd_multiGroup(abundance=sub_abund, group_info)

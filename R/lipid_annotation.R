@@ -4,7 +4,7 @@
 #' and mappings with other resource IDs. The returned lipid characteristics table
 #' will be used for further analysis in LipidSigR.
 #' @param goslin_annotation A data frame of lipid characteristics from the
-#' \code{\link[rgoslin]{parseLipidNames}} function of \pkg{\link{rgoslin}} package.
+#' \code{\link[rgoslin]{parseLipidNames}} function of rgoslin package.
 #' @return Return a data frame of lipid characteristics table.
 #' @export
 #' @examples
@@ -211,7 +211,7 @@ lipid_annotation <- function(goslin_annotation){
         dplyr::mutate(SN=stringr::str_replace_all(SN, '\\/', '_'),
                       index=seq_len(nrow(.))) %>%
         tidyr::separate_rows(SN, sep='_') %>%
-        dplyr::filter(!is.na(SN) | SN != '0:0') %>%
+        dplyr::filter(!is.na(SN) & SN != '0:0') %>%
         dplyr::group_by(index) %>%
         dplyr::mutate(label=paste0('FA', dplyr::row_number())) %>%
         dplyr::ungroup() %>%
@@ -543,6 +543,7 @@ lipid_annotation <- function(goslin_annotation){
     #### FA ####
     rm.lipid <- c(SP$feature, LPL$feature)
     FA <- goslin.char %>%
+        dplyr::filter(!feature %in% rm.lipid) %>%
         dplyr::filter(class == 'FA') %>%
         dplyr::mutate(GATOM.abbr=Species.Name)
     #### MG O-, DG O-, TG O- ####
