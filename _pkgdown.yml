@@ -1,0 +1,16 @@
+template:
+  bootstrap: 5
+  bootswatch: flatly
+articles:
+ - title: Articles
+   navbar: ~
+   contents:
+    - profiling
+    - de
+    - enrichment
+    - ml
+    - corr
+    - network
+    - tool_function
+    - case_twoGroup
+    - case_multiGroup
