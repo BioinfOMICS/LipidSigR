@@ -7,10 +7,9 @@
 heatmap_clustering(
   de_se,
   char,
-  distfun = c("pearson", "kendall", "spearman"),
-  hclustfun = c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty",
-    "median", "centroid"),
-  type = c("all", "sig")
+  distfun = "pearson",
+  hclustfun = "complete",
+  type = "sig"
 )
 }
 \arguments{
@@ -30,9 +29,9 @@ Default is \code{'pearson'}}
 "average" (= UPGMA), "mcquitty" (= WPGMA), "median" (= WPGMC), or "centroid" (= UPGMC).
 Default is \code{'complete'}}
 
-\item{type}{Character. It must be 'all' or 'sig.' 'all' for output the results of all
+\item{type}{Character. It must be 'all' or 'sig' 'all' for output the results of all
 lipid species or characteristics, and 'sig' for output the results of
-significant lipid species or characteristics.}
+significant lipid species or characteristics. Default is \code{'sig'}}
 }
 \value{
 Return a list with 1 figure and 1 matrix.

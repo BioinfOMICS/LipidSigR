@@ -18,11 +18,8 @@ For example, if char is 'class' and char_feature is 'Cer', the resulting
 plots will display data for 'Cer' within the 'class' category.}
 }
 \value{
-Return a list with 1 static plot and 1 interactive plot.
-\enumerate{
-\item static_enrichPlot: a static enriched plot of the selected lipid characteristic and feature.
-\item interactive_enrichPlot: an interactive enriched plot of the selected lipid characteristic and feature.
-}
+Return a static ggplot object: an enrichment plot for the
+selected lipid characteristic and feature.
 }
 \description{
 This function plots the result of \code{\link{enrichment_lsea}}.

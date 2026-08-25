@@ -6,8 +6,8 @@
 \usage{
 char_2wayAnova(
   processed_se,
-  ratio_transform = c("none", "log2"),
-  char_transform = c("none", "log10", "square", "cube")
+  ratio_transform = "log2",
+  char_transform = "log10"
 )
 }
 \arguments{

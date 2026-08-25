@@ -8,10 +8,10 @@ deChar_multiGroup(
   processed_se,
   char,
   ref_group,
-  post_hoc = c("One-way ANOVA", "Kruskal-Wallis test"),
-  post_hoc_sig = c("pval", "padj"),
+  post_hoc = "One-way ANOVA",
+  post_hoc_sig = "pval",
   post_hoc_p_cutoff = 0.05,
-  transform = c("none", "log10", "square", "cube", "log2")
+  transform = "log10"
 )
 }
 \arguments{

@@ -4,7 +4,7 @@
 \alias{convert_sp2char}
 \title{convert_sp2char}
 \usage{
-convert_sp2char(processed_se, transform = c("none", "log10", "square", "cube"))
+convert_sp2char(processed_se, transform = "log10")
 }
 \arguments{
 \item{processed_se}{A SummarizedExperiment object constructed by

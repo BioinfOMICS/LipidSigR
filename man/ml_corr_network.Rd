@@ -22,8 +22,10 @@ ml_corr_network(
 \item{correlation}{Character. The method for computing correlation coefficient.
 Allowed methods includes 'pearson', 'kendall', and 'spearman'. Default is \code{'pearson'}.}
 
-\item{edge_cutoff}{Numeric. A value between 0 and 1. Only the correlation
-coefficient larger than it will be shown as a line in the plot.}
+\item{edge_cutoff}{Numeric. A value between 0 and 1. Only edges whose
+absolute correlation coefficient is greater than or equal to this value
+will be shown as a line in the plot (this applies to both positive and
+negative correlations).}
 
 \item{feature_num}{Numeric. The number of features to be shown in the plots.
 A feature number value selected from \code{feature_option} of the

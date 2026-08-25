@@ -9,11 +9,11 @@ subChar_twoGroup(
   char,
   subChar,
   ref_group,
-  test = c("t-test", "Wilcoxon test"),
-  significant = c("pval", "padj"),
+  test = "t-test",
+  significant = "pval",
   p_cutoff = 0.05,
   FC_cutoff = 1,
-  transform = c("none", "log10", "square", "cube")
+  transform = "log10"
 )
 }
 \arguments{

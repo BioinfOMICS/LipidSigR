@@ -4,7 +4,7 @@
 \alias{plot_ml_probability}
 \title{plot_ml_probability}
 \usage{
-plot_ml_probability(ml_se, feature_num)
+plot_ml_probability(ml_se, feature_num = 10)
 }
 \arguments{
 \item{ml_se}{A SummarizedExperiment object with results computed by \code{\link{ml_model}}.}

@@ -8,8 +8,8 @@ boxPlot_feature_twoGroup(
   processed_se,
   feature,
   ref_group,
-  test = c("t-test", "Wilcoxon test"),
-  transform = c("none", "log10", "square", "cube")
+  test = "t-test",
+  transform = "log10"
 )
 }
 \arguments{

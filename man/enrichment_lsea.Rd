@@ -7,8 +7,8 @@
 enrichment_lsea(
   deSp_se,
   char = NULL,
-  rank_by = c("log2FC", "pval", "padj", "statistic"),
-  significant = c("pval", "padj"),
+  rank_by = "statistic",
+  significant = "pval",
   p_cutoff = 0.05,
   n_lipid = 2
 )

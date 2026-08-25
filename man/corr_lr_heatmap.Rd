@@ -10,16 +10,14 @@ corr_lr_heatmap(
   condition_col,
   adjusted_col,
   side_color_char,
-  significant = c("padj", "pval"),
+  significant = "pval",
   p_cutoff = 0.05,
-  adjust_p_method = c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr",
-    "none"),
-  distfun = c("pearson", "spearman", "kendall"),
-  hclustfun = c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty",
-    "median", "centroid"),
-  heatmap_col = c("beta_coef", "t_statistic"),
-  transform = c("none", "log10", "square", "cube"),
-  type = c("Sp", "Char")
+  adjust_p_method = "BH",
+  distfun = "spearman",
+  hclustfun = "average",
+  heatmap_col = "t_statistic",
+  transform = "log10",
+  type = "Sp"
 )
 }
 \arguments{
@@ -44,7 +42,7 @@ by \code{\link{list_lipid_char}}.}
 \item{significant}{Character. The p-value to be used for the statistically
 significant. Must be one of "pval" or "padj". Default is \code{'pval'}.}
 
-\item{p_cutoff}{Numeric. Significant level. Default is \code{1}.}
+\item{p_cutoff}{Numeric. Significant level. Default is \code{0.05}.}
 
 \item{adjust_p_method}{Character. The correction method of p-value. Allowed
 methods include "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr",
@@ -57,7 +55,7 @@ coefficient (or covariance). Allowed methods include "pearson", "kendall",
 \item{hclustfun}{Character. The agglomeration method. This should be
 (an unambiguous abbreviation of) one of "ward.D", "ward.D2",
 "single", "complete", "average" (= UPGMA), "mcquitty" (= WPGMA),
-"median" (= WPGMC) or "centroid" (= UPGMC). Default is \code{'centroid'}.}
+"median" (= WPGMC) or "centroid" (= UPGMC). Default is \code{'average'}.}
 
 \item{heatmap_col}{Character. The value for clustering. Allow method are
 "beta_coef" and "t_statistic". Default is \code{'t_statistic'}.}
@@ -67,7 +65,7 @@ include "none", "log10", "square", "cube". Select 'none' to skip data transforma
 Default is \code{'log10'}.}
 
 \item{type}{Character. Specifies the correlation type: 'Sp' for lipid species
-correlation and 'Char' for lipid characteristic correlation.}
+correlation and 'Char' for lipid characteristic correlation. Default is \code{'Sp'}.}
 }
 \value{
 Return a SummarizedExperiment object containing analysis results.

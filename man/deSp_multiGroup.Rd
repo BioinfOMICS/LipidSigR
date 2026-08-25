@@ -7,10 +7,10 @@
 deSp_multiGroup(
   processed_se,
   ref_group,
-  test = c("One-way ANOVA", "Kruskal-Wallis test"),
-  significant = c("pval", "padj"),
+  test = "One-way ANOVA",
+  significant = "pval",
   p_cutoff = 0.05,
-  transform = c("none", "log10", "square", "cube")
+  transform = "log10"
 )
 }
 \arguments{

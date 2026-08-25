@@ -4,12 +4,7 @@
 \alias{enrichment_ora}
 \title{enrichment_ora}
 \usage{
-enrichment_ora(
-  deSp_se,
-  char = NULL,
-  significant = c("pval", "padj"),
-  p_cutoff = 0.05
-)
+enrichment_ora(deSp_se, char = NULL, significant = "pval", p_cutoff = 0.05)
 }
 \arguments{
 \item{deSp_se}{The resulting SummarizedExperiment object from the differential

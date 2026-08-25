@@ -7,11 +7,10 @@
 ml_model(
   processed_se,
   char = "none",
-  transform = c("none", "log10", "square", "cube"),
-  ranking_method = c("p_value", "pvalue_FC", "ROC", "Random_forest", "SVM", "Lasso",
-    "Ridge", "ElasticNet"),
-  ml_method = c("Random_forest", "SVM", "Lasso", "Ridge", "ElasticNet", "xgboost"),
-  split_prop = 0.3,
+  transform = "log10",
+  ranking_method = "Random_forest",
+  ml_method = "Random_forest",
+  split_prop = 0.7,
   nfold = 10,
   alpha = NULL
 )
@@ -36,15 +35,16 @@ Allowed methods include 'Random_forest', 'SVM', 'Lasso', 'Ridge',
 'ElasticNet', 'xgboost'. Default is \code{'Random_forest'}.}
 
 \item{split_prop}{Numeric. The proportion of data to be retained for modeling/analysis.
-The range is 0.1 to 0.5. Default is \code{0.3}.}
+The range is 0.5 to 1. Default is \code{0.7}.}
 
 \item{nfold}{Numeric. The number of fold that the original dataset is randomly
 partitioned into equal-sized subsamples. Must be a positive interger.
 Default is \code{10}.}
 
 \item{alpha}{Numeric. The alpha value between 0 and 1 when choosing
-\code{"ElasticNet"} as ml_method. 0 is for Ridge and 1 is for Lasso.
-If "ElasticNet" is not selected as the ml_method, set the value to NULL.}
+\code{"ElasticNet"} as ranking_method or ml_method. 0 is for Ridge and 1
+is for Lasso. If "ElasticNet" is not selected as either ranking_method or
+ml_method, set the value to NULL.}
 }
 \value{
 Return a SummarizedExperiment object containing analysis results.
@@ -62,6 +62,6 @@ processed_se <- data_process(
 char_list <- list_lipid_char(processed_se)
 ml_se <- ml_model(
     processed_se, char=c("class","Total.DB"), transform='log10',
-    ranking_method='Random_forest', ml_method='Random_forest', split_prop=0.3,
+    ranking_method='Random_forest', ml_method='Random_forest', split_prop=0.7,
     nfold=5, alpha=NULL)
 }

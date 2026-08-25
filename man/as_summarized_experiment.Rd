@@ -6,47 +6,146 @@
 \usage{
 as_summarized_experiment(
   abundance,
-  goslin_annotation,
+  goslin_annotation = NULL,
   group_info = NULL,
-  se_type = c("profiling", "de_two", "de_multiple", "ml", "corr"),
+  se_type = "profiling",
   paired_sample = FALSE
 )
 }
 \arguments{
-\item{abundance}{A data frame of predictors includes features (such
-as molecules or lipid classes) and their abundance in each sample. NAs are
-allowed in all columns except the first. The first column must be named "feature"
-and contain names of unique lipid species.}
-
-\item{goslin_annotation}{A data frame of lipid characteristics from the
-\code{\link[rgoslin]{parseLipidNames}} function of \pkg{\link{rgoslin}} package.
-Please exclude lipids with the "Grammar" column marked as 'NOT_PARSEABLE'.}
-
-\item{group_info}{A data frame containing group information. The required
-columns are listed as below.
-\enumerate{
-\item sample_name: name of each sample. NAs are not allowed; the sample names
-must be unique and match those in the abundance data.
-\item label_name: label name of each sample. NAs are not allowed.
-\item group: group name of each sample. NAs are not allowed.
-\item pair: (only required for two-group data) If paired samples are contained,
-they should be sequentially numbered from 1 to N without missing, blank, or
-skipped numbers. If not, the values must all be marked as NA.
+\item{abundance}{A data frame of lipid abundance data with the following
+structure:
+\itemize{
+\item \strong{Column 1} (\code{feature}): a character column of unique
+lipid species names used for feature-level analysis and lipid
+recognition/mapping. Must be named \code{"feature"}. No duplicate or
+missing values are allowed.
+\item \strong{Columns 2 to N}: numeric columns of sample abundance values,
+one column per sample. Column names must match the \code{sample_name}
+values in \code{group_info}. \code{NA}s are allowed.
 }}
 
-\item{se_type}{Character. The SummarizedExperiment object is generated for
-running functions related to which analysis type. Must by one of "profiling",
-"de_two", "de_multiple", "ml", or "corr".}
+\item{goslin_annotation}{A data frame of lipid structural annotations
+returned by \code{\link[rgoslin]{parseLipidNames}} from the
+rgoslin package. Before passing this data frame to the
+function, remove any rows where the \code{Grammar} column is
+\code{'NOT_PARSEABLE'}, as these entries represent lipid names that could
+not be mapped to a recognised lipid grammar and are not supported for
+downstream analysis. The corresponding lipids should also be removed from
+\code{abundance}. Required for all lipidomics \code{se_type} options
+(\code{"profiling"}, \code{"de_two"}, \code{"de_multiple"}, \code{"ml"},
+\code{"corr"}). Must be \code{NULL} when \code{se_type = "rna"}, since
+non-lipidomics abundance data has no lipid structural annotation.}
 
-\item{paired_sample}{Logical/NULL. For two-group data, enter TRUE/FALSE
-to indicate if paired samples are included. For multi-group data, enter NULL.}
+\item{group_info}{A data frame containing sample metadata. The required
+structure depends on the \code{se_type} selected:
+\describe{
+\item{\code{"profiling"}}{No \code{group_info} is required; this argument
+is optional and can be omitted.}
+
+\item{\code{"de_two"}}{Required. Compares lipid abundance between exactly
+two groups, with optional paired design support. Must contain the
+following columns in order: \code{sample_name}, \code{label_name},
+\code{group}, \code{pair}.
+\itemize{
+\item \code{sample_name}: unique sample identifiers that match the
+column names in \code{abundance} exactly. No \code{NA}s allowed.
+\item \code{label_name}: human-readable label for each sample
+(e.g., \code{ctrl1}, \code{hfref9}). No \code{NA}s allowed.
+\item \code{group}: biological group used for differential abundance
+testing. Must contain exactly 2 unique values. No \code{NA}s allowed.
+\item \code{pair}: paired design indicator. If samples are paired,
+provide sequential integer identifiers (e.g., 1 to N) with no gaps or
+missing values. If samples are unpaired, set all values to \code{NA}.
+}}
+
+\item{\code{"de_multiple"}}{Required. Same structure as \code{"de_two"}
+but for comparisons across more than two groups. The \code{group} column
+must contain more than 2 unique values. The \code{pair} column is not
+required and should be omitted. Must contain the following columns in
+order: \code{sample_name}, \code{label_name}, \code{group}.}
+
+\item{\code{"ml"}}{Required. Provides the outcome label for model
+training. Must contain the following columns in order:
+\code{sample_name}, \code{group}.
+\itemize{
+\item \code{sample_name}: unique sample identifiers that match the
+column names in \code{abundance} exactly. No \code{NA}s allowed.
+\item \code{group}: the class label the model learns to predict.
+For binary classification, must be encoded as \code{0}/\code{1}.
+No \code{NA}s allowed. Note: this is a prediction outcome label,
+not an experimental group for statistical testing.
+}}
+
+\item{\code{"corr"}}{Required. Associates lipid abundance with continuous
+or categorical phenotype variables for correlation and/or regression
+analysis. Must contain the following columns:
+\itemize{
+\item \code{sample_name}: unique sample identifiers that match the
+column names in \code{abundance} exactly. No \code{NA}s allowed.
+\item Two or more phenotype or clinical variable columns (e.g.,
+\code{Age}, \code{BMI}, \code{Smoking}). Unlike other \code{se_type}
+options, there is no single \code{group} column; multiple phenotype
+columns are provided instead. Categorical variables must be pre-encoded
+as numeric values (e.g., binary categories as \code{0}/\code{1})
+before input.
+}}
+
+\item{\code{"rna"}}{Required. \code{se_type = "rna"} builds a
+\code{SummarizedExperiment} for non-lipidomics abundance data (e.g. RNA
+expression) that is meant to feed downstream Multi-Omics analysis (see
+\code{\link{as_MultiAssayExperiment}}) rather than one of the 4
+lipidomics analysis designs above. \code{group_info} must be provided;
+its format is auto-detected from the column layout and must match one
+of the following two lipidomics layouts (\code{"ml"}/\code{"corr"}
+layouts are not supported for \code{"rna"}):
+\itemize{
+\item 4 columns, \code{sample_name}, \code{label_name}, \code{group},
+\code{pair} (same layout as \code{"de_two"}): \code{group} must
+contain exactly 2 unique values; paired design is inferred directly
+from the \code{pair} column (all \code{NA} = unpaired, sequential
+integers = paired) rather than a separate \code{paired_sample}
+argument.
+\item 3 columns, \code{sample_name}, \code{label_name}, \code{group}
+(same layout as \code{"de_multiple"}): \code{group} must contain more
+than 2 unique values, each with more than 2 samples.
+}
+In both cases \code{sample_name} must match the column names in
+\code{abundance} exactly with no duplicates, and no \code{NA}s are
+allowed in \code{sample_name}, \code{label_name}, or \code{group}.}
+}}
+
+\item{se_type}{A character string specifying the analysis type for which
+the \code{SummarizedExperiment} object is constructed. Default is \code{'profiling'}.
+Must be one of:
+\itemize{
+\item \code{"profiling"}: lipid profiling and visualisation.
+\item \code{"de_two"}: differential abundance analysis between two groups.
+\item \code{"de_multiple"}: differential abundance analysis across
+multiple groups.
+\item \code{"ml"}: machine learning classification.
+\item \code{"corr"}: correlation and regression analysis with phenotype
+variables.
+\item \code{"rna"}: non-lipidomics (e.g. RNA) abundance data intended for
+downstream Multi-Omics analysis. When \code{se_type = "rna"},
+\code{goslin_annotation} is not used and must be \code{NULL} (no lipid
+characteristics table is built).
+}}
+
+\item{paired_sample}{Logical or \code{NULL}. For two-group analysis
+(\code{se_type = "de_two"}), set to \code{TRUE} if the samples are paired
+or \code{FALSE} if unpaired. For all other \code{se_type} options
+(including \code{"de_multiple"}, \code{"ml"}, \code{"corr"}), set to
+\code{NULL}. For \code{se_type = "rna"} the argument is not used and any
+value is ignored.}
 }
 \value{
-Return a SummarizedExperiment object.
+A \code{SummarizedExperiment} object configured for the specified
+analysis type.
 }
 \description{
-This function construct a SummarizedExperiment object for analysis.
-by input data frames.
+Constructs a \code{SummarizedExperiment} object from input
+data frames for downstream lipidomics analysis.
 }
 \examples{
 library(dplyr)

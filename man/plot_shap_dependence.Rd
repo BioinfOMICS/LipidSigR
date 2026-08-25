@@ -9,17 +9,15 @@ plot_shap_dependence(shap_se, feature, shap_feature, interaction_index)
 \arguments{
 \item{shap_se}{A SummarizedExperiment object with results computed by \code{\link{ml_shap}}.}
 
-\item{feature}{Character. A character string of the feature name the user selects
-from the "variable" column in \code{shap_result}. (Use \code{\link{extract_summarized_experiment}}
-to view \code{shap_result}.)}
+\item{feature}{Character. The feature name (from the "variable" column of
+\code{shap_result}) whose raw abundance value is plotted on the x-axis.}
 
-\item{shap_feature}{Character. A character string of the feature name the user selects from the
-"variable" column of \code{shap_result}. (Use \code{\link{extract_summarized_experiment}}
-to view \code{shap_result}.)}
+\item{shap_feature}{Character. The feature name (from the "variable" column
+of \code{shap_result}) whose SHAP value is plotted on the y-axis.}
 
-\item{interaction_index}{Character. A character string of the feature name the user selects
-from the "variable" column of \code{shap_result}. (Use \code{\link{extract_summarized_experiment}}
-to view \code{shap_result}.)}
+\item{interaction_index}{Character. The feature name (from the "variable"
+column of \code{shap_result}) whose raw abundance value is used to color
+the points, for visualizing interaction effects with \code{shap_feature}.}
 }
 \value{
 Return 1 interactive plot, 1 static plot, 1 table.

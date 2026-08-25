@@ -4,7 +4,7 @@
 \alias{nw_pathway_activity}
 \title{nw_pathway_activity}
 \usage{
-nw_pathway_activity(deSp_se, organism = c("human", "mouse"))
+nw_pathway_activity(deSp_se, organism = "human")
 }
 \arguments{
 \item{deSp_se}{A SummarizedExperiment object with results computed by \code{\link{deSp_twoGroup}}.}

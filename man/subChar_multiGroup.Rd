@@ -9,23 +9,22 @@ subChar_multiGroup(
   char,
   subChar,
   ref_group,
-  post_hoc = c("One-way ANOVA", "Kruskal-Wallis test"),
-  post_hoc_sig = c("pval", "padj"),
+  post_hoc = "One-way ANOVA",
+  post_hoc_sig = "pval",
   post_hoc_p_cutoff = 0.05,
-  transform = c("none", "log10", "square", "cube")
+  transform = "log10"
 )
 }
 \arguments{
 \item{processed_se}{A SummarizedExperiment object constructed by
 \code{\link{as_summarized_experiment}} and processed by \code{\link{data_process}}.}
 
-\item{char}{Character. A lipid characteristic selected from the common list
-returned by \code{\link{list_lipid_char}}. Allowed lipid characteristics include
-'Total.C', 'Total.DB', 'Total.OH', 'FA.C', 'FA.DB', and 'FA.OH'.
-Selected characteristics must be one of 'Total.C', 'Total.DB', 'Total.OH', 'FA.C', 'FA.DB', or 'FA.OH'.}
+\item{char}{Character. Allowed lipid characteristics include
+'Total.C', 'Total.DB', 'Total.OH', 'FA.C', 'FA.DB', and 'FA.OH'.}
 
-\item{subChar}{Character. A lipid characteristic selected from the common list
-returned by \code{\link{list_lipid_char}}. Must be differ from 'char'.}
+\item{subChar}{Character. A lipid characteristic selected from the
+\code{deChar_list} element of the list returned by
+\code{\link{list_lipid_char}}. Must be different from 'char'.}
 
 \item{ref_group}{Character. Group name of the reference group. It must be one of the
 group names in the group information table's group column.}

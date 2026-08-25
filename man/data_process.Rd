@@ -7,12 +7,12 @@
 data_process(
   se,
   exclude_missing = TRUE,
+  exclude_missing_method = "global",
   exclude_missing_pct = 70,
-  replace_na_method = c("none", "QRILC", "SVD", "KNN", "IRMI", "min", "mean", "median",
-    "PPCA", "BPCA", "RandomForest"),
+  replace_na_method = "min",
   replace_na_method_ref = 0.5,
-  normalization = c("none", "Percentage", "PQN", "Quantile", "Sum", "Median"),
-  transform = c("none", "log10", "cube", "square")
+  normalization = "Percentage",
+  transform = "log10"
 )
 }
 \arguments{
@@ -21,13 +21,17 @@ data_process(
 \item{exclude_missing}{Logical. If exclude_missing=TURE, lipids with
 missing values will be removed. Default is \code{TRUE}.}
 
+\item{exclude_missing_method}{Character. The method for filtration type.
+Allowed methods include "global", "group".}
+
 \item{exclude_missing_pct}{Numeric. Lipids with missing values over a
 certain percentage (5-100) should be removed. Default is \code{70}.}
 
 \item{replace_na_method}{Character. The method for NA values replacing.
-Allowed methods include "QRILC", "SVD", "KNN", "IRMI", "min", "mean", "median",
-"PPCA", "BPCA", "RandomForest", and "none". If you have already replaced NAs,
-select 'none'. Default is \code{'min'}.}
+Allowed methods include "min", "BPCA", "GMS", "KNN", "impSeq", "Impseqrob",
+"LLS", "mean", "median", "MinProb", "PPCA", "PI", "QRILC", "RandomForest",
+"SVD", and "none". If you have already replaced NAs, select "none".
+Default is \code{'min'}.}
 
 \item{replace_na_method_ref}{Numeric. The value for replacing NA values
 varies depending on the selected method, and each method applies different number ranges.
@@ -42,12 +46,13 @@ varies depending on the selected method, and each method applies different numbe
 Default is \code{0.5} for replace_na_method='min'.}
 
 \item{normalization}{Character. Normalization function. Allowed methods
-include "Percentage", "PQN", "Quantile", "Sum", "Median", and "none".
-If you have already normalized the abundance values, select 'none'.
+include "Percentage", "CubicSplines", "CyclicLoess", "EigenMS", "linear",
+"Mean", "Median", "nonLinear", "PQN", "Quantile", "RLR", "Sum", "TMM", and
+"none". If you have already normalized the abundance values, select 'none'.
 Default is \code{'Percentage'}.}
 
-\item{transform}{Character. Normalization function. Allowed methods
-include "log10", "cube", "square", and "none".
+\item{transform}{Character. Transformation function. Allowed methods
+include "log10", "log2", "cube", "square", and "none".
 If you have already transformed the abundance values, select 'none'.
 Default is \code{'log10'}.}
 }

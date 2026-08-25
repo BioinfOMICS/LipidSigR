@@ -8,11 +8,11 @@ deChar_twoGroup(
   processed_se,
   char,
   ref_group,
-  test = c("t-test", "Wilcoxon test"),
-  significant = c("pval", "padj"),
+  test = "t-test",
+  significant = "pval",
   p_cutoff = 0.05,
   FC_cutoff = 1,
-  transform = c("none", "log10", "square", "cube", "log2")
+  transform = "log10"
 )
 }
 \arguments{
@@ -25,8 +25,8 @@ returned by \code{\link{list_lipid_char}}.}
 \item{ref_group}{Character. Group name of the reference group. It must be one of the
 group names in the group information table's group column.}
 
-\item{test}{Character. The method to use for comparing means.
-Allowed method include "t-test" and "Wilcoxon test". Default is \code{'t-test'}.}
+\item{test}{Character. The method to use for comparing means. Allowed method
+include "t-test", "Wilcoxon test", and "limma". Default is \code{'t-test'}.}
 
 \item{significant}{Character. The p-value to be used for the statistically
 significant. Must be one of "pval" or "padj". Default is \code{'pval'}.}

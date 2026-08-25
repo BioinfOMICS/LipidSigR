@@ -9,18 +9,16 @@ corr_cor_heatmap(
   char = NULL,
   condition_col,
   side_color_char = NULL,
-  correlation = c("pearson", "kendall", "spearman"),
-  significant = c("padj", "pval"),
+  correlation = "pearson",
+  significant = "pval",
   p_cutoff = 1,
-  adjust_p_method = c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr",
-    "none"),
+  adjust_p_method = "BH",
   cor_coef_cutoff = 0,
-  distfun = c("pearson", "spearman", "kendall"),
-  hclustfun = c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty",
-    "median", "centroid"),
-  heatmap_col = c("cor_coef", "statistic"),
-  transform = c("none", "log10", "square", "cube"),
-  type = c("Sp", "Char")
+  distfun = "spearman",
+  hclustfun = "average",
+  heatmap_col = "statistic",
+  transform = "log10",
+  type = "Sp"
 )
 }
 \arguments{
@@ -71,7 +69,7 @@ include "none", "log10", "square", "cube". Select 'none' to skip data transforma
 Default is \code{'log10'}.}
 
 \item{type}{Character. Specifies the correlation type: 'Sp' for lipid species
-correlation and 'Char' for lipid characteristic correlation.}
+correlation and 'Char' for lipid characteristic correlation. Default is \code{'Sp'}.}
 }
 \value{
 Return a SummarizedExperiment object containing analysis results.

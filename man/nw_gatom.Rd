@@ -6,9 +6,9 @@
 \usage{
 nw_gatom(
   deSp_se,
-  organism = c("human", "mouse"),
+  organism = "human",
   n_lipid = 50,
-  sp_significant = c("pval", "padj"),
+  sp_significant = "pval",
   sp_p_cutoff = 0.05,
   sp_FC_cutoff = 1
 )

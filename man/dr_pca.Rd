@@ -8,7 +8,7 @@ dr_pca(
   processed_se,
   scaling = TRUE,
   centering = TRUE,
-  clustering = c("kmeans", "kmedoids", "hclustering", "dbscan", "group_info"),
+  clustering = "kmeans",
   cluster_num = 2,
   kmedoids_metric = NULL,
   distfun = NULL,
@@ -29,9 +29,8 @@ dr_pca(
 \item{scaling}{Logical. If scaling=TRUE, each block is
 standardized to zero means and unit variances. Default is \code{TRUE}.}
 
-\item{centering}{Logical. If centering=TRUE, the variables should be
-shifted to be zero centered. Alternately, a vector of length equal the
-number of columns of x can be supplied. The value is passed to scale. Default is \code{TRUE}.}
+\item{centering}{Logical. If centering=TRUE, the variables should be shifted
+to be zero centered. Default is \code{TRUE}.}
 
 \item{clustering}{Character. The method to be used for clustering. Allowed method
 include "kmeans", "kmedoids", "hclustering", "dbscan", "group_info". Default is \code{"kmeans"}.
@@ -43,8 +42,8 @@ significant features and group information derived from the DE results.}
 \item{cluster_num}{Numeric. The interpretation of \code{cluster_num} depends on the value of \code{clustering}:
 \itemize{
 \item \code{"group_info"}: A positive integer equal to the number of groups.
-\item \code{"kmeans"} or \code{"kmedoids"}: A positive integer between 1 and (number of samples - 1).
-\item \code{"hclustering"}: A positive integer between 1 and the number of samples.
+\item \code{"kmeans"} or \code{"kmedoids"}: A positive integer between 2 and (number of samples - 1).
+\item \code{"hclustering"}: A positive integer between 2 and the number of samples.
 \item \code{"dbscan"}: Should be \code{NULL}.
 }
 Default is \code{2}.}

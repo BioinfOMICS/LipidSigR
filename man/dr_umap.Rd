@@ -7,9 +7,9 @@
 dr_umap(
   processed_se,
   n_neighbors = 15,
-  scaling = c("none", FALSE, NULL, "Z", "scale", TRUE, "maxabs", "range", "colrange"),
-  umap_metric = c("euclidean", "cosine", "manhattan", "hamming", "categorical"),
-  clustering = c("kmeans", "kmedoids", "hclustering", "dbscan", "group_info"),
+  scaling = TRUE,
+  umap_metric = "euclidean",
+  clustering = "kmeans",
   cluster_num = 2,
   kmedoids_metric = NULL,
   distfun = NULL,
@@ -42,7 +42,7 @@ element is 0 and the largest is 1.
 Default is \code{TRUE}.}
 
 \item{umap_metric}{Character. Type of distance metric to use to find nearest neighbors.
-One of "euclidean", "cosine", "manhattan", "hamming", "categorical". Default is \code{'euclidean'}.}
+One of "euclidean", "cosine", "manhattan", "hamming", "correlation". Default is \code{'euclidean'}.}
 
 \item{clustering}{Character. The method to be used for clustering. Allowed method
 include "kmeans", "kmedoids", "hclustering", "dbscan", "group_info". Default is \code{"kmeans"}.
@@ -54,8 +54,8 @@ significant features and group information derived from the DE results.}
 \item{cluster_num}{Numeric. The interpretation of \code{cluster_num} depends on the value of \code{clustering}:
 \itemize{
 \item \code{"group_info"}: A positive integer equal to the number of groups.
-\item \code{"kmeans"} or \code{"kmedoids"}: A positive integer between 1 and (number of samples - 1).
-\item \code{"hclustering"}: A positive integer between 1 and the number of samples.
+\item \code{"kmeans"} or \code{"kmedoids"}: A positive integer between 2 and (number of samples - 1).
+\item \code{"hclustering"}: A positive integer between 2 and the number of samples.
 \item \code{"dbscan"}: Should be \code{NULL}.
 }
 Default is \code{2}.}

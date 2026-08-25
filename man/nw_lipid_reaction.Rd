@@ -6,13 +6,13 @@
 \usage{
 nw_lipid_reaction(
   deSp_se,
-  organism = c("human", "mouse"),
-  show_sp = c("all", "sigClass", "none"),
+  organism = "human",
+  show_sp = "sigClass",
   show_all_reactions = FALSE,
-  sp_significant = c("pval", "padj"),
+  sp_significant = "pval",
   sp_p_cutoff = 0.05,
   sp_FC_cutoff = 1,
-  class_significant = c("pval", "padj"),
+  class_significant = "pval",
   class_p_cutoff = 0.05,
   class_FC_cutoff = 1
 )

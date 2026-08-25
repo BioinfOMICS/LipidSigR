@@ -8,9 +8,9 @@ boxPlot_feature_multiGroup(
   processed_se,
   feature,
   ref_group,
-  test = c("One-way ANOVA", "Kruskal-Wallis test"),
-  post_hoc_sig = c("pval", "padj"),
-  transform = c("none", "log10", "square", "cube")
+  test = "One-way ANOVA",
+  post_hoc_sig = "pval",
+  transform = "log10"
 )
 }
 \arguments{
@@ -57,6 +57,6 @@ processed_se <- data_process(
     replace_na_method='min', replace_na_method_ref=0.5,
     normalization='Percentage', transform='log10')
 boxPlot_result <- boxPlot_feature_multiGroup(
-    processed_se, feature='PE O- 17:0;0_20:3;0', ref_group='ctrl',
+    processed_se, feature='PE O- 17:1;0_20:4;0', ref_group='ctrl',
     test='One-way ANOVA', post_hoc_sig='padj', transform='log10')
 }

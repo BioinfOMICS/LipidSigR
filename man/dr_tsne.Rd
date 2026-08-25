@@ -9,7 +9,7 @@ dr_tsne(
   pca = TRUE,
   perplexity = 5,
   max_iter = 500,
-  clustering = c("kmeans", "kmedoids", "hclustering", "dbscan", "group_info"),
+  clustering = "kmeans",
   cluster_num = 2,
   kmedoids_metric = NULL,
   distfun = NULL,
@@ -41,8 +41,8 @@ significant features and group information derived from the DE results.}
 \item{cluster_num}{Numeric. The interpretation of \code{cluster_num} depends on the value of \code{clustering}:
 \itemize{
 \item \code{"group_info"}: A positive integer equal to the number of groups.
-\item \code{"kmeans"} or \code{"kmedoids"}: A positive integer between 1 and (number of samples - 1).
-\item \code{"hclustering"}: A positive integer between 1 and the number of samples.
+\item \code{"kmeans"} or \code{"kmedoids"}: A positive integer between 2 and (number of samples - 1).
+\item \code{"hclustering"}: A positive integer between 2 and the number of samples.
 \item \code{"dbscan"}: Should be \code{NULL}.
 }
 Default is \code{2}.}

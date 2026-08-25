@@ -8,7 +8,7 @@ lipid_annotation(goslin_annotation)
 }
 \arguments{
 \item{goslin_annotation}{A data frame of lipid characteristics from the
-\code{\link[rgoslin]{parseLipidNames}} function of \pkg{\link{rgoslin}} package.}
+\code{\link[rgoslin]{parseLipidNames}} function of rgoslin package.}
 }
 \value{
 Return a data frame of lipid characteristics table.

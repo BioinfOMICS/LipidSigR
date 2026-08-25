@@ -7,12 +7,10 @@
 heatmap_correlation(
   processed_se,
   char,
-  transform = c("none", "log10", "square", "cube"),
-  correlation = c("pearson", "spearman"),
-  distfun = c("pearson", "spearman", "kendall", "euclidean", "maximum", "manhattan",
-    "canberra", "binary", "minkowski"),
-  hclustfun = c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty",
-    "median", "centroid"),
+  transform = "log10",
+  correlation = "pearson",
+  distfun = "maximum",
+  hclustfun = "average",
   type = c("sample", "class")
 )
 }
@@ -42,7 +40,7 @@ coefficient (or covariance). Allowed methods include "pearson", "spearman",
 
 \item{type}{Character. It must be 'sample' or 'class'. 'sample' outputs the
 correlation results of samples, and 'class' outputs output the correlation
-results of lipid class.}
+results of lipid class. Default is \code{'sample'}.}
 }
 \value{
 Return a list of 1 interactive plot, 1 static plot, and 1 table.

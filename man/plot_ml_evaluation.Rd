@@ -4,7 +4,7 @@
 \alias{plot_ml_evaluation}
 \title{plot_ml_evaluation}
 \usage{
-plot_ml_evaluation(ml_se, eval_method)
+plot_ml_evaluation(ml_se, eval_method = "Accuracy")
 }
 \arguments{
 \item{ml_se}{A SummarizedExperiment object with results computed by \code{\link{ml_model}}.}

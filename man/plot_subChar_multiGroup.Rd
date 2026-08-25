@@ -44,5 +44,5 @@ subChar_se <- subChar_multiGroup(
     processed_se, char='Total.C', subChar='class', ref_group='ctrl',
     post_hoc='One-way ANOVA', post_hoc_sig='pval', post_hoc_p_cutoff=0.05,
     transform='log10')
-subChar_plot <- plot_subChar_multiGroup(subChar_se, subChar_feature='CL')
+subChar_plot <- plot_subChar_multiGroup(subChar_se, subChar_feature='PC')
 }

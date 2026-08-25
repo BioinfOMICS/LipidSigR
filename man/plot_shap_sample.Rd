@@ -9,7 +9,9 @@ plot_shap_sample(shap_se, sample_id = 10)
 \arguments{
 \item{shap_se}{A SummarizedExperiment object with results computed by \code{\link{ml_shap}}.}
 
-\item{sample_id}{Numeric. The number of samples to display for each feature. Default is \code{10}.}
+\item{sample_id}{Numeric. The sample to plot, given as its ID number in
+the "ID" column of \code{shap_result}. Default is \code{10}, i.e. the
+sample whose ID equals 10.}
 }
 \value{
 Return 1 interactive plot, 1 static plot, and 1 table.
