@@ -89,6 +89,20 @@ expect_umap <- function(res){
     expect_s3_class(res$static_umap, "ggplot")
 }
 
+expect_pcoa <- function(res){
+    # Check if `res` is a list
+    expect_true(is.list(res), info = "Output should be a list")
+    expect_true("pcoa_rotated_data" %in% names(res), info = "'pcoa_rotated_data' should be in the list")
+    expect_true("table_pcoa_contribution" %in% names(res), info = "'table_pcoa_contribution' should be in the list")
+    expect_true("interactive_pcoa" %in% names(res), info = "'interactive_pcoa' should be in the list")
+    expect_true("static_pcoa" %in% names(res), info = "'static_pcoa' should be in the list")
+    expect_s3_class(res$pcoa_rotated_data, "data.frame")
+    expect_s3_class(res$table_pcoa_contribution, "data.frame")
+    # Check print_static parameter
+    expect_s3_class(res$interactive_pcoa, "plotly")
+    expect_s3_class(res$static_pcoa, "ggplot")
+}
+
 expect_plsda <- function(res){
     # Check if `res` is a list
     expect_true(is.list(res), info = "Output should be a list")
@@ -106,6 +120,7 @@ expect_plsda <- function(res){
     expect_s3_class(res$static_plsda, "ggplot")
     expect_s3_class(res$static_loadingPlot, "ggplot")
 }
+
 
 ### PCA ---------------------
 # Test for PCA function and output structure
@@ -150,29 +165,25 @@ test_that("dr_pca scaling & centering parameters", {
                hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)
         )
     expect_PCA(PCA)
-    expect_error(suppressWarnings(
+    expect_snapshot(suppressWarnings(
         dr_pca(deSp_se, scaling=NULL, centering=TRUE,
                clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
-               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)),
-        "scaling must be a logical value.")
-    expect_error(suppressWarnings(
+               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)), error=TRUE)
+    expect_snapshot(suppressWarnings(
         dr_pca(deSp_se, scaling=TRUE, centering="yes",
                clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
-               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)),
-        "centering must be a logical value.")
+               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)), error=TRUE)
 })
 # Test for clustering
 test_that("dr_pca clustering & related parameters", {
-    expect_error(suppressWarnings(
+    expect_snapshot(suppressWarnings(
         dr_pca(deSp_se, scaling=TRUE, centering=TRUE,
                clustering='k-means', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
-               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)),
-        "clustering must be one of 'kmeans', 'kmedoids', 'hclustering', 'dbscan', or 'group_info'.")
-    expect_error(suppressWarnings(
+               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)), error=TRUE)
+    expect_snapshot(suppressWarnings(
         dr_pca(deSp_se, scaling=TRUE, centering=TRUE,
                clustering='kmeans', cluster_num=0, kmedoids_metric=NULL, distfun=NULL,
-               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)),
-        "cluster_num must be a numeric value between ")
+               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)), error=TRUE)
     PCA <- suppressWarnings(
         dr_pca(deSp_se, scaling=TRUE, centering=TRUE,
                clustering='kmeans', cluster_num=10, kmedoids_metric=NULL, distfun=NULL,
@@ -185,11 +196,10 @@ test_that("dr_pca clustering & related parameters", {
                hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)
     )
     expect_PCA(PCA)
-    expect_error(suppressWarnings(
+    expect_snapshot(suppressWarnings(
         dr_pca(deSp_se, scaling=TRUE, centering=TRUE,
-               clustering='kmedoids', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
-               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)),
-        'kmedoids_metric must be one of "euclidean" or "manhattan".')
+               clustering='kmedoids', cluster_num=2, kmedoids_metric="invalid", distfun=NULL,
+               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)), error=TRUE)
     # hclustering
     for (distfun in c("pearson", "spearman", "kendall", "euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski")){
         for (hclustfun in c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid")) {
@@ -201,16 +211,14 @@ test_that("dr_pca clustering & related parameters", {
             expect_PCA(PCA)
         }
     }
-    expect_error(suppressWarnings(
+    expect_snapshot(suppressWarnings(
         dr_pca(deSp_se, scaling=TRUE, centering=TRUE,
-               clustering='hclustering', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
-               hclustfun="ward.D", eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)),
-        'distfun must be one of "pearson", "spearman", "kendall", "euclidean", "maximum", "manhattan", "canberra", "binary", or "minkowski".')
-    expect_error(suppressWarnings(
+               clustering='hclustering', cluster_num=2, kmedoids_metric=NULL, distfun='invalid',
+               hclustfun="ward.D", eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)), error=TRUE)
+    expect_snapshot(suppressWarnings(
         dr_pca(deSp_se, scaling=TRUE, centering=TRUE,
                clustering='hclustering', cluster_num=2, kmedoids_metric=NULL, distfun="maximum",
-               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)),
-        'hclustfun must be one of "ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", or "centroid".')
+               hclustfun='invalid', eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)), error=TRUE)
     # dbscan
     PCA <- suppressWarnings(
         dr_pca(deSp_se, scaling=TRUE, centering=TRUE,
@@ -224,16 +232,29 @@ test_that("dr_pca clustering & related parameters", {
                hclustfun=NULL, eps=0, minPts=0, feature_contrib_pc=c(1,2), plot_topN=10)
     )
     expect_PCA(PCA)
-    expect_error(suppressWarnings(
+    expect_snapshot(suppressWarnings(
         dr_pca(deSp_se, scaling=TRUE, centering=TRUE,
                clustering='dbscan', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
-               hclustfun=NULL, eps=NULL, minPts=100, feature_contrib_pc=c(1,2), plot_topN=10)),
-        'eps must be must be numeric value >= 0.')
-    expect_error(suppressWarnings(
+               hclustfun=NULL, eps=NULL, minPts=100, feature_contrib_pc=c(1,2), plot_topN=10)), error=TRUE)
+    expect_snapshot(suppressWarnings(
         dr_pca(deSp_se, scaling=TRUE, centering=TRUE,
                clustering='dbscan', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
-               hclustfun=NULL, eps=0, minPts=-1, feature_contrib_pc=c(1,2), plot_topN=10)),
-        'minPts must be must be numeric value >= 0.')
+               hclustfun=NULL, eps=0, minPts=-1, feature_contrib_pc=c(1,2), plot_topN=10)), error=TRUE)
+
+    expect_snapshot(suppressWarnings(
+        dr_pca(deSp_se, scaling=TRUE, centering=TRUE,
+               clustering='hclustering', cluster_num=24, kmedoids_metric=NULL, distfun=NULL,
+               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)), error=TRUE)
+
+    expect_snapshot(suppressWarnings(
+        dr_pca(deSp_se, scaling=TRUE, centering=TRUE,
+               clustering='group_info', cluster_num=24, kmedoids_metric=NULL, distfun=NULL,
+               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)), error=TRUE)
+
+    expect_snapshot(suppressWarnings(
+        dr_pca(profiling_se, scaling=TRUE, centering=TRUE,
+               clustering='group_info', cluster_num=24, kmedoids_metric=NULL, distfun=NULL,
+               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)), error=TRUE)
 })
 # Test plot_topN
 test_that("dr_pca plot_topN parameters", {
@@ -243,26 +264,24 @@ test_that("dr_pca plot_topN parameters", {
                hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=9.5)
     )
     expect_PCA(PCA)
-    expect_error(suppressWarnings(
+    expect_snapshot(suppressWarnings(
         dr_pca(deSp_se, scaling=TRUE, centering=TRUE,
                clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
-               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=0)),
-        "plot_topN must be a numeric value less than the number of lipids.")
+               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=0)), error=TRUE)
 })
 # Test for Insufficient number of significant lipids
 test_that("dr_pca handles insufficient number of significant lipids condition", {
     S4Vectors::metadata(deSp_se)[["sig_deSp_result"]] <- S4Vectors::metadata(deSp_se)[["sig_deSp_result"]][1, ]
-    expect_error(suppressWarnings(
+    expect_snapshot(suppressWarnings(
         dr_pca(deSp_se, scaling=TRUE, centering=TRUE,
                clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
-               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)),
-        "Insufficient number of significant lipids.")
+               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)), error=TRUE)
     S4Vectors::metadata(deSp_se)[["sig_deSp_result"]] <- "No significant lipid."
-    expect_error(suppressWarnings(
+    expect_snapshot(suppressWarnings(
         dr_pca(deSp_se, scaling=TRUE, centering=TRUE,
                clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
-               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)),
-        "Insufficient number of significant lipids.")
+               hclustfun=NULL, eps=NULL, minPts=NULL, feature_contrib_pc=c(1,2), plot_topN=10)), error=TRUE)
+
 })
 
 
@@ -298,23 +317,20 @@ test_that("dr_tsne returns correct output results", {
 })
 # Test for error parameter
 test_that("dr_tsne can return error message for incorrect input", {
-    expect_error(suppressWarnings(
+    expect_snapshot(suppressWarnings(
         dr_tsne(profiling_se, pca=NULL, perplexity=5, max_iter=500, clustering='kmeans',
-                cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL)),
-        "pca must be a logical value.")
+                cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL)), error=TRUE)
     tsne <- suppressWarnings(
         dr_tsne(deSp_se, pca=FALSE, perplexity=5, max_iter=500, clustering='kmeans',
                 cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL)
     )
     expect_tsne(tsne)
-    expect_error(suppressWarnings(
+    expect_snapshot(suppressWarnings(
         dr_tsne(profiling_se, pca=TRUE, perplexity=-1, max_iter=500, clustering='kmeans',
-                cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL)),
-        "perplexity cannot be a negative value.")
-    expect_error(suppressWarnings(
+                cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL)), error=TRUE)
+    expect_snapshot(suppressWarnings(
         dr_tsne(profiling_se, pca=TRUE, perplexity=5, max_iter=-1, clustering='kmeans',
-                cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL)),
-        "max_iter cannot be a negative value.")
+                cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL)), error=TRUE)
     tsne <- suppressWarnings(
         dr_tsne(deSp_se, pca=TRUE, perplexity=5, max_iter=1, clustering='kmeans',
                 cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL)
@@ -329,6 +345,7 @@ test_that("dr_tsne dbscan clustering", {
     )
     expect_tsne(tsne)
 })
+
 
 # UMAP-----------------------
 # Test for UMAP function and output structure
@@ -367,12 +384,11 @@ test_that("dr_umap returns correct output results", {
 })
 # Test for incorrect input
 test_that("dr_umap returns error message for incorrect input", {
-    expect_error(
+    expect_snapshot(
         suppressWarnings(
             dr_umap(profiling_se, n_neighbors=0, scaling=TRUE, umap_metric='euclidean',
                     clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
-                    hclustfun=NULL, eps=NULL, minPts=NULL)),
-        "n_neighbors must be >= 2.")
+                    hclustfun=NULL, eps=NULL, minPts=NULL)), error=TRUE)
     umap <- suppressWarnings(
         dr_umap(profiling_se, n_neighbors=2, scaling=TRUE, umap_metric='euclidean',
                 clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
@@ -434,12 +450,11 @@ test_that("dr_umap returns error message for incorrect input", {
     )
     expect_umap(umap)
 
-    expect_error(
+    expect_snapshot(
         suppressWarnings(
             dr_umap(profiling_se, n_neighbors=150, scaling="YES", umap_metric='euclidean',
                     clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
-                    hclustfun=NULL, eps=NULL, minPts=NULL)),
-        'scaling must be one of "none", FALSE, NULL, "Z", "scale", TRUE, "maxabs", "range", or "colrange".')
+                    hclustfun=NULL, eps=NULL, minPts=NULL)), error=TRUE)
     # umap_metric
     for (umap_metric in c('euclidean', 'cosine', 'manhattan', 'hamming', "correlation")) {
         umap <- suppressWarnings(
@@ -449,12 +464,11 @@ test_that("dr_umap returns error message for incorrect input", {
         )
         expect_umap(umap)
     }
-    expect_error(
+    expect_snapshot(
         suppressWarnings(
             dr_umap(profiling_se, n_neighbors=150, scaling=TRUE, umap_metric='Euclidean',
                     clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
-                    hclustfun=NULL, eps=NULL, minPts=NULL)),
-        "umap_metric must be one of 'euclidean', 'cosine', 'manhattan', 'hamming', or 'correlation'.")
+                    hclustfun=NULL, eps=NULL, minPts=NULL)), error=TRUE)
 })
 # Test for clustering
 test_that("dr_umap dbscan clustering", {
@@ -467,14 +481,175 @@ test_that("dr_umap dbscan clustering", {
 })
 
 
-# PLSDA ---------------------
+### PCoA ---------------------
+# Test for PCoA function and output structure
+test_that("dr_pcoa returns correct output results", {
+    pcoa <- suppressWarnings(
+        dr_pcoa(profiling_se, dist_method='euclidean', correction='cailliez',
+                clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
+                hclustfun=NULL, eps=NULL, minPts=NULL)
+    )
+    expect_pcoa(pcoa)
+    pcoa <- suppressWarnings(
+        dr_pcoa(deSp_se, dist_method='euclidean', correction='cailliez',
+                clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
+                hclustfun=NULL, eps=NULL, minPts=NULL)
+    )
+    expect_pcoa(pcoa)
+    pcoa <- suppressWarnings(
+        dr_pcoa(deChar_se, dist_method='euclidean', correction='cailliez',
+                clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
+                hclustfun=NULL, eps=NULL, minPts=NULL)
+    )
+    expect_pcoa(pcoa)
+    ## DE-multi
+    pcoa <- suppressWarnings(
+        dr_pcoa(deSp_se_multi, dist_method='euclidean', correction='cailliez',
+                clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
+                hclustfun=NULL, eps=NULL, minPts=NULL)
+    )
+    expect_pcoa(pcoa)
+    pcoa <- suppressWarnings(
+        dr_pcoa(deChar_se_multi, dist_method='euclidean', correction='cailliez',
+                clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
+                hclustfun=NULL, eps=NULL, minPts=NULL)
+    )
+    expect_pcoa(pcoa)
+})
+# Test for dist_method and correction parameters
+test_that("dr_pcoa dist_method & correction parameters", {
+    # Test valid dist_method options
+    for (dm in c("euclidean", "manhattan", "mahalanobis", "gower", "chord", "canberra")) {
+        pcoa <- suppressWarnings(
+            dr_pcoa(deSp_se, dist_method=dm, correction='cailliez',
+                    clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
+                    hclustfun=NULL, eps=NULL, minPts=NULL)
+        )
+        expect_pcoa(pcoa)
+    }
+    expect_snapshot(suppressWarnings(
+        dr_pcoa(profiling_se, dist_method='invalid_method', correction='cailliez',
+                clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
+                hclustfun=NULL, eps=NULL, minPts=NULL)), error=TRUE)
+    # Test correction options
+    for (corr in c('none', 'lingoes', 'cailliez')) {
+        pcoa <- suppressWarnings(
+            dr_pcoa(deSp_se, dist_method='euclidean', correction=corr,
+                    clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
+                    hclustfun=NULL, eps=NULL, minPts=NULL)
+        )
+        expect_pcoa(pcoa)
+    }
+    expect_snapshot(suppressWarnings(
+        dr_pcoa(profiling_se, dist_method='euclidean', correction='invalid',
+                clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
+                hclustfun=NULL, eps=NULL, minPts=NULL)), error=TRUE)
+})
+# Test for clustering
+test_that("dr_pcoa clustering & related parameters", {
+    expect_snapshot(suppressWarnings(
+        dr_pcoa(deSp_se, dist_method='euclidean', correction='cailliez',
+               clustering='k-means', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
+               hclustfun=NULL, eps=NULL, minPts=NULL)), error=TRUE)
+    expect_snapshot(suppressWarnings(
+        dr_pcoa(deSp_se, dist_method='euclidean', correction='cailliez',
+               clustering='kmeans', cluster_num=0, kmedoids_metric=NULL, distfun=NULL,
+               hclustfun=NULL, eps=NULL, minPts=NULL)), error=TRUE)
+    pcoa <- suppressWarnings(
+        dr_pcoa(deSp_se, dist_method='euclidean', correction='cailliez',
+               clustering='kmeans', cluster_num=10, kmedoids_metric=NULL, distfun=NULL,
+               hclustfun=NULL, eps=NULL, minPts=NULL))
+    expect_pcoa(pcoa)
+    # kmedoids
+    pcoa <- suppressWarnings(
+        dr_pcoa(deSp_se, dist_method='euclidean', correction='cailliez',
+               clustering='kmedoids', cluster_num=2, kmedoids_metric="euclidean", distfun=NULL,
+               hclustfun=NULL, eps=NULL, minPts=NULL)
+    )
+    expect_pcoa(pcoa)
+    expect_snapshot(suppressWarnings(
+        dr_pcoa(deSp_se, dist_method='euclidean', correction='cailliez',
+               clustering='kmedoids', cluster_num=2, kmedoids_metric='invalid', distfun=NULL,
+               hclustfun=NULL, eps=NULL, minPts=NULL)), error=TRUE)
+    # hclustering
+    for (distfun in c("pearson", "spearman", "kendall", "euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski")){
+        for (hclustfun in c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid")) {
+            pcoa <- suppressWarnings(
+                dr_pcoa(deSp_se, dist_method='euclidean', correction='cailliez',
+                       clustering='hclustering', cluster_num=2, kmedoids_metric=NULL, distfun,
+                       hclustfun, eps=NULL, minPts=NULL)
+            )
+            expect_pcoa(pcoa)
+        }
+    }
+    expect_snapshot(suppressWarnings(
+        dr_pcoa(deSp_se, dist_method='euclidean', correction='cailliez',
+               clustering='hclustering', cluster_num=2, kmedoids_metric=NULL, distfun='invalid',
+               hclustfun="ward.D", eps=NULL, minPts=NULL)), error=TRUE)
+    expect_snapshot(suppressWarnings(
+        dr_pcoa(deSp_se, dist_method='euclidean', correction='cailliez',
+               clustering='hclustering', cluster_num=2, kmedoids_metric=NULL, distfun="maximum",
+               hclustfun='invalid', eps=NULL, minPts=NULL)), error=TRUE)
+    # dbscan
+    pcoa <- suppressWarnings(
+        dr_pcoa(deSp_se, dist_method='euclidean', correction='cailliez',
+               clustering='dbscan', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
+               hclustfun=NULL, eps=10, minPts=100)
+    )
+    expect_pcoa(pcoa)
+    pcoa <- suppressWarnings(
+        dr_pcoa(deSp_se, dist_method='euclidean', correction='cailliez',
+               clustering='dbscan', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
+               hclustfun=NULL, eps=0, minPts=0)
+    )
+    expect_pcoa(pcoa)
+    expect_snapshot(suppressWarnings(
+        dr_pcoa(deSp_se, dist_method='euclidean', correction='cailliez',
+               clustering='dbscan', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
+               hclustfun=NULL, eps=NULL, minPts=100)), error=TRUE)
+    expect_snapshot(suppressWarnings(
+        dr_pcoa(deSp_se, dist_method='euclidean', correction='cailliez',
+               clustering='dbscan', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
+               hclustfun=NULL, eps=0, minPts=-1)), error=TRUE)
+
+    expect_snapshot(suppressWarnings(
+        dr_pcoa(deSp_se, dist_method='euclidean', correction='cailliez',
+               clustering='hclustering', cluster_num=24, kmedoids_metric=NULL, distfun=NULL,
+               hclustfun=NULL, eps=NULL, minPts=NULL)), error=TRUE)
+
+    expect_snapshot(suppressWarnings(
+        dr_pcoa(deSp_se, dist_method='euclidean', correction='cailliez',
+               clustering='group_info', cluster_num=24, kmedoids_metric=NULL, distfun=NULL,
+               hclustfun=NULL, eps=NULL, minPts=NULL)), error=TRUE)
+
+    expect_snapshot(suppressWarnings(
+        dr_pcoa(profiling_se, dist_method='euclidean', correction='cailliez',
+               clustering='group_info', cluster_num=24, kmedoids_metric=NULL, distfun=NULL,
+               hclustfun=NULL, eps=NULL, minPts=NULL)), error=TRUE)
+})
+# Test for Insufficient number of significant lipids
+test_that("dr_pcoa handles insufficient number of significant lipids condition", {
+    S4Vectors::metadata(deSp_se)[["sig_deSp_result"]] <- S4Vectors::metadata(deSp_se)[["sig_deSp_result"]][1, ]
+    expect_snapshot(suppressWarnings(
+        dr_pcoa(deSp_se, dist_method='euclidean', correction='cailliez',
+               clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
+               hclustfun=NULL, eps=NULL, minPts=NULL)), error=TRUE)
+    S4Vectors::metadata(deSp_se)[["sig_deSp_result"]] <- "No significant lipid."
+    expect_snapshot(suppressWarnings(
+        dr_pcoa(deSp_se, dist_method='euclidean', correction='cailliez',
+               clustering='kmeans', cluster_num=2, kmedoids_metric=NULL, distfun=NULL,
+               hclustfun=NULL, eps=NULL, minPts=NULL)), error=TRUE)
+
+})
+
+
+### PLSDA ---------------------
 # Test for PLSDA function and output structure
 test_that("dr_plsda returns correct output results", {
-    expect_error(
+    expect_snapshot(
         dr_plsda(
             profiling_se, ncomp=2, scaling=TRUE, clustering='group_info',
-            cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL),
-        "Incorrect SummarizedExperiment structure.")
+            cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL), error=TRUE)
     plsda <- suppressWarnings(
         dr_plsda(deSp_se, ncomp=2, scaling=TRUE, clustering='group_info',
                  cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
@@ -503,16 +678,14 @@ test_that("dr_plsda returns correct output results", {
 })
 # Test incorrect parameter
 test_that("dr_plsda returns error message for incorrect input.", {
-    expect_error(suppressWarnings(
+    expect_snapshot(suppressWarnings(
         dr_plsda(deSp_se, ncomp=-1, scaling=TRUE, clustering='group_info',
                  cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
-                 eps=NULL, minPts=NULL)),
-        "ncomp cannot be a negative value or NULL.")
-    expect_error(suppressWarnings(
+                 eps=NULL, minPts=NULL)), error=TRUE)
+    expect_snapshot(suppressWarnings(
         dr_plsda(deSp_se, ncomp=2, scaling=1, clustering='group_info',
                  cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
-                 eps=NULL, minPts=NULL)),
-        "scaling must be a logical value.")
+                 eps=NULL, minPts=NULL)), error=TRUE)
     plsda <- suppressWarnings(
         dr_plsda(deChar_se_multi, ncomp=2, scaling=FALSE, clustering='group_info',
                  cluster_num=3, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
@@ -528,4 +701,145 @@ test_that("dr_plsda dbscan clustering", {
                  eps=0, minPts=0)
     )
     expect_plsda(plsda)
+})
+
+
+expect_oplsda <- function(res){
+    # Check if `res` is a list
+    expect_true(is.list(res), info = "Output should be a list")
+    expect_true("oplsda_result" %in% names(res), info = "'oplsda_result' should be in the list")
+    expect_true("table_oplsda_loading" %in% names(res), info = "'table_oplsda_loading' should be in the list")
+    expect_true("interacitve_oplsda" %in% names(res), info = "'interacitve_oplsda' should be in the list")
+    expect_true("static_oplsda" %in% names(res), info = "'static_oplsda' should be in the list")
+    expect_s3_class(res$oplsda_result, "data.frame")
+    expect_s3_class(res$table_oplsda_loading, "data.frame")
+    # Check print_static parameter
+    expect_s3_class(res$interacitve_oplsda, "plotly")
+    expect_s3_class(res$static_oplsda, "ggplot")
+}
+
+# oplsda ---------------------
+# Test for oplsda function and output structure
+test_that("dr_oplsda returns correct output results", {
+    expect_snapshot(
+        dr_oplsda(
+            profiling_se, ncomp=2, scaling=TRUE, clustering='group_info',
+            cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL), error=TRUE)
+    oplsda <- suppressWarnings(
+        dr_oplsda(deSp_se, ncomp=2, scaling=TRUE, clustering='group_info',
+                  cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
+                  eps=NULL, minPts=NULL)
+    )
+    expect_oplsda(oplsda)
+})
+# Test incorrect parameter
+test_that("dr_oplsda returns error message for incorrect input.", {
+    expect_snapshot(suppressWarnings(
+        dr_oplsda(deSp_se, ncomp=-1, scaling=TRUE, clustering='group_info',
+                  cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
+                  eps=NULL, minPts=NULL)), error=TRUE)
+    expect_snapshot(suppressWarnings(
+        dr_oplsda(deSp_se, ncomp=2, scaling=1, clustering='group_info',
+                  cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
+                  eps=NULL, minPts=NULL)), error=TRUE)
+    expect_snapshot(dr_oplsda(deSp_se_multi, ncomp=2, scaling=TRUE, clustering='group_info',
+                           cluster_num=3, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
+                           eps=NULL, minPts=NULL), error=TRUE)
+    expect_snapshot(dr_oplsda(deChar_se, ncomp=2, scaling=TRUE, clustering='group_info',
+                           cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
+                           eps=NULL, minPts=NULL), error=TRUE)
+})
+# Test for clustering
+test_that("dr_oplsda dbscan clustering", {
+    oplsda <- suppressWarnings(
+        dr_oplsda(deSp_se, ncomp=2, scaling=FALSE, clustering='dbscan',
+                  cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
+                  eps=0, minPts=0)
+    )
+    expect_oplsda(oplsda)
+})
+
+
+expect_splsda <- function(res){
+    # Check if `res` is a list
+    expect_true(is.list(res), info = "Output should be a list")
+    expect_true("splsda_result" %in% names(res), info = "'splsda_result' should be in the list")
+    expect_true("table_splsda_loading" %in% names(res), info = "'table_splsda_loading' should be in the list")
+    expect_true("interacitve_splsda" %in% names(res), info = "'interacitve_splsda' should be in the list")
+    expect_true("static_splsda" %in% names(res), info = "'static_splsda' should be in the list")
+    expect_true("interactive_loadingPlot" %in% names(res), info = "'interactive_loadingPlot' should be in the list")
+    expect_true("static_loadingPlot" %in% names(res), info = "'static_loadingPlot' should be in the list")
+    expect_s3_class(res$splsda_result, "data.frame")
+    expect_s3_class(res$table_splsda_loading, "data.frame")
+    # Check print_static parameter
+    expect_s3_class(res$interacitve_splsda, "plotly")
+    expect_s3_class(res$interactive_loadingPlot, "plotly")
+    expect_s3_class(res$static_splsda, "ggplot")
+    expect_s3_class(res$static_loadingPlot, "ggplot")
+}
+
+# splsda ---------------------
+# Test for splsda function and output structure
+test_that("dr_splsda returns correct output results", {
+    expect_snapshot(
+        dr_splsda(
+            profiling_se, ncomp=2, scaling=TRUE, clustering='group_info',
+            cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL, eps=NULL, minPts=NULL), error=TRUE)
+    splsda <- suppressWarnings(
+        dr_splsda(deSp_se, ncomp=2, scaling=TRUE, clustering='group_info',
+                  cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
+                  eps=NULL, minPts=NULL)
+    )
+    expect_splsda(splsda)
+    splsda <- suppressWarnings(
+        dr_splsda(deSp_se, ncomp=2, scaling=TRUE, optimize=TRUE, clustering='group_info',
+                  cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
+                  eps=NULL, minPts=NULL)
+    )
+    expect_splsda(splsda)
+    splsda <- suppressWarnings(
+        dr_splsda(deChar_se, ncomp=2, scaling=TRUE, clustering='group_info',
+                  cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
+                  eps=NULL, minPts=NULL)
+    )
+    expect_splsda(splsda)
+    ## DE-multi
+    splsda <- suppressWarnings(
+        dr_splsda(deSp_se_multi, ncomp=2, scaling=TRUE, clustering='group_info',
+                  cluster_num=3, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
+                  eps=NULL, minPts=NULL)
+    )
+    expect_splsda(splsda)
+    splsda <- suppressWarnings(
+        dr_splsda(deChar_se_multi, ncomp=2, scaling=TRUE, clustering='group_info',
+                  cluster_num=3, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
+                  eps=NULL, minPts=NULL)
+    )
+    expect_splsda(splsda)
+})
+# Test incorrect parameter
+test_that("dr_splsda returns error message for incorrect input.", {
+    expect_snapshot(suppressWarnings(
+        dr_splsda(deSp_se, ncomp=-1, scaling=TRUE, clustering='group_info',
+                  cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
+                  eps=NULL, minPts=NULL)), error=TRUE)
+    expect_snapshot(suppressWarnings(
+        dr_splsda(deSp_se, ncomp=2, scaling=1, clustering='group_info',
+                  cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
+                  eps=NULL, minPts=NULL)), error=TRUE)
+    plsda <- suppressWarnings(
+        dr_splsda(deChar_se_multi, ncomp=2, scaling=FALSE, clustering='group_info',
+                  cluster_num=3, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
+                  eps=NULL, minPts=NULL)
+    )
+    expect_splsda(plsda)
+})
+# Test for clustering
+test_that("dr_splsda dbscan clustering", {
+    splsda <- suppressWarnings(
+        dr_splsda(deChar_se_multi, ncomp=2, scaling=FALSE, clustering='dbscan',
+                  cluster_num=2, kmedoids_metric=NULL, distfun=NULL, hclustfun=NULL,
+                  eps=0, minPts=0)
+    )
+    expect_splsda(splsda)
 })

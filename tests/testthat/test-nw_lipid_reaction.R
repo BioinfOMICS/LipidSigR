@@ -114,87 +114,67 @@ deSp_se_multi <- deSp_multiGroup(
     significant='pval', p_cutoff=0.05, transform='log10')
 
 test_that("Test for incorrect input and error message", {
-    expect_error(
+    expect_snapshot(
         nw_lipid_reaction(
             deSp_se=deSp_se_twoGroup, organism='humna', show_sp='sigClass',
             show_all_reactions=FALSE, sp_significant='pval', sp_p_cutoff=0.05,
             sp_FC_cutoff=1, class_significant='pval', class_p_cutoff=0.05,
-            class_FC_cutoff=1),
-        "The 'organism' parameter must be either 'human' or 'mouse'."
-    )
-    expect_error(
+            class_FC_cutoff=1), error=TRUE)
+    expect_snapshot(
         nw_lipid_reaction(
-            deSp_se=deSp_se_twoGroup, organism='human', show_sp='sig',
+            deSp_se=deSp_se_twoGroup, organism='human', show_sp='invalid',
             show_all_reactions=FALSE, sp_significant='pval', sp_p_cutoff=0.05,
             sp_FC_cutoff=1, class_significant='pval', class_p_cutoff=0.05,
-            class_FC_cutoff=1),
-        "The 'show_sp' parameter must be one of 'all', 'sigClass' or 'none'."
-    )
-    expect_error(
+            class_FC_cutoff=1), error=TRUE)
+    expect_snapshot(
         nw_lipid_reaction(
             deSp_se=deSp_se_twoGroup, organism='human', show_sp='sigClass',
             show_all_reactions=FALSE, sp_significant='Pval', sp_p_cutoff=0.05,
             sp_FC_cutoff=1, class_significant='pval', class_p_cutoff=0.05,
-            class_FC_cutoff=1),
-        "The 'sp_significant' parameter must be either 'pval' or 'padj'."
-    )
-    expect_error(
+            class_FC_cutoff=1),error=TRUE)
+    expect_snapshot(
         nw_lipid_reaction(
             deSp_se=deSp_se_twoGroup, organism='human', show_sp='sigClass',
             show_all_reactions=FALSE, sp_significant='pval', sp_p_cutoff=0.05,
             sp_FC_cutoff=1, class_significant='Pval', class_p_cutoff=0.05,
-            class_FC_cutoff=1),
-        "The 'class_significant' parameter must be either 'pval' or 'padj'."
-    )
-    expect_error(
+            class_FC_cutoff=1), error=TRUE)
+    expect_snapshot(
         nw_lipid_reaction(
             deSp_se=deSp_se_twoGroup, organism='human', show_sp='sigClass',
             show_all_reactions=FALSE, sp_significant='pval', sp_p_cutoff=1.1,
             sp_FC_cutoff=2, class_significant='pval', class_p_cutoff=0.05,
-            class_FC_cutoff=1),
-        "The 'sp_p_cutoff' parameter must be a numeric value between 0 and 1."
-    )
-    expect_error(
+            class_FC_cutoff=1), error=TRUE)
+    expect_snapshot(
         nw_lipid_reaction(
             deSp_se=deSp_se_twoGroup, organism='human', show_sp='sigClass',
             show_all_reactions=FALSE, sp_significant='pval', sp_p_cutoff=0.05,
             sp_FC_cutoff=1, class_significant='pval', class_p_cutoff=1.5,
-            class_FC_cutoff=1),
-        "The 'class_p_cutoff' parameter must be a numeric value between 0 and 1."
-    )
-    expect_error(
+            class_FC_cutoff=1), error=TRUE)
+    expect_snapshot(
         nw_lipid_reaction(
             deSp_se=deSp_se_twoGroup, organism='human', show_sp='sigClass',
             show_all_reactions=FALSE, sp_significant='pval', sp_p_cutoff=0.05,
             sp_FC_cutoff=0, class_significant='pval', class_p_cutoff=0.05,
-            class_FC_cutoff=1),
-        "The minimum value for the 'sp_FC_cutoff' parameter is 1."
-    )
-    expect_error(
+            class_FC_cutoff=1), error=TRUE)
+    expect_snapshot(
         nw_lipid_reaction(
             deSp_se=deSp_se_twoGroup, organism='human', show_sp='sigClass',
             show_all_reactions=FALSE, sp_significant='pval', sp_p_cutoff=0.05,
             sp_FC_cutoff=1, class_significant='pval', class_p_cutoff=0.05,
-            class_FC_cutoff=0),
-        "The minimum value for the 'class_FC_cutoff' parameter is 1."
-    )
-    expect_error(nw_lipid_reaction(
+            class_FC_cutoff=0), error=TRUE)
+    expect_snapshot(nw_lipid_reaction(
         deSp_se_multi, organism='human', show_sp='sigClass',
         show_all_reactions=FALSE, sp_significant='pval', sp_p_cutoff=0.05,
         sp_FC_cutoff=1, class_significant='pval', class_p_cutoff=0.05,
-        class_FC_cutoff=1),
-        "This function is used for two groups. If your data consists of multiple groups, please subset two of those groups for analysis."
-    )
+        class_FC_cutoff=1), error=TRUE)
     sub <- processed_se_twoGroup[, SummarizedExperiment::colData(processed_se_twoGroup)$sample_name %in% c("control_01", "hfref_patient_01")]
     deSp_se <- suppressWarnings(
         deSp_twoGroup(
             sub, ref_group='ctrl', test='Wilcoxon test', significant='padj',
             p_cutoff=0.05, FC_cutoff=2, transform='log10'))
-    expect_error(nw_lipid_reaction(
+    expect_snapshot(nw_lipid_reaction(
         deSp_se, organism='human', show_sp='sigClass',
         show_all_reactions=FALSE, sp_significant='pval', sp_p_cutoff=0.05,
         sp_FC_cutoff=1, class_significant='pval', class_p_cutoff=0.05,
-        class_FC_cutoff=1),
-    "This function requires each group to have at least two samples."
-    )
+        class_FC_cutoff=1), error=TRUE)
 })

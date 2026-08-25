@@ -56,144 +56,114 @@ test_that("corr_lr_heatmap returns correct heatmap result", {
 })
 
 test_that("corr_lr_heatmap can handle error inputs", {
-    expect_error(
+    expect_snapshot(
         corr_lr_heatmap(
             processed_se, char='char', condition_col=c("FEV1_FVC", "Emphysema"),
             adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
             side_color_char=NULL, significant='pval', p_cutoff=0.05,
             adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
-            heatmap_col='t_statistic', transform='log10', type='Char'),
-        "Wrong char input, you can view the available char list by list_lipid_char function."
-    )
-    expect_error(
+            heatmap_col='t_statistic', transform='log10', type='Char'), error=TRUE)
+    expect_snapshot(
         corr_lr_heatmap(
             processed_se, char=NULL, condition_col=c("FEV1_FVC", "Emphysema"),
             adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
             side_color_char=NULL, significant='p', p_cutoff=0.05,
             adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
-            heatmap_col='t_statistic', transform='log10', type='Sp'),
-        "significant must be one of 'pval' or 'padj'."
-    )
-    expect_error(
+            heatmap_col='t_statistic', transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_lr_heatmap(
             processed_se, char=NULL, condition_col=c("FEV1_FVC", "Emphysema"),
             adjusted_col=c("Age", "Sex", "Smoking", "BMI", "FEV1"),
-            side_color_char=NULL, significant='pval', p_cutoff=NULL,
+            side_color_char=NULL, significant='pval', p_cutoff=1.2,
             adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
-            heatmap_col='t_statistic', transform='log10', type='Sp'),
-        "p_cutoff must be a numeric value between 0 and 1."
-    )
-    expect_error(
+            heatmap_col='t_statistic', transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_lr_heatmap(
             processed_se, char=NULL, condition_col=c("FEV1_FVC", "Emphysema"),
             adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
             side_color_char=NULL, significant='pval', p_cutoff=0.05,
-            adjust_p_method=NULL, distfun='spearman', hclustfun='centroid',
-            heatmap_col='t_statistic', transform='log10', type='Sp'),
-        "adjust_p_method must be one of 'holm', 'hochberg', 'hommel', 'bonferroni', 'BH', 'BY', 'fdr', or 'none'."
-    )
-    expect_error(
+            adjust_p_method='other', distfun='spearman', hclustfun='centroid',
+            heatmap_col='t_statistic', transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_lr_heatmap(
             processed_se, char=NULL, condition_col=c("FEV1_FVC", "Emphysema"),
             adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
             side_color_char=NULL, significant='pval', p_cutoff=0.05,
             adjust_p_method='BH', distfun='Spearman', hclustfun='centroid',
-            heatmap_col='t_statistic', transform='log10', type='Sp'),
-        "distfun must be one of 'pearson', 'spearman', or 'kendall'."
-    )
-    expect_error(
+            heatmap_col='t_statistic', transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_lr_heatmap(
             processed_se, char=NULL, condition_col=c("FEV1_FVC", "Emphysema"),
             adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
             side_color_char=NULL, significant='pval', p_cutoff=0.05,
             adjust_p_method='BH', distfun='spearman', hclustfun='Centroid',
-            heatmap_col='t_statistic', transform='log10', type='Sp'),
-        "hclustfun must be one of 'ward.D', 'ward.D2', 'single', 'complete', 'average', 'mcquitty', 'median', or 'centroid'."
-    )
-    expect_error(
+            heatmap_col='t_statistic', transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_lr_heatmap(
             processed_se, char=NULL, condition_col=c("FEV1_FVC", "Emphysema"),
             adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
             side_color_char=NULL, significant='pval', p_cutoff=0.05,
             adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
-            heatmap_col='statistic', transform='log10', type='Sp'),
-        "heatmap_col must be 'beta_coef' or 't_statistic'."
-    )
-    expect_error(
+            heatmap_col='statistic', transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_lr_heatmap(
             processed_se, char=NULL, condition_col=c("FEV1_FVC", "Emphysema"),
             adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
             side_color_char=NULL, significant='pval', p_cutoff=0.05,
             adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
-            heatmap_col='t_statistic', transform='log2', type='Sp'),
-        "transform must be one of 'none', 'log10', 'square', or 'cube'."
-    )
-    expect_error(
+            heatmap_col='t_statistic', transform='log2', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_lr_heatmap(
             processed_se, char=NULL, condition_col=c("FEV1_FVC", "Emphysema"),
             adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
             side_color_char=NULL, significant='pval', p_cutoff=0.05,
             adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
-            heatmap_col='t_statistic', transform='log10', type=NULL),
-        "type must be one of 'Sp' or 'Char'."
-    )
-    expect_error(
+            heatmap_col='t_statistic', transform='log10', type='other'), error=TRUE)
+    expect_snapshot(
         corr_lr_heatmap(
             processed_se, char="class", condition_col=c("FEV1_FVC", "Emphysema"),
             adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
             side_color_char=NULL, significant='pval', p_cutoff=0.05,
             adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
-            heatmap_col='t_statistic', transform='log10', type='Sp'),
-        "If type is set to 'Sp' for running lipid species correlation analysis, char must be set to NULL."
-    )
-    expect_error(
+            heatmap_col='t_statistic', transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_lr_heatmap(
             processed_se, char=NULL, condition_col=c("FEV1_FVC", "Emphysema"),
             adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
             side_color_char='char', significant='pval', p_cutoff=0.05,
             adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
-            heatmap_col='t_statistic', transform='log10', type='Sp'),
-        "Wrong side_color_char input, you can view the available side_color_char list by list_lipid_char function."
-    )
-    expect_error(
+            heatmap_col='t_statistic', transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_lr_heatmap(
             processed_se, char=NULL, condition_col=c("FEV1_FVC", "Emphysema"),
             adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
             side_color_char='char', significant='pval', p_cutoff=0.05,
             adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
-            heatmap_col='t_statistic', transform='log10', type='Char'),
-        "If type is set to 'Char' for running lipid characteristics correlation analysis, side_color_char must be set to NULL."
-    )
+            heatmap_col='t_statistic', transform='log10', type='Char'), error=TRUE)
 })
 
 test_that("corr_lr_heatmap can handle condition_col and adjusted_col inputs.", {
-    expect_error(
+    expect_snapshot(
         corr_lr_heatmap(
             processed_se, char=NULL, condition_col=c("ABC", "Emphysema"),
             adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
             side_color_char=NULL, significant='pval', p_cutoff=0.05,
             adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
-            heatmap_col='t_statistic', transform='log10', type='Sp'),
-        "The condition_col must be column names selected from FEV1_FVC, Emphysema, Exacerbations, Age, Sex, Smoking, BMI, FEV1."
-    )
-    expect_error(
+            heatmap_col='t_statistic', transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_lr_heatmap(
             processed_se, char=NULL, condition_col=c("Emphysema"),
             adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
             side_color_char=NULL, significant='pval', p_cutoff=0.05,
             adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
-            heatmap_col='t_statistic', transform='log10', type='Sp'),
-        "The condition_col must include at least two columns from FEV1_FVC, Emphysema, Exacerbations, Age, Sex, Smoking, BMI, FEV1."
-    )
-    expect_error(
+            heatmap_col='t_statistic', transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_lr_heatmap(
             processed_se, char=NULL, condition_col=NULL,
             adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
             side_color_char=NULL, significant='pval', p_cutoff=0.05,
             adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
-            heatmap_col='t_statistic', transform='log10', type='Sp'),
-        "The condition_col parameter cannot be null. Select at least two columns from FEV1_FVC, Emphysema, Exacerbations, Age, Sex, Smoking, BMI, FEV1."
-    )
+            heatmap_col='t_statistic', transform='log10', type='Sp'), error=TRUE)
     # adjusted_col with NA
     res <- corr_lr_heatmap(
         corr_data_err, char=NULL, condition_col=c("FEV1_FVC", "Emphysema", "Exacerbations"),
@@ -204,37 +174,30 @@ test_that("corr_lr_heatmap can handle condition_col and adjusted_col inputs.", {
     expect_corr_heatmap(res)
     corr_group_info[2, "FEV1_FVC"] <- NA
     SummarizedExperiment::colData(corr_data_err) <- S4Vectors::DataFrame(corr_group_info)
-    expect_error(
+    expect_snapshot(
         corr_lr_heatmap(
             corr_data_err, char=NULL, condition_col=c("FEV1_FVC", "Emphysema"),
             adjusted_col=c("Age", "Sex", "Smoking", "BMI"),
             side_color_char=NULL, significant='pval', p_cutoff=0.05,
             adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
-            heatmap_col='t_statistic', transform='log10', type='Sp'),
-        "Except for the first column, sample_name, the group information table must include at least two columns with numeric values and no missing values."
-    )
-    expect_error(
+            heatmap_col='t_statistic', transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_lr_heatmap(
             processed_se, char=NULL, condition_col=c("FEV1_FVC", "Emphysema"),
             adjusted_col=c("FEV1_FVC", "Age", "Sex", "Smoking", "BMI"),
             side_color_char=NULL, significant='pval', p_cutoff=0.05,
             adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
-            heatmap_col='t_statistic', transform='log10', type='Sp'),
-        "The condition_col and adjusted_col must not have overlapping columns."
-    )
-    expect_error(
+            heatmap_col='t_statistic', transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_lr_heatmap(
             processed_se, char=NULL, condition_col=c("FEV1_FVC", "Emphysema"),
             adjusted_col=c("ABC", "Sex", "Smoking", "BMI"),
             side_color_char=NULL, significant='pval', p_cutoff=0.05,
             adjust_p_method='BH', distfun='spearman', hclustfun='centroid',
-            heatmap_col='t_statistic', transform='log10', type='Sp'),
-        "The adjusted_col must be column names selected from FEV1_FVC, Emphysema, Exacerbations, Age, Sex, Smoking, BMI, FEV1."
-    )
+            heatmap_col='t_statistic', transform='log10', type='Sp'), error=TRUE)
 })
 
 test_that("corr_lr_heatmap can handle all adjust_p_method.", {
-    #adjust_p_list <- c('holm', 'hochberg', 'hommel', 'bonferroni', 'BH', 'BY', 'fdr', 'none')
     adjust_p_list <- c('hochberg', 'hommel', 'BH', 'fdr', 'none')
     for (adjust_p in adjust_p_list) {
         res_padj <- corr_lr_heatmap(
@@ -248,7 +211,7 @@ test_that("corr_lr_heatmap can handle all adjust_p_method.", {
     }
     adjust_p_list <- c('holm', 'bonferroni', 'BY')
     for (adjust_p in adjust_p_list) {
-        expect_error(
+        expect_snapshot(
             corr_lr_heatmap(
                 processed_se, char=NULL,
                 condition_col=c("FEV1_FVC", "Emphysema", "Exacerbations"),
@@ -256,9 +219,7 @@ test_that("corr_lr_heatmap can handle all adjust_p_method.", {
                 side_color_char=NULL, significant='padj', p_cutoff=1,
                 adjust_p_method=adjust_p, distfun='spearman',
                 hclustfun='centroid', heatmap_col='t_statistic',
-                transform='log10', type='Sp'),
-            "Insufficient data for plotting heatmap."
-        )
+                transform='log10', type='Sp'), error=TRUE)
     }
 })
 

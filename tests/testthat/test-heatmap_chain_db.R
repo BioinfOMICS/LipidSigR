@@ -139,52 +139,47 @@ test_that("Test special conditions: two groups", {
 
 test_that("Test error conditions", {
     # Invalid char
-    expect_error(heatmap_chain_db(processed_se_twoGroup, char='invalid_char', ref_group='ctrl'))
+    expect_snapshot(heatmap_chain_db(processed_se_twoGroup, char='invalid_char', ref_group='ctrl'), error=TRUE)
 
     # Invalid char_feature
-    expect_error(heatmap_chain_db(processed_se_twoGroup, char='class', char_feature='invalid_feature', ref_group='ctrl'))
+    expect_snapshot(heatmap_chain_db(processed_se_twoGroup, char='class', char_feature='invalid_feature', ref_group='ctrl'), error=TRUE)
 
     # Invalid ref_group
-    expect_error(heatmap_chain_db(processed_se_twoGroup, char='class', ref_group='invalid_group'))
+    expect_snapshot(heatmap_chain_db(processed_se_twoGroup, char='class', ref_group='invalid_group'), error=TRUE)
 
     # Invalid test for two groups
-    expect_error(heatmap_chain_db(processed_se_twoGroup, char='class', ref_group='ctrl', test='One-way ANOVA'))
+    expect_snapshot(heatmap_chain_db(processed_se_twoGroup, char='class', ref_group='ctrl', test='One-way ANOVA'), error=TRUE)
 
     # Invalid test for multi groups
-    expect_error(heatmap_chain_db(processed_se_multiGroup, char='class', ref_group='ctrl', test='t-test'))
+    expect_snapshot(heatmap_chain_db(processed_se_multiGroup, char='class', ref_group='ctrl', test='t-test'), error=TRUE)
 
     # Invalid significant
-    expect_error(heatmap_chain_db(processed_se_twoGroup, char='class', ref_group='ctrl', significant='invalid'))
+    expect_snapshot(heatmap_chain_db(processed_se_twoGroup, char='class', ref_group='ctrl', significant='invalid'), error=TRUE)
 
     # Invalid p_cutoff
-    expect_error(heatmap_chain_db(processed_se_twoGroup, char='class', ref_group='ctrl', p_cutoff=2))
+    expect_snapshot(heatmap_chain_db(processed_se_twoGroup, char='class', ref_group='ctrl', p_cutoff=2), error=TRUE)
 
     # Invalid FC_cutoff
-    expect_error(heatmap_chain_db(processed_se_twoGroup, char='class', ref_group='ctrl', FC_cutoff=0))
+    expect_snapshot(heatmap_chain_db(processed_se_twoGroup, char='class', ref_group='ctrl', FC_cutoff=0), error=TRUE)
 
     # Invalid transform
-    expect_error(heatmap_chain_db(processed_se_twoGroup, char='class', ref_group='ctrl', transform='invalid'))
+    expect_snapshot(heatmap_chain_db(processed_se_twoGroup, char='class', ref_group='ctrl', transform='invalid'), error=TRUE)
 })
 
 test_that("Test edge cases", {
     # Empty SummarizedExperiment
     empty_se <- SummarizedExperiment(assays=matrix(nrow=0, ncol=0))
-    expect_error(
-        heatmap_chain_db(empty_se, char='class', ref_group='ctrl'),
-        "The input must be a SummarizedExperiment object construct by as_summarized_experiment function or output from upstream analysis function.")
+    expect_snapshot(
+        heatmap_chain_db(empty_se, char='class', ref_group='ctrl'), error=TRUE)
 
     # Single feature
     single_feature_se <- processed_se_twoGroup[1,]
-    expect_error(
-        heatmap_chain_db(single_feature_se, char='class', ref_group='ctrl'),
-        "Input SummarizedExperiment contains fewer than two features."
-    )
+    expect_snapshot(
+        heatmap_chain_db(single_feature_se, char='class', ref_group='ctrl'), error=TRUE)
 
     # All p-values above cutoff
-    expect_error(
-        heatmap_chain_db(processed_se_twoGroup, char='class', ref_group='ctrl', p_cutoff=1e-10),
-        "'One-way ANOVA' and 'Kruskal-Wallis test' are for multiple group comparisons. Please choose either 't-test' or 'Wilcoxon test' for two group analysis."
-    )
+    expect_snapshot(
+        heatmap_chain_db(processed_se_twoGroup, char='class', test='One-way ANOVA', ref_group='ctrl', p_cutoff=1e-10), error=TRUE)
     res_high_p <- suppressWarnings(
         heatmap_chain_db(
             processed_se_twoGroup, char='class', char_feature=NULL, ref_group='ctrl',
@@ -207,28 +202,5 @@ test_that("Test edge cases", {
         )
     }
 
-
-    # # All fold changes below cutoff (for two groups)
-    # res_high_fc <- suppressWarnings(
-    #     heatmap_chain_db(
-    #         processed_se_twoGroup, char='class', char_feature=NULL, ref_group='ctrl',
-    #         test='t-test', significant='pval', p_cutoff=0.05,  FC_cutoff=1000, transform='log10')
-    # )
-    # if (!is.character(res_high_fc$total_chain) ) {
-    #     heatmap_chain_db_test(res_high_fc$total_chain, p_cutoff=0.05, n_group="two")
-    # } else {
-    #     expect_identical(
-    #         res_high_fc$total_chain,
-    #         "This lipid characteristic or characteristic feature does not include any lipids for total chain analysis. Therefore, the 'total_chain' object is NULL."
-    #     )
-    # }
-    # if (!is.character(res_high_fc$each_chain) ) {
-    #     heatmap_chain_db_test(res_high_fc$each_chain, p_cutoff=0.05, n_group="two")
-    # } else {
-    #     expect_identical(
-    #         res_high_fc$each_chain,
-    #         "This lipid characteristic or characteristic feature does not include any lipids for total chain analysis. Therefore, the 'total_chain' object is NULL."
-    #     )
-    # }
 })
 

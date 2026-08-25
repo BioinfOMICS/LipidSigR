@@ -71,26 +71,12 @@ test_that("plot_subChar_multiGroup handles errors correctly", {
         post_hoc_p_cutoff=post_hoc_p_cutoff, transform='none')
 
     # Test with invalid subChar_feature
-    expect_error(
-        plot_subChar_multiGroup(subChar_se, subChar_feature="lipid"),
-        "The 'subChar_feature' parameter must be one of the valid subChar features."
-    )
+    expect_snapshot(
+        plot_subChar_multiGroup(subChar_se, subChar_feature="lipid"), error=TRUE)
 
     # Test with missing metadata
     invalid_se <- subChar_se
     S4Vectors::metadata(invalid_se)$all_deChar_result <- NULL
-    expect_error(
-        plot_subChar_multiGroup(invalid_se, subChar_feature="CL"),
-        "Correct SummarizedExperiment metadata not found, please use output from upstream analysis function."
-    )
-
-    # Test with two-group data
-    # subChar_se <- subChar_twoGroup(
-    #     processed_se_two, char="Total.C", subChar="class",
-    #     ref_group="ctrl", test='t-test', significant="pval", p_cutoff=0.05,
-    #     FC_cutoff=1, transform='log10')
-    # expect_error(
-    #     plot_subChar_multiGroup(subChar_se, subChar_feature="CL"),
-    #     "This function is used for multiple groups. If your data consists of two groups, please use plot_subChar_twoGroup function for analysis."
-    # )
+    expect_snapshot(
+        plot_subChar_multiGroup(invalid_se, subChar_feature="CL"), error=TRUE)
 })

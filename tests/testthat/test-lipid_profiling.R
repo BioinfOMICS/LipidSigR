@@ -45,12 +45,8 @@ test_that("lipid_profiling function handles all characteristics.", {
 })
 
 test_that("lipid_profiling can handle invalid char", {
-    expect_error(
-        lipid_profiling(processed_se, char="lipid"),
-        "Wrong char input, you can view the available char list by list_lipid_char function."
-    )
-    expect_error(
-        lipid_profiling(processed_se, char=NULL),
-        "Wrong char input, you can view the available char list by list_lipid_char function."
-    )
+    expect_snapshot(
+        lipid_profiling(processed_se, char="lipid"), error=TRUE)
+    expect_snapshot(
+        lipid_profiling(processed_se, char=NULL), error=TRUE)
 })

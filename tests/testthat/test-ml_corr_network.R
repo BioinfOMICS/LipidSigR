@@ -10,7 +10,7 @@ processed_se <- data_process(
     normalization='Percentage', transform='log10')
 ml_se <- ml_model(
     processed_se, char='none', transform='log10',
-    ranking_method='Random_forest', ml_method='Random_forest', split_prop=0.3,
+    ranking_method='Random_forest', ml_method='Random_forest', split_prop=0.7,
     nfold=3, alpha=NULL)
 
 expect_network <- function(res) {
@@ -36,36 +36,26 @@ test_that("ml_corr_network functions works", {
 })
 
 test_that("ml_corr_network can handle input errors.", {
-    expect_error(
+    expect_snapshot(
         ml_corr_network(
             ml_se, feature_importance='correlation', correlation='pearson',
-            edge_cutoff=0, feature_num=10, nsim=5),
-        'feature_importance must be "Algorithm-based" or "SHAP".'
-    )
-    expect_error(
+            edge_cutoff=0, feature_num=10, nsim=5), error=TRUE)
+    expect_snapshot(
         ml_corr_network(
             ml_se, feature_importance='Algorithm-based', correlation=NULL,
-            edge_cutoff=0, feature_num=10, nsim=5),
-        'correlation must be one of "pearson", "kendall", or "spearman".'
-    )
-    expect_error(
+            edge_cutoff=0, feature_num=10, nsim=5), error=TRUE)
+    expect_snapshot(
         ml_corr_network(
             ml_se, feature_importance='Algorithm-based', correlation='pearson',
-            edge_cutoff=0, feature_num='10', nsim=5),
-        'feature_num must be a numeric value chosen from the following options:'
-    )
-    expect_error(
+            edge_cutoff=0, feature_num='10', nsim=5), error=TRUE)
+    expect_snapshot(
         ml_corr_network(
             ml_se, feature_importance='Algorithm-based', correlation='pearson',
-            edge_cutoff=0, feature_num=10, nsim=-1),
-        'nsim must be a integer >= 0.'
-    )
-    expect_error(
+            edge_cutoff=0, feature_num=10, nsim=-1), error=TRUE)
+    expect_snapshot(
         ml_corr_network(
             ml_se, feature_importance='Algorithm-based', correlation='pearson',
-            edge_cutoff='0', feature_num=10, nsim=5),
-        'edge_cutoff must be a numeric value between 0 and 1.'
-    )
+            edge_cutoff='0', feature_num=10, nsim=5), error=TRUE)
 })
 
 test_that("ml_corr_network can handle all feature_importance methods and correlation methods.", {
@@ -79,7 +69,7 @@ test_that("ml_corr_network can handle all feature_importance methods and correla
             ml_model(
                 processed_se, char=c("class","Total.DB"), transform='log10',
                 ranking_method='Random_forest', ml_method=method,
-                split_prop=0.3, nfold=3, alpha=0.5)
+                split_prop=0.7, nfold=3, alpha=0.5)
         )
         res <- ml_corr_network(
             ml_se, feature_importance='Algorithm-based', correlation='pearson',

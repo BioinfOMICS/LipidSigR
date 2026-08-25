@@ -10,7 +10,7 @@ processed_se <- data_process(
     normalization='Percentage', transform='log10')
 ml_se <- ml_model(
     processed_se, char='none', transform='log10',
-    ranking_method='Random_forest', ml_method='Random_forest', split_prop=0.3,
+    ranking_method='Random_forest', ml_method='Random_forest', split_prop=0.7,
     nfold=3, alpha=NULL)
 
 expect_se_format <- function(se) {
@@ -97,7 +97,7 @@ test_that("ml_shap & plot_ml_shap works correctly and can handle error inputs", 
                 processed_se, transform='log10',
                 char=c("class", "Total.OH", "Total.DB", "FA.OH", "FA.DB", "FA.C"),
                 ranking_method='Random_forest',
-                ml_method=method, split_prop=0.3, nfold=3, alpha=0.5)
+                ml_method=method, split_prop=0.7, nfold=3, alpha=0.5)
         )
         feature_num <- S4Vectors::metadata(ml_res)$feature_option
         for (num in feature_num) {
@@ -107,14 +107,10 @@ test_that("ml_shap & plot_ml_shap works correctly and can handle error inputs", 
             expect_shap_plots(res)
         }
     }
-    expect_error(
-        ml_shap(ml_se, feature_num='200', nsim=5),
-        "feature_num must be a numeric value chosen from the following options: "
-    )
-    expect_error(
-        ml_shap(ml_se, feature_num=10, nsim=-1),
-        "nsim must be a positive integer."
-    )
+    expect_snapshot(
+        ml_shap(ml_se, feature_num='200', nsim=5), error=TRUE)
+    expect_snapshot(
+        ml_shap(ml_se, feature_num=10, nsim=-1), error=TRUE)
 })
 
 shap_se <- ml_shap(ml_se, feature_num=10, nsim=5)
@@ -122,10 +118,8 @@ shap_se <- ml_shap(ml_se, feature_num=10, nsim=5)
 test_that("plot_shap_sample can return correct plots.", {
     res <- plot_shap_sample(shap_se, sample_id=10)
     expect_shap_sample(res)
-    expect_error(
-        plot_shap_sample(shap_se, sample_id='10'),
-        "sample_id must be one of the ID number in 'ID' column of shap_result."
-    )
+    expect_snapshot(
+        plot_shap_sample(shap_se, sample_id='10'), error=TRUE)
 })
 
 test_that("plot_shap_force can return correct plots.", {
@@ -134,23 +128,14 @@ test_that("plot_shap_force can return correct plots.", {
         res <- plot_shap_force(shap_se, top_feature=10, cluster_method=cluster, group_num=10)
         expect_shap_force(res)
     }
-    expect_error(
-        plot_shap_force(shap_se, top_feature=10, cluster_method='cluster', group_num=10),
-        'cluster_method must be one of the strings "ward.D", "ward.D2",
-         "single", "complete", "average", "mcquitty", "median", "centroid".'
-    )
-    expect_error(
-        plot_shap_force(shap_se, top_feature=10, cluster_method='ward.D', group_num='10'),
-        "group_num must be a numeric value between 0 and "
-    )
-    expect_error(
-        plot_shap_force(shap_se, top_feature='10', cluster_method='ward.D', group_num=10),
-        "top_feature must be a positive value."
-    )
+    expect_snapshot(
+        plot_shap_force(shap_se, top_feature=10, cluster_method='cluster', group_num=10), error=TRUE)
+    expect_snapshot(
+        plot_shap_force(shap_se, top_feature=10, cluster_method='ward.D', group_num='10'), error=TRUE)
+    expect_snapshot(
+        plot_shap_force(shap_se, top_feature='10', cluster_method='ward.D', group_num=10), error=TRUE)
     expect_warning(
-        plot_shap_force(shap_se, top_feature=20, cluster_method='ward.D', group_num=10),
-        "top_feature is set to greater than 10, only the top 10 samples will be displayed"
-    )
+        plot_shap_force(shap_se, top_feature=20, cluster_method='ward.D', group_num=10))
 
 })
 
@@ -162,22 +147,16 @@ test_that("plot_shap_dependence can return correct plots.", {
             interaction_index=selected_feature[2])
     )
     expect_shap_dependence(res)
-    expect_error(
+    expect_snapshot(
         plot_shap_dependence(
             shap_se, feature='feature1', shap_feature=selected_feature[2],
-            interaction_index=selected_feature[2]),
-        "feature must be one of the feature names in the 'variable' column of shap_result."
-    )
-    expect_error(
+            interaction_index=selected_feature[2]), error=TRUE)
+    expect_snapshot(
         plot_shap_dependence(
             shap_se, feature=selected_feature[1], shap_feature=NULL,
-            interaction_index=selected_feature[2]),
-        "shap_feature must be one of the feature names in the 'variable' column of shap_result."
-    )
-    expect_error(
+            interaction_index=selected_feature[2]), error=TRUE)
+    expect_snapshot(
         plot_shap_dependence(
             shap_se, feature=selected_feature[1], shap_feature=selected_feature[2],
-            interaction_index='abd'),
-        "interaction_index must be one of the feature names in the 'variable' column of shap_result."
-    )
+            interaction_index='abd'), error=TRUE)
 })

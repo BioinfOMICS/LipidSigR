@@ -132,9 +132,6 @@ test_that("Test for incorrect input & error message", {
     deChar_se_two <- deChar_twoGroup(
         processed_se_two, char="Total.C", ref_group="ctrl", test='t-test',
         significant="padj", p_cutoff=0.05, FC_cutoff=1, transform='log10')
-    expect_error(
-        plot_deChar_multiGroup(deChar_se_two),
-        "This function is used for multiple groups. If your data consists of two groups, please use plot_deChar_twoGroup for analysis."
-    )
+    expect_snapshot(plot_deChar_multiGroup(deChar_se_two), error=TRUE)
 
 })

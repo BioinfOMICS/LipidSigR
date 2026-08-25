@@ -9,7 +9,7 @@ processed_se <- data_process(
     normalization='Percentage', transform='log10')
 ml_se <- ml_model(
     processed_se, char=c("class","Total.DB"), transform='log10',
-    ranking_method='Random_forest', ml_method='Random_forest', split_prop=0.3,
+    ranking_method='Random_forest', ml_method='Random_forest', split_prop=0.7,
     nfold=3, alpha=NULL)
 
 expect_eva_plots <- function(res) {
@@ -39,13 +39,7 @@ test_that("plot_ml_evaluation returns expected plots", {
 
 
 test_that("plot_ml_evaluation handles wrong input", {
-    expect_error(
-        plot_ml_evaluation(ml_se, eval_method=NULL),
-        'eval_method must be one of the strings "Accuracy", "Sensitivity",
-         "Specificity", "Pos Pred Value", "Neg Pred Value", "Precision",
-         "Recall", "F1", "Prevalence", "Detection Rate",
-         "Detection Prevalence", or "Balanced Accuracy".'
-    )
+    expect_snapshot(plot_ml_evaluation(ml_se, eval_method='invalid'),error=TRUE)
 })
 
 

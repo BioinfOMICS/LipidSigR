@@ -98,7 +98,6 @@ test_that("Test for error char input", {
     deSp_se_multiGroup <- deSp_multiGroup(
         processed_se_multiGroup, ref_group='ctrl', test="One-way ANOVA",
         significant="pval", p_cutoff=0.005, transform="log10")
-    expect_error(
-        char_association(deSp_se_multiGroup, char=NULL),
-        "Wrong char input, you can view the available char list by list_lipid_char function.")
+    expect_snapshot(
+        char_association(deSp_se_multiGroup, char=NULL), error=TRUE)
 })

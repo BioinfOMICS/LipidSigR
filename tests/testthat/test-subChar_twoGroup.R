@@ -136,66 +136,56 @@ test_that("plot_subChar_twoGroup returns correct output", {
 # Test error handling
 test_that("subChar_twoGroup handles errors correctly", {
     # Test with invalid char
-    expect_error(
+    expect_snapshot(
         subChar_twoGroup(
             processed_se, char="Invalid", subChar="class", ref_group="ctrl",
-            test='t-test', significant="pval", p_cutoff=0.05, FC_cutoff=1, transform='log10'),
-        "The 'char' parameter must be a numeric lipid characteristic, such as 'Total.C'. Please execute list_lipid_char function to view the valid lipid characteristics you can input.")
+            test='t-test', significant="pval", p_cutoff=0.05, FC_cutoff=1, transform='log10'), error=TRUE)
 
     # Test with invalid subChar
-    expect_error(
+    expect_snapshot(
         subChar_twoGroup(
             processed_se, char="Total.C", subChar="Invalid", ref_group="ctrl",
-            test='t-test', significant="pval", p_cutoff=0.05, FC_cutoff=1, transform='log10'),
-        "The 'subChar' parameter is not in the list of lipid characteristics. Please execute list_lipid_char function to view the valid lipid characteristics you can input.")
+            test='t-test', significant="pval", p_cutoff=0.05, FC_cutoff=1, transform='log10'), error=TRUE)
 
     # Test with same char and subChar
-    expect_error(
+    expect_snapshot(
         subChar_twoGroup(
             processed_se, char="Total.C", subChar="Total.C", ref_group="ctrl",
-            test='t-test', significant="pval", p_cutoff=0.05, FC_cutoff=1, transform='log10'),
-        "The 'char' and 'subChar' parameters cannot be the same")
+            test='t-test', significant="pval", p_cutoff=0.05, FC_cutoff=1, transform='log10'), error=TRUE)
 
     # Test with invalid ref_group
-    expect_error(
+    expect_snapshot(
         subChar_twoGroup(
             processed_se, char="Total.C", subChar="class", ref_group="control",
-            test='t-test', significant="pval", p_cutoff=0.05, FC_cutoff=1, transform='log10'),
-        "ref_group must be one of the group names in the 'group' column of the group information table")
+            test='t-test', significant="pval", p_cutoff=0.05, FC_cutoff=1, transform='log10'), error=TRUE)
 
     # Test with invalid test method
-    expect_error(
+    expect_snapshot(
         subChar_twoGroup(
             processed_se, char="Total.C", subChar="class", ref_group="ctrl",
-            test="ttest", significant="pval", p_cutoff=0.05, FC_cutoff=1, transform='log10'),
-        "The 'test' parameter must be either 't-test', or 'Wilcoxon test'")
+            test="ttest", significant="pval", p_cutoff=0.05, FC_cutoff=1, transform='log10'), error=TRUE)
 
     # Test with invalid significant method
-    expect_error(
+    expect_snapshot(
         subChar_twoGroup(
             processed_se, char="Total.C", subChar="class", ref_group="ctrl",
-            test='t-test', significant="pvalue", p_cutoff=0.05, FC_cutoff=1, transform='log10'),
-        "The 'significant' parameter must be either 'pval' or 'padj'")
+            test='t-test', significant="pvalue", p_cutoff=0.05, FC_cutoff=1, transform='log10'), error=TRUE)
 
     # Test with invalid p_cutoff
-    expect_error(
+    expect_snapshot(
         subChar_twoGroup(
             processed_se, char="Total.C", subChar="class", ref_group="ctrl",
-            test='t-test', significant="pval", p_cutoff=2, FC_cutoff=1, transform='log10'),
-        "The 'p_cutoff' parameter must be a numeric value between 0 and 1")
+            test='t-test', significant="pval", p_cutoff=2, FC_cutoff=1, transform='log10'), error=TRUE)
 
     # Test with invalid transform method
-    expect_error(
+    expect_snapshot(
         subChar_twoGroup(
             processed_se, char="Total.C", subChar="class", ref_group="ctrl",
-            test='t-test', significant="pval", p_cutoff=0.05, FC_cutoff=1, transform="log2"),
-        "The 'transform' parameter must be one of 'none', 'log10', 'square', or 'cube'")
-    expect_error(
+            test='t-test', significant="pval", p_cutoff=0.05, FC_cutoff=1, transform="log2"), error=TRUE)
+    expect_snapshot(
         subChar_twoGroup(
             processed_se_multi, char="Total.C", subChar="class", ref_group="ctrl",
-            test='t-test', significant="pval", p_cutoff=0.05, FC_cutoff=1, transform="log10"),
-        "This function is used for two groups. If your data consists of multi groups, please use deChar_multiGroup functionfor analysis."
-    )
+            test='t-test', significant="pval", p_cutoff=0.05, FC_cutoff=1, transform="log10"), error=TRUE)
 })
 
 test_that("plot_subChar_twoGroup handles errors correctly", {
@@ -204,7 +194,6 @@ test_that("plot_subChar_twoGroup handles errors correctly", {
         test='t-test', significant="pval", p_cutoff=0.05, FC_cutoff=1, transform='log10')
 
     # Test with invalid subChar_feature
-    expect_error(
-        plot_subChar_twoGroup(subChar_se, subChar_feature="Invalid"),
-        "The 'subChar_feature' parameter must be one of the valid subChar features.")
+    expect_snapshot(
+        plot_subChar_twoGroup(subChar_se, subChar_feature="Invalid"), error=TRUE)
 })

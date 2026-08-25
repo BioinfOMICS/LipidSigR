@@ -9,7 +9,7 @@ processed_se <- data_process(
     normalization='Percentage', transform='log10')
 ml_se <- ml_model(
     processed_se, char=c("class","Total.DB"), transform='log10',
-    ranking_method='Random_forest', ml_method='Random_forest', split_prop=0.3,
+    ranking_method='Random_forest', ml_method='Random_forest', split_prop=0.7,
     nfold=3, alpha=NULL)
 
 expect_roc_plots <- function(res) {
@@ -17,13 +17,13 @@ expect_roc_plots <- function(res) {
     expect_true(is.list(res), info="Output should be a list")
     expect_named(
         res,
-        c("interactive_mean_auc", "static_mean_auc", "initeractive_roc",
+        c("interactive_mean_auc", "static_mean_auc", "interactive_roc",
           "static_roc", "table_mean_auc_plot", "table_roc"))
     # Check char_var & print_static parameter
     expect_s3_class(res$interactive_mean_auc, "plotly")
     expect_s3_class(res$static_mean_auc, "ggplot")
     expect_s3_class(res$table_mean_auc_plot, "data.frame")
-    expect_s3_class(res$initeractive_roc, "plotly")
+    expect_s3_class(res$interactive_roc, "plotly")
     expect_s3_class(res$static_roc, "ggplot")
     expect_s3_class(res$table_roc, "data.frame")
 }
@@ -38,8 +38,5 @@ test_that("plot_ml_roc returns expected plots", {
 
 
 test_that("plot_ml_roc handles wrong input", {
-    expect_error(
-        plot_ml_roc(ml_se, feature_num=NULL),
-        "feature_num must be a numeric value chosen from the following options: 2, 3, 5, 10, 20, 50, 100."
-    )
+    expect_snapshot(plot_ml_roc(ml_se, feature_num=NULL), error=TRUE)
 })

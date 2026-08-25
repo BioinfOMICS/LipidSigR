@@ -53,20 +53,17 @@ test_that("Test under normal conditions: 3 groups", {
 })
 
 test_that("Test for error input", {
-    expect_error(
+    expect_snapshot(
         char_2wayAnova(
-            processed_se=processed_se_multiGroup, ratio_transform=NULL, char_transform='log10'),
-        "The 'ratio_transform' parameter must be either 'none' or 'log2'.")
-    expect_error(
+            processed_se=processed_se_multiGroup, ratio_transform=NULL, char_transform='log10'), error=TRUE)
+    expect_snapshot(
         char_2wayAnova(
-            processed_se=processed_se_multiGroup, ratio_transform='log2', char_transform='log2'),
-        "The 'char_transform' parameter must be one of 'none', 'log10', 'square' or 'cube'.")
+            processed_se=processed_se_multiGroup, ratio_transform='log2', char_transform='log2'), error=TRUE)
 
     sub <- processed_se_twoGroup[, SummarizedExperiment::colData(processed_se_twoGroup)$sample_name %in% c("control_01", "hfref_patient_01")]
-    expect_error(
+    expect_snapshot(
         char_2wayAnova(
-            processed_se=sub, ratio_transform='log2', char_transform='log10'),
-        "This function requires each group to have at least two samples.")
+            processed_se=sub, ratio_transform='log2', char_transform='log10'), error=TRUE)
 })
 
 

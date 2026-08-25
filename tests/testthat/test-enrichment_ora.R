@@ -103,16 +103,10 @@ test_that("Test for cases where there are no significant lipids.", {
 })
 
 test_that("Test for incorrect input and related error messages", {
-    expect_error(
-        enrichment_ora(deSp_se_twoGroup, char='lipid', significant='pval', p_cutoff=0.05),
-        "The 'char' parameter must be one of the listed lipid characteristics. Please use the list_lipid_char() function to view which lipid characteristics can be analyzed."
-    )
-    expect_error(
-        enrichment_ora(deSp_se_twoGroup, char='class', significant='Pval', p_cutoff=0.05),
-        "The 'significant' parameter must be either 'pval' or 'padj'."
-    )
-    expect_error(
-        enrichment_ora(deSp_se_twoGroup, char='class', significant='pval', p_cutoff=1.5),
-        "The 'p_cutoff' parameter must be a numeric value between 0 and 1."
-    )
+    expect_snapshot(
+        enrichment_ora(deSp_se_twoGroup, char='lipid', significant='pval', p_cutoff=0.05), error=TRUE)
+    expect_snapshot(
+        enrichment_ora(deSp_se_twoGroup, char='class', significant='Pval', p_cutoff=0.05), error=TRUE)
+    expect_snapshot(
+        enrichment_ora(deSp_se_twoGroup, char='class', significant='pval', p_cutoff=1.5), error=TRUE)
 })

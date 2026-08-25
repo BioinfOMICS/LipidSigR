@@ -48,146 +48,118 @@ test_that("corr_cor_heatmap returns correct heatmap result", {
 })
 
 test_that("corr_cor_heatmap can handle all error inputs.", {
-    expect_error(
+    expect_snapshot(
         corr_cor_heatmap(
             processed_se, char="char",
             condition_col=c("FEV1_FVC", "Emphysema", "Exacerbations"),
             side_color_char=NULL, correlation='pearson', significant='pval',
             p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=0,
             distfun='spearman', hclustfun='average', heatmap_col='statistic',
-            transform='log10', type='Char'),
-        "Wrong char input, you can view the available char list by list_lipid_char function."
-    )
-    expect_error(
+            transform='log10', type='Char'), error=TRUE)
+    expect_snapshot(
         corr_cor_heatmap(
             processed_se, char=NULL,
             condition_col=c("FEV1_FVC", "Emphysema", "Exacerbations"),
-            side_color_char=NULL, correlation=NULL, significant='pval',
+            side_color_char=NULL, correlation='other', significant='pval',
             p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=0,
             distfun='spearman', hclustfun='average', heatmap_col='statistic',
-            transform='log10', type='Sp'),
-        "correlation must be one of 'pearson', 'spearman', or 'kendall'."
-    )
-    expect_error(
+            transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_cor_heatmap(
             processed_se, char=NULL,
             condition_col=c("FEV1_FVC", "Emphysema", "Exacerbations"),
             side_color_char=NULL, correlation='pearson', significant='p',
             p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=0,
             distfun='spearman', hclustfun='average', heatmap_col='statistic',
-            transform='log10', type='Sp'),
-        "significant must be one of 'pval' or 'padj'."
-    )
-    expect_error(
+            transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_cor_heatmap(
             processed_se, char=NULL,
             condition_col=c("FEV1_FVC", "Emphysema", "Exacerbations"),
             side_color_char=NULL, correlation='pearson', significant='pval',
             p_cutoff=NULL, adjust_p_method='BH', cor_coef_cutoff=0,
             distfun='spearman', hclustfun='average', heatmap_col='statistic',
-            transform='log10', type='Sp'),
-        "p_cutoff must be a numeric value between 0 and 1."
-    )
-    expect_error(
+            transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_cor_heatmap(
             processed_se, char=NULL,
             condition_col=c("FEV1_FVC", "Emphysema", "Exacerbations"),
             side_color_char=NULL, correlation='pearson', significant='pval',
-            p_cutoff=1, adjust_p_method=NULL, cor_coef_cutoff=0,
+            p_cutoff=1, adjust_p_method='other', cor_coef_cutoff=0,
             distfun='spearman', hclustfun='average', heatmap_col='statistic',
-            transform='log10', type='Sp'),
-        "adjust_p_method must be one of 'holm', 'hochberg', 'hommel', 'bonferroni', 'BH', 'BY', 'fdr', or 'none'."
-    )
-    expect_error(
+            transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_cor_heatmap(
             processed_se, char=NULL,
             condition_col=c("FEV1_FVC", "Emphysema", "Exacerbations"),
             side_color_char=NULL, correlation='pearson', significant='pval',
             p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=2,
             distfun='spearman', hclustfun='average', heatmap_col='statistic',
-            transform='log10', type='Sp'),
-        "cor_coef_cutoff must be a numeric value between 0 and 1."
-    )
-    expect_error(
+            transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_cor_heatmap(
             processed_se, char=NULL,
             condition_col=c("FEV1_FVC", "Emphysema", "Exacerbations"),
             side_color_char=NULL, correlation='pearson', significant='pval',
             p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=0,
             distfun=NULL, hclustfun='average', heatmap_col='statistic',
-            transform='log10', type='Sp'),
-        "distfun must be one of 'pearson', 'spearman', or 'kendall'."
-    )
-    expect_error(
+            transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_cor_heatmap(
             processed_se, char=NULL,
             condition_col=c("FEV1_FVC", "Emphysema", "Exacerbations"),
             side_color_char=NULL, correlation='pearson', significant='pval',
             p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=0,
             distfun='spearman', hclustfun='Average', heatmap_col='statistic',
-            transform='log10', type='Sp'),
-        "hclustfun must be one of 'ward.D', 'ward.D2', 'single', 'complete', 'average', 'mcquitty', 'median', or 'centroid'."
-    )
-    expect_error(
+            transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_cor_heatmap(
             processed_se, char=NULL,
             condition_col=c("FEV1_FVC", "Emphysema", "Exacerbations"),
             side_color_char=NULL, correlation='pearson', significant='pval',
             p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=0,
             distfun='spearman', hclustfun='average', heatmap_col='t_statistic',
-            transform='log10', type='Sp'),
-        "heatmap_col must be 'cor_coef' or 'statistic'."
-    )
-    expect_error(
+            transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_cor_heatmap(
             processed_se, char=NULL,
             condition_col=c("FEV1_FVC", "Emphysema", "Exacerbations"),
             side_color_char=NULL, correlation='pearson', significant='pval',
             p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=0,
             distfun='spearman', hclustfun='average', heatmap_col='statistic',
-            transform='log2', type='Sp'),
-        "transform must be one of 'none', 'log10', 'square', or 'cube'."
-    )
-    expect_error(
+            transform='log2', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_cor_heatmap(
             processed_se, char=NULL,
             condition_col=c("FEV1_FVC", "Emphysema", "Exacerbations"),
             side_color_char=NULL, correlation='pearson', significant='pval',
             p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=0,
             distfun='spearman', hclustfun='average', heatmap_col='statistic',
-            transform='log10', type=NULL),
-        "type must be one of 'Sp' or 'Char'."
-    )
-    expect_error(
+            transform='log10', type='other'), error=TRUE)
+    expect_snapshot(
         corr_cor_heatmap(
             processed_se, char='class',
             condition_col=c("FEV1_FVC", "Emphysema", "Exacerbations"),
             side_color_char=NULL, correlation='pearson', significant='pval',
             p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=0,
             distfun='spearman', hclustfun='average', heatmap_col='statistic',
-            transform='log10', type='Sp'),
-        "If type is set to 'Sp' for running lipid species correlation analysis, char must be set to NULL."
-    )
-    expect_error(
+            transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_cor_heatmap(
             processed_se, char=NULL,
             condition_col=c("FEV1_FVC", "Emphysema", "Exacerbations"),
             side_color_char='class', correlation='pearson', significant='pval',
             p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=0,
             distfun='spearman', hclustfun='average', heatmap_col='statistic',
-            transform='log10', type='Char'),
-        "If type is set to 'Char' for running lipid characteristics correlation analysis, side_color_char must be set to NULL."
-    )
-    expect_error(
+            transform='log10', type='Char'), error=TRUE)
+    expect_snapshot(
         corr_cor_heatmap(
             processed_se, char=NULL,
             condition_col=c("FEV1_FVC", "Emphysema", "Exacerbations"),
             side_color_char='char', correlation='pearson', significant='pval',
             p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=0,
             distfun='spearman', hclustfun='average', heatmap_col='statistic',
-            transform='log10', type='Sp'),
-        "Wrong side_color_char input, you can view the available side_color_char list by list_lipid_char function."
-    )
+            transform='log10', type='Sp'), error=TRUE)
 })
 
 test_that("corr_cor_heatmap can handle all adjust_p_method.", {
@@ -205,46 +177,38 @@ test_that("corr_cor_heatmap can handle all adjust_p_method.", {
 })
 
 test_that("corr_cor_heatmap can handle condition_col and adjusted_col inputs.", {
-    expect_error(
+    expect_snapshot(
         corr_cor_heatmap(
             processed_se, char=NULL,
             condition_col=c("ABC", "Emphysema", "Exacerbations"),
             side_color_char='class', correlation='pearson', significant='pval',
             p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=0,
             distfun='spearman', hclustfun='average', heatmap_col='statistic',
-            transform='log10', type='Sp'),
-        "The condition_col must be column names selected from FEV1_FVC, Emphysema, Exacerbations, Age, Sex, Smoking, BMI, FEV1."
-    )
-    expect_error(
+            transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_cor_heatmap(
             processed_se, char=NULL,
             condition_col=c("Exacerbations"),
             side_color_char='class', correlation='pearson', significant='pval',
             p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=0,
             distfun='spearman', hclustfun='average', heatmap_col='statistic',
-            transform='log10', type='Sp'),
-        "The condition_col must include at least two columns from FEV1_FVC, Emphysema, Exacerbations, Age, Sex, Smoking, BMI, FEV1."
-    )
-    expect_error(
+            transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_cor_heatmap(
             processed_se, char=NULL,
             condition_col=NULL,
             side_color_char='class', correlation='pearson', significant='pval',
             p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=0,
             distfun='spearman', hclustfun='average', heatmap_col='statistic',
-            transform='log10', type='Sp'),
-        "The condition_col parameter cannot be null. Select at least two columns from FEV1_FVC, Emphysema, Exacerbations, Age, Sex, Smoking, BMI, FEV1."
-    )
-    expect_error(
+            transform='log10', type='Sp'), error=TRUE)
+    expect_snapshot(
         corr_cor_heatmap(
             corr_data_err, char=NULL,
             condition_col=c("FEV1_FVC", "Emphysema", "Exacerbations"),
             side_color_char='class', correlation='pearson', significant='pval',
             p_cutoff=1, adjust_p_method='BH', cor_coef_cutoff=0,
             distfun='spearman', hclustfun='average', heatmap_col='statistic',
-            transform='log10', type='Sp'),
-        "Except for the first column, sample_name, the group information table must include at least two columns with numeric values and no missing values."
-    )
+            transform='log10', type='Sp'), error=TRUE)
 })
 
 test_that("corr_cor_heatmap can handle all distfun & hclustfun.", {

@@ -1,6 +1,4 @@
 library(testthat)
-# library(SummarizedExperiment)
-# library(tidyverse)
 data("se_multiGroup")
 processed_se_multiGroup <- data_process(
     se=se_multiGroup, exclude_missing=TRUE, exclude_missing_pct=70,
@@ -29,7 +27,7 @@ DE_multi_box_test <- function(res, lipid){
     expect_equal(lipid, unique(res$table_stat$feature))
     # Numeric value.
     expect_true(is.numeric(res$table_boxplot$abund))
-    expect_true(all(sapply(res$table_stat[, c(4:5, 7)], is.numeric)))
+    expect_true(all(sapply(res$table_stat[, c(4, 5, 7)], is.numeric)))
 }
 
 
@@ -45,13 +43,9 @@ test_that("Test results from data_process.R", {
             for(post_hoc_sig in post_hoc_sig_method){
                 res <- boxPlot_feature_multiGroup(
                     processed_se=processed_se_multiGroup,
-                    feature='PE O- 17:0;0_20:3;0', ref_group='ctrl',
+                    feature='PE O- 16:1;0_16:1;0', ref_group='ctrl',
                     test, post_hoc_sig, transform)
-                # if(is.list(res)){
-                    DE_multi_box_test(res, lipid='PE O- 17:0;0_20:3;0')
-                # }else{
-                #     expect_identical(res, 'Unable to perform statistical tests for this feature; therefore, results could not be generated.')
-                # }
+                DE_multi_box_test(res, lipid='PE O- 16:1;0_16:1;0')
             }
         }
     }
@@ -98,34 +92,28 @@ processed_se_two <- data_process(
 
 
 test_that("Test that message return for invalid input", {
-    expect_error(
+    expect_snapshot(
         boxPlot_feature_multiGroup(
             processed_se=processed_se_multiGroup, feature='ABC',
-            ref_group='ctrl', test="One-way ANOVA", post_hoc_sig='padj', transform='log10'),
-        "'feature' must be one of the lipids in your lipid abundance data; please revise your input.")
-    expect_error(
+            ref_group='ctrl', test="One-way ANOVA", post_hoc_sig='padj', transform='log10'), error=TRUE)
+    expect_snapshot(
         boxPlot_feature_multiGroup(
-            processed_se=processed_se_multiGroup, feature='PE O- 17:0;0_20:3;0',
-            ref_group='AA1', test="One-way ANOVA", post_hoc_sig='padj', transform='log10'),
-        "ref_group must be one of the group names in the 'group' column of the group information table.")
-    expect_error(
+            processed_se=processed_se_multiGroup, feature='PE O- 16:1;0_16:1;0',
+            ref_group='AA1', test="One-way ANOVA", post_hoc_sig='padj', transform='log10'), error=TRUE)
+    expect_snapshot(
         boxPlot_feature_multiGroup(
-            processed_se=processed_se_multiGroup, feature='PE O- 17:0;0_20:3;0',
-            ref_group='ctrl', test="One-way-ANOVA", post_hoc_sig='padj', transform='log10'),
-        "The 'test' parameter must be either 'One-way ANOVA' or 'Kruskal-Wallis test'.")
-    expect_error(
+            processed_se=processed_se_multiGroup, feature='PE O- 16:1;0_16:1;0',
+            ref_group='ctrl', test="One-way-ANOVA", post_hoc_sig='padj', transform='log10'), error=TRUE)
+    expect_snapshot(
         boxPlot_feature_multiGroup(
-            processed_se=processed_se_multiGroup, feature='PE O- 17:0;0_20:3;0',
-            ref_group='ctrl', test="Kruskal-Wallis test", post_hoc_sig='p-val', transform='log10'),
-        "The 'post_hoc_sig' parameter must be either 'pval' or 'padj'.")
-    expect_error(
+            processed_se=processed_se_multiGroup, feature='PE O- 16:1;0_16:1;0',
+            ref_group='ctrl', test="Kruskal-Wallis test", post_hoc_sig='p-val', transform='log10'), error=TRUE)
+    expect_snapshot(
         boxPlot_feature_multiGroup(
-            processed_se=processed_se_multiGroup, feature='PE O- 17:0;0_20:3;0',
-            ref_group='ctrl', test="One-way ANOVA", post_hoc_sig='padj', transform='log2'),
-        "The transform parameter must be one of 'none', 'log10', 'square' or 'cube'.")
-    expect_error(
+            processed_se=processed_se_multiGroup, feature='PE O- 16:1;0_16:1;0',
+            ref_group='ctrl', test="One-way ANOVA", post_hoc_sig='padj', transform='log2'), error=TRUE)
+    expect_snapshot(
         boxPlot_feature_multiGroup(
-            processed_se=processed_se_two, feature='PC O- 16:1;0-20:3;0',
-            ref_group='ctrl', test="One-way ANOVA", post_hoc_sig='padj', transform='log10'),
-        "This function is used for multiple groups. If your data consists of two groups, please use boxPlot_feature_twoGroup\\(\\) for analysis.")
+            processed_se=processed_se_two, feature='PE O- 16:1;0-18:2;0',
+            ref_group='ctrl', test="One-way ANOVA", post_hoc_sig='padj', transform='log10'), error=TRUE)
 })

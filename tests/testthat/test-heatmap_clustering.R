@@ -60,10 +60,8 @@ test_that("heatmap_clustering function outputs correct structure", {
 })
 
 test_that("heatmap_clustering handles different char parameters", {
-    expect_error(
-        heatmap_clustering(deSp_se, char=NULL, distfun='pearson', hclustfun='complete', type='all'),
-        "Wrong char input, you can view the available char list by list_lipid_char function."
-    )
+    expect_snapshot(
+        heatmap_clustering(deSp_se, char=NULL, distfun='pearson', hclustfun='complete', type='all'), error=TRUE)
     char_list <- list_lipid_char(processed_se)$common_list
     names(char_list) <- NULL
     for (i in seq_along(char_list)) {
@@ -87,10 +85,8 @@ test_that("heatmap_clustering handles different distfun parameters", {
         expect_heatmap(res)
     }
 
-    expect_error(
-        heatmap_clustering(deSp_se, char='class', distfun='invalid', hclustfun='complete', type='all'),
-        "distfun must be one of 'pearson', 'kendall', or 'spearman'."
-    )
+    expect_snapshot(
+        heatmap_clustering(deSp_se, char='class', distfun='invalid', hclustfun='complete', type='all'), error=TRUE)
 })
 
 test_that("heatmap_clustering handles different hclustfun parameters", {
@@ -102,10 +98,8 @@ test_that("heatmap_clustering handles different hclustfun parameters", {
         expect_heatmap(res)
     }
 
-    expect_error(
-        heatmap_clustering(deSp_se, char='class', distfun='pearson', hclustfun='invalid', type='all'),
-        "hclustfun must be one of 'ward.D', 'ward.D2', 'single', 'complete', 'average', 'mcquitty', 'median', or 'centroid'."
-    )
+    expect_snapshot(
+        heatmap_clustering(deSp_se, char='class', distfun='pearson', hclustfun='invalid', type='all'), error=TRUE)
 })
 
 test_that("heatmap_clustering handles different type parameters", {
@@ -119,10 +113,8 @@ test_that("heatmap_clustering handles different type parameters", {
     )
     expect_heatmap(res_sig)
 
-    expect_error(
-        heatmap_clustering(deSp_se, char='class', distfun='pearson', hclustfun='complete', type='invalid'),
-        "type must be one of 'all' or 'sig'."
-    )
+    expect_snapshot(
+        heatmap_clustering(deSp_se, char='class', distfun='pearson', hclustfun='complete', type='invalid'), error=TRUE)
 })
 
 test_that("heatmap_clustering handles edge cases", {
@@ -130,18 +122,14 @@ test_that("heatmap_clustering handles edge cases", {
     feature_name <- S4Vectors::metadata(deSp_se)[["sig_deSp_result"]][1, "feature"]
     sub <- deSp_se[SummarizedExperiment::rowData(deSp_se)$feature == feature_name, ]
     S4Vectors::metadata(sub)[["sig_deSp_result"]] <- S4Vectors::metadata(sub)[["sig_deSp_result"]][1, ]
-    expect_error(
-        suppressWarnings(heatmap_clustering(sub, char="class", distfun='pearson', hclustfun='complete', type='sig')),
-        "Insufficient number of lipids."
-    )
+    expect_snapshot(
+        suppressWarnings(heatmap_clustering(sub, char="class", distfun='pearson', hclustfun='complete', type='sig')), error=TRUE)
 
     # Test with no significant lipids
     no_sig_se <- deSp_se
     S4Vectors::metadata(no_sig_se)[["sig_deSp_result"]] <- "No significant lipids."
-    expect_error(
-        suppressWarnings(heatmap_clustering(no_sig_se, char="class", distfun='pearson', hclustfun='complete', type='sig')),
-        "Insufficient number of significant lipids."
-    )
+    expect_snapshot(
+        suppressWarnings(heatmap_clustering(no_sig_se, char="class", distfun='pearson', hclustfun='complete', type='sig')), error=TRUE)
 })
 
 test_that("heatmap_clustering handles different data scales", {
@@ -173,6 +161,5 @@ test_that("heatmap_clustering can handle one row data condition", {
     feature_name <- S4Vectors::metadata(deSp_se)[["sig_deSp_result"]][1, "feature"]
     sub <- deSp_se[SummarizedExperiment::rowData(deSp_se)$feature == feature_name, ]
     S4Vectors::metadata(sub)[["sig_deSp_result"]] <- S4Vectors::metadata(sub)[["sig_deSp_result"]][1, ]
-    expect_error(suppressWarnings(heatmap_clustering(sub, char="class", distfun='pearson', hclustfun='complete', type='sig')),
-                 "Insufficient number of lipids.")
+    expect_snapshot(suppressWarnings(heatmap_clustering(sub, char="class", distfun='pearson', hclustfun='complete', type='sig')), error=TRUE)
 })

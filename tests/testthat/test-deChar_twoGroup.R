@@ -156,54 +156,42 @@ test_that("deChar_twoGroup handles edge cases", {
 })
 
 test_that("deChar_twoGroup handles invalid inputs", {
-    expect_error(
+    expect_snapshot(
         deChar_twoGroup(
             processed_se, char="Invalid", ref_group="ctrl", test='t-test',
-            significant="padj", p_cutoff=0.05, FC_cutoff=1, transform='log10'),
-        "The 'char' parameter is not in the list of lipid characteristics")
-    expect_error(
+            significant="padj", p_cutoff=0.05, FC_cutoff=1, transform='log10'), error=TRUE)
+    expect_snapshot(
         deChar_twoGroup(
             processed_se, char="Total.C", ref_group="invalid", test='t-test',
-            significant="padj", p_cutoff=0.05, FC_cutoff=1, transform='log10'),
-        "ref_group must be one of the group names")
-    expect_error(
+            significant="padj", p_cutoff=0.05, FC_cutoff=1, transform='log10'), error=TRUE)
+    expect_snapshot(
         deChar_twoGroup(
             processed_se, char="Total.C", ref_group="ctrl", test="invalid",
-            significant="padj", p_cutoff=0.05, FC_cutoff=1, transform='log10'),
-        "test must be one of 't-test' or 'Wilcoxon test'")
-    expect_error(
+            significant="padj", p_cutoff=0.05, FC_cutoff=1, transform='log10'), error=TRUE)
+    expect_snapshot(
         deChar_twoGroup(
             processed_se, char="Total.C", ref_group="ctrl", test='t-test',
-            significant="invalid", p_cutoff=0.05, FC_cutoff=1, transform='log10'),
-                 "significant must be one of 'pval' or 'padj'")
-    expect_error(
+            significant="invalid", p_cutoff=0.05, FC_cutoff=1, transform='log10'), error=TRUE)
+    expect_snapshot(
         deChar_twoGroup(
             processed_se, char="Total.C", ref_group="ctrl", test='t-test',
-            significant="padj", p_cutoff=2, FC_cutoff=1, transform='log10'),
-                 "p_cutoff must be a numeric value between 0 and 1")
-    expect_error(
+            significant="padj", p_cutoff=2, FC_cutoff=1, transform='log10'), error=TRUE)
+    expect_snapshot(
         deChar_twoGroup(
             processed_se, char="Total.C", ref_group="ctrl", test='t-test',
-            significant="padj", p_cutoff=0.05, FC_cutoff=0),
-        "FC_cutoff must be a numeric value >= 1.")
-    expect_error(
+            significant="padj", p_cutoff=0.05, FC_cutoff=0), error=TRUE)
+    expect_snapshot(
         deChar_twoGroup(
             processed_se, char="Total.C", ref_group="ctrl", test='t-test',
-            significant="padj", p_cutoff=1, FC_cutoff=1, transform='log2'),
-        "The 'char' is not a ratio-based characteristic. The 'transform' parameter must be one of 'none', 'log10', 'square', or 'cube'."
-    )
-    expect_error(
+            significant="padj", p_cutoff=1, FC_cutoff=1, transform='log2'), error=TRUE)
+    expect_snapshot(
         deChar_twoGroup(
             processed_se, char="Chains odd/even ratio", ref_group="ctrl", test='t-test',
-            significant="padj", p_cutoff=1, FC_cutoff=1, transform='log10'),
-        "The 'char' is a ratio-based characteristic. The 'transform' parameter must be either 'none' or 'log2'."
-    )
-    expect_error(
+            significant="padj", p_cutoff=1, FC_cutoff=1, transform='log10'), error=TRUE)
+    expect_snapshot(
         deChar_twoGroup(
             processed_se_multi, char="Total.C", ref_group="ctrl", test='t-test',
-            significant="padj", p_cutoff=1, FC_cutoff=1, transform='log10'),
-        "This function is used for two groups. If your data consists of multi groups, please use deChar_nultiGroup function for analysis."
-    )
+            significant="padj", p_cutoff=1, FC_cutoff=1, transform='log10'), error=TRUE)
 })
 
 ## test plot_deChar_twoGroup
@@ -230,8 +218,6 @@ test_that("plot_deChar_twoGroup handles invalid inputs", {
     deChar_se <- deChar_multiGroup(
         processed_se_multi, char='class', ref_group='ctrl', post_hoc='One-way ANOVA',
         post_hoc_sig='pval', post_hoc_p_cutoff=0.05, transform='log10')
-    expect_error(
-        plot_deChar_twoGroup(deChar_se),
-        "This function is used for two groups. If your data consists of two groups, please use plot_deChar_multiGroup function for analysis."
-    )
+    expect_snapshot(
+        plot_deChar_twoGroup(deChar_se), error=TRUE)
 })

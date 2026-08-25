@@ -109,7 +109,7 @@ test_that("deSp_twoGroup handles paired samples", {
 
 test_that("deSp_twoGroup handles different parameter combinations", {
     param_combinations <- tidyr::crossing(
-        test = c('t-test', 'Wilcoxon test'),
+        test = c('t-test', 'Wilcoxon test', 'limma'),
         significant = c('pval', 'padj'),
         transform = c('none', 'log10', 'square', 'cube')
     )
@@ -157,25 +157,16 @@ test_that("deSp_twoGroup handles edge cases correctly", {
 })
 
 test_that("deSp_twoGroup handles errors correctly", {
-    expect_error(deSp_twoGroup(processed_se, ref_group='nonexistent'),
-                 "ref_group must be one of the group names in the 'group' column of the group information table.")
-    expect_error(deSp_twoGroup(processed_se, ref_group='ctrl', test='invalid_test'),
-                 "test must be one of 't-test' or 'Wilcoxon test'.")
-    expect_error(deSp_twoGroup(processed_se, ref_group='ctrl', significant='invalid'),
-                 "significant must be one of 'pval' or 'padj'.")
-    expect_error(deSp_twoGroup(processed_se, ref_group='ctrl', p_cutoff=2),
-                 "p_cutoff must be a numeric value between 0 and 1.")
-    expect_error(deSp_twoGroup(processed_se, ref_group='ctrl', FC_cutoff=0),
-                 "FC_cutoff must be a numeric value >= 1.")
-    expect_error(deSp_twoGroup(processed_se, ref_group='ctrl', transform='invalid'),
-                 "transform must be one of 'none', 'log10', 'square', or 'cube'.")
-    expect_error(
+    expect_snapshot(deSp_twoGroup(processed_se, ref_group='nonexistent'), error=TRUE)
+    expect_snapshot(deSp_twoGroup(processed_se, ref_group='ctrl', test='invalid_test'), error=TRUE)
+    expect_snapshot(deSp_twoGroup(processed_se, ref_group='ctrl', significant='invalid'), error=TRUE)
+    expect_snapshot(deSp_twoGroup(processed_se, ref_group='ctrl', p_cutoff=2), error=TRUE)
+    expect_snapshot(deSp_twoGroup(processed_se, ref_group='ctrl', FC_cutoff=0), error=TRUE)
+    expect_snapshot(deSp_twoGroup(processed_se, ref_group='ctrl', transform='invalid'), error=TRUE)
+    expect_snapshot(
         deSp_twoGroup(
             processed_se_multi, ref_group='ctrl', test='t-test', significant='padj',
-            p_cutoff=0.05, FC_cutoff=1, transform='log10'),
-        "This function is used for two groups. If your data consists of multi groups, please use deSp_multiGroup function for analysis."
-
-    )
+            p_cutoff=0.05, FC_cutoff=1, transform='log10'), error=TRUE)
 })
 
 
@@ -235,6 +226,6 @@ test_that("plot_deSp_twoGroup handles edge cases correctly", {
 
 test_that("plot_deSp_twoGroup handles errors correctly", {
     # Test with invalid input
-    expect_error(plot_deSp_twoGroup("not a SummarizedExperiment object"),
-                 "The input must be a SummarizedExperiment object construct by upstream analysis function, e.g. deSp_twoGroup, deChar_twoGroup...")
+    expect_snapshot(plot_deSp_twoGroup("not a SummarizedExperiment object"), error=TRUE)
 })
+

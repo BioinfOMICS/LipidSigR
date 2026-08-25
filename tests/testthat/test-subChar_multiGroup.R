@@ -103,60 +103,42 @@ test_that("Test under normal conditions: Lipid characteristics", {
 # Test subChar_multiGroup function
 test_that("subChar_multiGroup can handle invalid inputs.", {
     # Test error handling
-    expect_error(
+    expect_snapshot(
         subChar_multiGroup(
             processed_se, char='Invalid', subChar='class', ref_group='ctrl',
-            post_hoc='One-way ANOVA', post_hoc_sig='pval', post_hoc_p_cutoff=0.05, transform='log10'),
-        "The 'char' parameter must be a numeric lipid characteristic, such as 'Total.C'. Please execute list_lipid_char function to view the valid lipid characteristics you can input."
-        )
-    expect_error(
+            post_hoc='One-way ANOVA', post_hoc_sig='pval', post_hoc_p_cutoff=0.05, transform='log10'), error=TRUE)
+    expect_snapshot(
         subChar_multiGroup(
             processed_se, char='Total.C', subChar='Total.C', ref_group='ctrl',
-            post_hoc='One-way ANOVA', post_hoc_sig='pval', post_hoc_p_cutoff=0.05, transform='log10'),
-        "The 'char' and 'subChar' parameters cannot be the same."
-        )
-    expect_error(
+            post_hoc='One-way ANOVA', post_hoc_sig='pval', post_hoc_p_cutoff=0.05, transform='log10'), error=TRUE)
+    expect_snapshot(
         subChar_multiGroup(
             processed_se, char='Total.C', subChar='Invalid', ref_group='ctrl',
-            post_hoc='One-way ANOVA', post_hoc_sig='pval', post_hoc_p_cutoff=0.05, transform='log10'),
-        "The 'subChar' parameter is not in the list of lipid characteristics. Please execute list_lipid_char function to view the valid lipid characteristics you can input."
-        )
-    expect_error(
+            post_hoc='One-way ANOVA', post_hoc_sig='pval', post_hoc_p_cutoff=0.05, transform='log10'), error=TRUE)
+    expect_snapshot(
         subChar_multiGroup(
             processed_se, char='Total.C', subChar='class', ref_group='Invalid',
-            post_hoc='One-way ANOVA', post_hoc_sig='pval', post_hoc_p_cutoff=0.05, transform='log10'),
-        "ref_group must be one of the group names in the 'group' column of the group information table."
-        )
-    expect_error(
+            post_hoc='One-way ANOVA', post_hoc_sig='pval', post_hoc_p_cutoff=0.05, transform='log10'), error=TRUE)
+    expect_snapshot(
         subChar_multiGroup(
             processed_se, char='Total.C', subChar='class', ref_group='ctrl', post_hoc='Invalid',
-            post_hoc_sig='pval', post_hoc_p_cutoff=0.05, transform='log10'),
-        "The 'post_hoc' parameter must be either 'One-way ANOVA' or 'Kruskal-Wallis test'."
-        )
-    expect_error(
+            post_hoc_sig='pval', post_hoc_p_cutoff=0.05, transform='log10'), error=TRUE)
+    expect_snapshot(
         subChar_multiGroup(
             processed_se, char='Total.C', subChar='class', ref_group='ctrl', post_hoc='One-way ANOVA',
-            post_hoc_sig='Pvalue', post_hoc_p_cutoff=0.05, transform='log10'),
-        "The 'post_hoc_sig' parameter must be either 'pval' or 'padj'."
-        )
-    expect_error(
+            post_hoc_sig='Pvalue', post_hoc_p_cutoff=0.05, transform='log10'), error=TRUE)
+    expect_snapshot(
         subChar_multiGroup(
             processed_se, char='Total.C', subChar='class', ref_group='ctrl',
-            post_hoc='One-way ANOVA', post_hoc_sig='pval', post_hoc_p_cutoff=2, transform='log10'),
-        "The 'post_hoc_p_cutoff' parameter must be a numeric value between 0 and 1."
-        )
-    expect_error(
+            post_hoc='One-way ANOVA', post_hoc_sig='pval', post_hoc_p_cutoff=2, transform='log10'), error=TRUE)
+    expect_snapshot(
         subChar_multiGroup(
             processed_se, char='Total.C', subChar='class', ref_group='ctrl',
-            post_hoc='One-way ANOVA', post_hoc_sig='pval', post_hoc_p_cutoff=0.05, transform='log2'),
-        "The 'transform' parameter must be one of 'none', 'log10','square', or 'cube'."
-        )
-    expect_error(
+            post_hoc='One-way ANOVA', post_hoc_sig='pval', post_hoc_p_cutoff=0.05, transform='log2'),error=TRUE)
+    expect_snapshot(
         subChar_multiGroup(
             processed_se_two, char='Total.C', subChar='class', ref_group='ctrl',
-            post_hoc='One-way ANOVA', post_hoc_sig='pval', post_hoc_p_cutoff=0.05, transform='log10'),
-        "This function is used for multiple groups. If your data consists of two groups, please use subChar_twoGroup function for analysis."
-    )
+            post_hoc='One-way ANOVA', post_hoc_sig='pval', post_hoc_p_cutoff=0.05, transform='log10'), error=TRUE)
 })
 
 # Test helper functions

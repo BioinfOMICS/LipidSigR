@@ -97,46 +97,39 @@ test_that("Test under normal conditions", {
 
 
 test_that("deSp_multiGroup handles invalid inputs correctly", {
-    expect_error(
+    expect_snapshot(
         deSp_multiGroup(
             processed_se_multiGroup, ref_group='abc', test='One-way ANOVA',
-            significant='pval', p_cutoff=0.05, transform='log10'),
-        "ref_group must be one of the group names in the 'group' column of the group information table.")
+            significant='pval', p_cutoff=0.05, transform='log10'), error=TRUE)
 
-    expect_error(
+    expect_snapshot(
         deSp_multiGroup(
             processed_se_multiGroup, ref_group='ctrl', test='one-way ANOVA',
-            significant='pval', p_cutoff=0.05, transform='log10'),
-        "The 'test' parameter must be either 'One-way ANOVA' or 'Kruskal-Wallis test'.")
+            significant='pval', p_cutoff=0.05, transform='log10'), error=TRUE)
 
-    expect_error(
+    expect_snapshot(
         deSp_multiGroup(
             processed_se_multiGroup, ref_group='ctrl', test='One-way ANOVA',
-            significant='p-value', p_cutoff=0.05, transform='log10'),
-        "The 'significant' parameter must be either 'pval' or 'padj'.")
+            significant='p-value', p_cutoff=0.05, transform='log10'), error=TRUE)
 
-    expect_error(
+    expect_snapshot(
         deSp_multiGroup(
             processed_se_multiGroup, ref_group='ctrl', test='One-way ANOVA',
-            significant='pval', p_cutoff=2, transform='log10'),
-        "The 'p_cutoff' parameter must be a numeric value between 0 and 1.")
+            significant='pval', p_cutoff=2, transform='log10'), error=TRUE)
 
-    expect_error(
+    expect_snapshot(
         deSp_multiGroup(
             processed_se_multiGroup, ref_group='ctrl', test='One-way ANOVA',
-            significant='pval', p_cutoff=0.05, transform='log2'),
-        "The 'transform' parameter must be one of 'none', 'log10', 'square' or 'cube'.")
-    expect_error(
+            significant='pval', p_cutoff=0.05, transform='log2'), error=TRUE)
+    expect_snapshot(
         deSp_multiGroup(
             processed_se_two, ref_group='ctrl', test='One-way ANOVA',
-            significant='pval', p_cutoff=0.05, transform='log10'),
-        "This function is used for multiple groups. If your data consists of two groups, please use deSp_twoGroup function for analysis.")
+            significant='pval', p_cutoff=0.05, transform='log10'), error=TRUE)
     se_subset <- processed_se_multiGroup[, c("ctrl1", "DHA1", "AA1")]
-    expect_error(
+    expect_snapshot(
         deSp_multiGroup(
             se_subset, ref_group='ctrl', test='One-way ANOVA',
-            significant='pval', p_cutoff=0.05, transform='log10'),
-        "In Group information table of multiple groups, each group must contains more than 2 samples.")
+            significant='pval', p_cutoff=0.05, transform='log10'), error=TRUE)
 })
 
 test_that("deSp_multiGroup handles edge cases correctly", {
@@ -201,12 +194,10 @@ test_that("deSp_multiGroup handles missing values correctly", {
         rowData = SummarizedExperiment::rowData(processed_se_multiGroup)
     )
 
-    expect_error(
+    expect_snapshot(
         deSp_multiGroup(
             processed_se = mod_se, ref_group='ctrl', test='One-way ANOVA',
-            significant='pval', p_cutoff=0.05, transform='log10'),
-        "Detect 0 values or NAs in abundance data. Please perform data imputation by the data_process function first."
-    )
+            significant='pval', p_cutoff=0.05, transform='log10'), error=TRUE)
 })
 
 

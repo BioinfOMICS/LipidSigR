@@ -90,20 +90,11 @@ deSp_se_multi <- deSp_multiGroup(
     significant='pval', p_cutoff=0.05, transform='log10')
 
 test_that("Test for incorrect input data.", {
-    expect_error(
-        nw_pathway_activity(deSp_se_multi, organism="human"),
-        'This function is used for two groups. If your data consists of multiple groups, please subset two of those groups for analysis.'
-    )
-    expect_error(
-        nw_pathway_activity(deSp_se_twoGroup, organism="humna"),
-        "The 'organism' parameter must be either 'human' or 'mouse'."
-    )
+    expect_snapshot(nw_pathway_activity(deSp_se_multi, organism="human"), error=TRUE)
+    expect_snapshot(nw_pathway_activity(deSp_se_twoGroup, organism="humna"), error=TRUE)
     sub <- processed_se_twoGroup[, SummarizedExperiment::colData(processed_se_twoGroup)$sample_name %in% c("control_01", "hfref_patient_01")]
     deSp_se <- deSp_twoGroup(
         sub, ref_group='ctrl', test='Wilcoxon test', significant='padj',
         p_cutoff=0.05, FC_cutoff=2, transform='log10')
-    expect_error(suppressWarnings(
-        nw_pathway_activity(deSp_se, organism="human") ),
-        "Comparing the means of two independent groups requires each group to have at least two samples."
-    )
+    expect_snapshot(suppressWarnings(nw_pathway_activity(deSp_se, organism="human")), error=TRUE)
 })

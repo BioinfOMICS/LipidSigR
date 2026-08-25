@@ -29,7 +29,7 @@ test_that("Test under normal conditions", {
 test_that("Test when none of the lipids can be recognized", {
     abundance_multiGroup$feature <- paste0(abundance_multiGroup$feature, '!@#$')
     parse_lipid <- rgoslin::parseLipidNames(lipidNames=abundance_multiGroup$feature[1:20])
-    expect_error(lipid_annotation(parse_lipid), info='None of the lipid names are parseable by Goslin. Please check if your lipid dialects conform to the formats supported by Goslin.')
+    expect_snapshot(lipid_annotation(parse_lipid), error=TRUE)
 })
 
 test_that("Test with only 'Sn.Position' level lipids", {

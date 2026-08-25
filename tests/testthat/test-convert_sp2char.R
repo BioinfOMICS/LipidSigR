@@ -37,15 +37,13 @@ test_that("convert_sp2char function outputs correct structure when rowData not c
 })
 
 test_that("convert_sp2char return error message for special condition or incorrect input", {
-    expect_error(
-        convert_sp2char(processed_se, transform=NULL),
-        "transform must be one of 'none', 'log10', 'square' or 'cube'.")
+    expect_snapshot(
+        convert_sp2char(processed_se, transform='log20'), error=TRUE)
     sub <- processed_se[1:2, ]
     resultSE <- convert_sp2char(sub, transform="log10")
     expect_char_abundance(sub, resultSE)
     rowData_sub <- as.data.frame(SummarizedExperiment::rowData(sub))
     rowData_sub[, colnames(rowData_sub[,-1])] <- NA
     SummarizedExperiment::rowData(sub) <- rowData_sub
-    expect_error(convert_sp2char(sub, transform='log10'),
-                 "No enough data.")
+    expect_snapshot(convert_sp2char(sub, transform='log10'), error=TRUE)
 })

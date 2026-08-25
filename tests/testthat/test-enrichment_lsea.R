@@ -85,27 +85,18 @@ test_that("Test under normal conditions: multiple groups", {
             lsea_test(res=res.one, significant, p_cutoff)
         }
     }
-    expect_error(enrichment_lsea(
+    expect_snapshot(enrichment_lsea(
         deSp_se=deSp_se_multiGroup, char=NULL, rank_by='log2FC',
-        significant='pval', p_cutoff, n_lipid=2),
-        info='Log2 fold change (log2FC) ranking is not suitable for multiple group data. Please choose p-value (pval), adjusted p-value (padj), or statistic as the ranking criterion instead.')
+        significant='pval', p_cutoff, n_lipid=2), error=TRUE)
 })
 
 test_that("Test for incorrect input & error message", {
-    expect_error(
-        enrichment_lsea(deSp_se_twoGroup, char='abc', rank_by='statistic', significant='pval', p_cutoff=0.05),
-        "The 'char' parameter must be one of the listed lipid characteristics. Please use the list_lipid_char() function to view which lipid characteristics can be analyzed."
-    )
-    expect_error(
-        enrichment_lsea(deSp_se_twoGroup, char=NULL, rank_by='Statistic', significant='pval', p_cutoff=0.05),
-        "The 'rank_by' parameter must be one of 'log2FC', 'pval', 'padj' or 'statictic'."
-    )
-    expect_error(
-        enrichment_lsea(deSp_se_twoGroup, char=NULL, rank_by='statistic', significant='Pval', p_cutoff=0.05),
-        "The 'significant' parameter must be either 'pval' or 'padj'."
-    )
-    expect_error(
-        enrichment_lsea(deSp_se_twoGroup, char=NULL, rank_by='statistic', significant='pval', p_cutoff=1.5),
-        "The 'p_cutoff' parameter must be a numeric value between 0 and 1."
-    )
+    expect_snapshot(
+        enrichment_lsea(deSp_se_twoGroup, char='abc', rank_by='statistic', significant='pval', p_cutoff=0.05), error=TRUE)
+    expect_snapshot(
+        enrichment_lsea(deSp_se_twoGroup, char=NULL, rank_by='Statistic', significant='pval', p_cutoff=0.05), error=TRUE)
+    expect_snapshot(
+        enrichment_lsea(deSp_se_twoGroup, char=NULL, rank_by='statistic', significant='Pval', p_cutoff=0.05), error=TRUE)
+    expect_snapshot(
+        enrichment_lsea(deSp_se_twoGroup, char=NULL, rank_by='statistic', significant='pval', p_cutoff=1.5), error=TRUE)
 })

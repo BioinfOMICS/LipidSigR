@@ -52,10 +52,9 @@ test_that("heatmap_correlation handles all char.", {
     }
     char_list <- c("FA.OH", "Bond.type")
     for (i in seq(char_list)) {
-        expect_error(heatmap_correlation(
+        expect_snapshot(heatmap_correlation(
             processed_se, char=char_list[i], transform='log10', correlation='pearson',
-            distfun='maximum', hclustfun='average', type='class'),
-            "Not enough data for plotting the heatmap.")
+            distfun='maximum', hclustfun='average', type='class'), error=TRUE)
     }
 })
 
@@ -86,51 +85,42 @@ test_that("heatmap_correlation handles all the distfun & hclustfun  combinations
 
 # Test error handling for invalid parameters
 test_that("heatmap_correlation handles invalid parameters correctly", {
-    expect_error(heatmap_correlation(
+    expect_snapshot(heatmap_correlation(
         processed_se, char=NULL, transform='log10', correlation='pearson',
-        distfun='maximum', hclustfun='average', type='class'),
-        "For 'class' type, char cannot be NULL.")
-    expect_error(
+        distfun='maximum', hclustfun='average', type='class'), error=TRUE)
+    expect_snapshot(
         heatmap_correlation(
             processed_se, char=12345, transform='log10', correlation='pearson',
-            distfun='maximum', hclustfun='average', type='class'),
-        "Wrong char input, you can view the available char list by list_lipid_char function.")
-    expect_error(
+            distfun='maximum', hclustfun='average', type='class'), error=TRUE)
+    expect_snapshot(
         heatmap_correlation(
-            processed_se, char=NULL, transform=NULL, correlation='pearson',
-            distfun='maximum', hclustfun='average', type='sample'),
-        "transform must be one of 'none', 'log10', 'square', or 'cube'.")
-    expect_error(
+            processed_se, char=NULL, transform='invalid', correlation='pearson',
+            distfun='maximum', hclustfun='average', type='sample'), error=TRUE)
+    expect_snapshot(
         heatmap_correlation(
             processed_se, char=NULL, transform='log10', correlation="ABC",
-            distfun='maximum', hclustfun='average', type='sample'),
-        "correlation must be one of 'pearson' or 'spearman'.")
-    expect_error(
+            distfun='maximum', hclustfun='average', type='sample'), error=TRUE)
+    expect_snapshot(
         heatmap_correlation(
             processed_se, char=NULL, transform='log10', correlation="pearson",
-            distfun='ward.D2', hclustfun='average', type='sample'),
-        "distfun must be one of 'pearson', 'spearman', 'kendall', 'euclidean', 'maximum', 'manhattan', 'canberra', 'binary', or 'minkowski'.")
-    expect_error(
+            distfun='ward.D2', hclustfun='average', type='sample'), error=TRUE)
+    expect_snapshot(
         heatmap_correlation(
             processed_se, char=NULL, transform='log10', correlation="pearson",
-            distfun='maximum', hclustfun='class', type='sample'),
-        "hclustfun must be one of 'ward.D', 'ward.D2', 'single', 'complete', 'average', 'mcquitty', 'median', or 'centroid'.")
-    expect_error(
+            distfun='maximum', hclustfun='class', type='sample'), error=TRUE)
+    expect_snapshot(
         heatmap_correlation(
             processed_se, char=NULL, transform='log10', correlation="pearson",
-            distfun='maximum', hclustfun='average', type='lipid'),
-        "type must be one of 'sample' or 'class'.")
+            distfun='maximum', hclustfun='average', type='lipid'), error=TRUE)
 })
 
 # Test handling of unprocessed data
 test_that("heatmap_correlation handles unprocessed data correctly", {
-    expect_error(
+    expect_snapshot(
         heatmap_correlation(
             profiling_data, char=NULL, transform='log10',
             correlation="pearson", distfun='maximum', hclustfun='average',
-            type='sample'),
-        "Detect 0 values or NAs in abundance data. Please perform data imputation by the data_process function first."
-    )
+            type='sample'), error=TRUE)
 })
 
 # Test different transform methods

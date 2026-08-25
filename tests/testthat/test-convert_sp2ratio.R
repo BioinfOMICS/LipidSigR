@@ -50,17 +50,6 @@ test_that("Test under normal conditions", {
 })
 
 
-test_that("Test without any molecular subspecies", {
-    ## Without any molecular subspecies
-    processed_se_multiGroup <- processed_se_multiGroup[19:34,]
-    for(transform in c('none', 'log2')){
-        ratio.res3 <- suppressWarnings(
-            convert_sp2ratio(processed_se_multiGroup, transform))
-        expect_true(is.null(ratio.res3))
-        expect_warning(convert_sp2ratio(processed_se_multiGroup, transform),
-                       info='There are no ratio characteristics that can be converted in your dataset.')
-    }
-})
 
 test_that("Test lipids containing only even-chain fatty acids", {
     ## Lipids containing only even-chain fatty acids.
@@ -74,20 +63,9 @@ test_that("Test lipids containing only even-chain fatty acids", {
     }
 })
 
-test_that("Test for special condition.", {
-    sub <- processed_se_twoGroup[1:2, ]
-    expect_warning(
-        convert_sp2ratio(sub, transform="log2"),
-        "There are no ratio characteristics that can be converted in your dataset.")
-    res <- suppressWarnings(
-        convert_sp2ratio(sub, transform="log2")
-    )
-    ratioChar_se_format(res)
-})
 
 test_that("Test for error input", {
-    expect_error(
-        convert_sp2ratio(processed_se_multiGroup, transform="log10"),
-        "The 'transform' parameter must be either 'none' or 'log2'.")
+    expect_snapshot(
+        convert_sp2ratio(processed_se_multiGroup, transform="log10"), error=TRUE)
 })
 

@@ -9,7 +9,7 @@ processed_se <- data_process(
   normalization='Percentage', transform='log10')
 ml_se <- ml_model(
   processed_se, char=c("class","Total.DB"), transform='log10',
-  ranking_method='Random_forest', ml_method='Random_forest', split_prop=0.3,
+  ranking_method='Random_forest', ml_method='Random_forest', split_prop=0.7,
   nfold=3, alpha=NULL)
 
 expect_prob_plots <- function(res) {
@@ -39,9 +39,6 @@ test_that("plot_ml_probability returns expected plots", {
 
 
 test_that("plot_ml_probability handles wrong input", {
-  expect_error(
-    plot_ml_probability(ml_se, feature_num=NULL),
-    "feature_num must be a numeric value chosen from the following options: 2, 3, 5, 10, 20, 50, 100."
-  )
+    expect_snapshot(plot_ml_probability(ml_se, feature_num=NULL), error=TRUE)
 })
 

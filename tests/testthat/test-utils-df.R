@@ -93,138 +93,124 @@ test_that("as_summarized_experiment build SE correctly.", {
 
 # Test for error input
 test_that("as_summarized_experiment can handle NULL or 0*0 data frame error input.", {
-    expect_error(as_summarized_experiment(
+    expect_snapshot(as_summarized_experiment(
         abundance=NULL, two_char_table, group_info=NULL, se_type='profiling',
-        paired_sample=FALSE), "cannot be null.")
-    expect_error(
-        as_summarized_experiment(
-            two_abundance, goslin_annotation=NULL, group_info=NULL, se_type='profiling', paired_sample=FALSE),
-        "Goslin lipid characteristics table cannot be null.")
-    expect_error(
+        paired_sample=FALSE), error=TRUE)
+    expect_snapshot(
         as_summarized_experiment(
             abundance=data.frame(), two_char_table, group_info=NULL, se_type='profiling', paired_sample=FALSE),
-        "must be a data frame and cannot be data frame with 0 columns and 0 rows.")
-    expect_error(
+        error=TRUE)
+    expect_snapshot(
         as_summarized_experiment(
             two_abundance, goslin_annotation=data.frame(), group_info=NULL, se_type='de_two', paired_sample=FALSE),
-        "must be a data frame and cannot be data frame with 0 columns and 0 rows.")
-    expect_error(as_summarized_experiment(
+        error=TRUE)
+    expect_snapshot(as_summarized_experiment(
         two_abundance, two_char_table, group_info=data.frame(), se_type='de_two',
-        paired_sample=FALSE), "Group information table must be a data frame and cannot be data frame with 0 columns and 0 rows.")
-    expect_error(as_summarized_experiment(
+        paired_sample=FALSE), error=TRUE)
+    expect_snapshot(as_summarized_experiment(
         two_abundance, two_char_table, group_info="ABC", se_type='de_two',
-        paired_sample=FALSE), "Group information table must be a data frame and cannot be data frame with 0 columns and 0 rows.")
+        paired_sample=FALSE), error=TRUE)
 })
 
 # Test for group info error input
 test_that("as_summarized_experiment can handle group_info error input.", {
-    expect_error(
+    expect_snapshot(
         as_summarized_experiment(
-            two_abundance, two_char_table, group_info_twoGroup, se_type=NULL, paired_sample=FALSE),
-        "se_type must be one of 'profiling', 'de_two', 'de_multiple', 'ml', or 'corr'.")
-    expect_error(
+            two_abundance, two_char_table, group_info_twoGroup, se_type='invalid', paired_sample=FALSE),
+        error=TRUE)
+    expect_snapshot(
         as_summarized_experiment(
-            two_abundance, two_char_table, group_info_twoGroup, se_type='de_two', paired_sample=NULL),
-        "paired_sample must be logical value for two group data of differential analysis.")
-    expect_error(
+            two_abundance, two_char_table, group_info_twoGroup, se_type='de_two', paired_sample='invalid'),
+        error=TRUE)
+    expect_snapshot(
         as_summarized_experiment(
             two_abundance, two_char_table, group_info_twoGroup, se_type='de_multiple', paired_sample=NULL),
-        "Group information table must contain columns of sample_name, label_name, and group.")
-    expect_error(
+        error=TRUE)
+    expect_snapshot(
         as_summarized_experiment(
             multi_abundance, multi_char_table, group_info_multiGroup, se_type='de_multiple', paired_sample=TRUE),
-        "paired_sample should be NULL.")
+        error=TRUE)
 })
 
 # Test for group info error format
 test_that("as_summarized_experiment can handle group_info format error.", {
-    expect_error(
+    expect_snapshot(
         as_summarized_experiment(
             two_abundance, two_char_table, group_info_multiGroup, se_type='de_two', paired_sample=FALSE),
-        "Group information table must contain columns of sample_name, label_name, group, and pair.")
-    expect_error(
+        error=TRUE)
+    expect_snapshot(
         as_summarized_experiment(multi_abundance, multi_char_table, group_info_twoGroup, se_type='de_multiple', paired_sample=NULL),
-        "Group information table must contain columns of sample_name, label_name, and group.")
+        error=TRUE)
     wrong_name <- group_info_twoGroup %>% dplyr::rename(paired_sample=pair)
-    expect_error(
+    expect_snapshot(
         as_summarized_experiment(
             two_abundance, two_char_table, wrong_name, se_type='de_two', paired_sample=FALSE),
-        "Group information table column names must be arranged in order of sample_name, label_name, group, and pair.")
+        error=TRUE)
     wrong_name <- group_info_multiGroup %>% dplyr::rename(group_name=group)
-    expect_error(
+    expect_snapshot(
         as_summarized_experiment(multi_abundance, multi_char_table, wrong_name, se_type='de_multiple', paired_sample=NULL),
-        "Group information table column names must be arranged in order of sample_name, label_name, and group.")
-    expect_error(
+        error=TRUE)
+    expect_snapshot(
         as_summarized_experiment(two_abundance[, 1:10], two_char_table, group_info_twoGroup, se_type='de_two', paired_sample=FALSE),
-        "Sample names in group information table 'sample_name' column must be as same as the sample names in lipid abundance data.")
+        error=TRUE)
     wrong_group_info <- group_info_twoGroup
     wrong_group_info[2, "group"] <- NA
-    expect_error(
+    expect_snapshot(
         as_summarized_experiment(two_abundance, two_char_table, wrong_group_info, se_type='de_two', paired_sample=FALSE),
-        "NA values are not allowed in the 'sample_name', 'label_name', and 'group' columns.")
+        error=TRUE)
     wrong_twoGroup <- group_info_twoGroup
     wrong_twoGroup[5:10, "group"] <- "A"
-    expect_error(
+    expect_snapshot(
         as_summarized_experiment(two_abundance, two_char_table, wrong_twoGroup, se_type='de_two', paired_sample=FALSE),
-        "The column 'group' in group information table must contain 2 groups.")
+        error=TRUE)
     wrong_multiGroup <- group_info_multiGroup
     wrong_multiGroup[14:17, "group"] <- "DHA"
-    expect_error(
+    expect_snapshot(
         as_summarized_experiment(multi_abundance, multi_char_table, wrong_multiGroup, se_type='de_multiple', paired_sample=NULL),
-        "The column 'group' in group information table must contain more than 2 groups.")
+        error=TRUE)
     wrong_multiGroup <- group_info_multiGroup[group_info_multiGroup$sample_name %in% c("ctrl1", "DHA1", "AA1"), ]
     multi_oneSample <- multi_abundance[, c("feature", "ctrl1", "DHA1",  "AA1")]
-    expect_error(
+    expect_snapshot(
         as_summarized_experiment(multi_oneSample, multi_char_table, wrong_multiGroup, se_type='de_multiple', paired_sample=NULL),
-        "In Group information table of multiple groups, each group must contains more than 2 samples.")
+        error=TRUE)
     ## pair sample for two group
-    expect_error(
+    expect_snapshot(
         as_summarized_experiment(
             two_abundance, two_char_table, group_info_twoGroup, se_type='de_two', paired_sample=TRUE),
-        "Incorrect values in group information table 'pair' column. Each pair
-        should be sequentially numbered from 1 to N without any missing, blank,
-        or skipped numbers; otherwise, the value must be marked as NA.")
+        error=TRUE)
     group_info_twoGroup <- group_info_twoGroup[1:22, ] %>% dplyr::select(-pair) %>%
         dplyr::mutate(pair=1:22)
-    expect_error(
+    expect_snapshot(
         as_summarized_experiment(
             two_abundance[, 1:23], two_char_table, group_info_twoGroup, se_type='de_two', paired_sample=TRUE),
-        "Incorrect values in group information table 'pair' column. Each pair
-        should be sequentially numbered from 1 to N without any missing, blank,
-        or skipped numbers; otherwise, the value must be marked as NA.")
+        error=TRUE)
     group_info_twoGroup[2:4, "pair"] <- NA
-    expect_error(
+    expect_snapshot(
         as_summarized_experiment(
             two_abundance[, 1:23], two_char_table, group_info_twoGroup, se_type='de_two', paired_sample=TRUE),
-        "Incorrect values in group information table 'pair' column. Each pair
-        should be sequentially numbered from 1 to N without any missing, blank,
-        or skipped numbers; otherwise, the value must be marked as NA.")
+        error=TRUE)
 })
 
 # Test for correlation analysis
 test_that("as_summarized_experiment can handle wrong correlation group_info.", {
     group_info <- corr_group_info[, 1:2]
-    expect_error(
+    expect_snapshot(
         as_summarized_experiment(
-            corr_abundance, corr_char_table, group_info,
-            se_type='corr', paired_sample=NULL),
-        "Group information table must include columns for sample_name and at least two clinical terms."
-    )
+            corr_abundance, corr_char_table, group_info, se_type='corr', paired_sample=NULL),
+        error=TRUE)
     group_info <- corr_group_info[, 1:2] %>% dplyr::mutate(A="A", .after=sample_name)
-    expect_error(
+    expect_snapshot(
         as_summarized_experiment(
             corr_abundance, corr_char_table, group_info,
             se_type='corr', paired_sample=NULL),
-        "Except for the first column, sample_name, the group information table must include at least two columns with numeric values and no missing values."
-    )
+        error=TRUE)
     group_info <- corr_group_info[, 1:3]
     group_info[2:4, 3] <- NA
-    expect_error(
+    expect_snapshot(
         as_summarized_experiment(
             corr_abundance, corr_char_table, group_info,
             se_type='corr', paired_sample=NULL),
-        "Except for the first column, sample_name, the group information table must include at least two columns with numeric values and no missing values."
-    )
+        error=TRUE)
     group_info <- corr_group_info[, 1:3] %>% dplyr::mutate(A="A", .after=sample_name)
     corr_se <- as_summarized_experiment(
         corr_abundance, corr_char_table, corr_group_info, se_type='corr', paired_sample=NULL)
@@ -234,12 +220,12 @@ test_that("as_summarized_experiment can handle wrong correlation group_info.", {
 
 # Test for error data frame input
 test_that("as_summarized_experiment can handle wrong input.", {
-    expect_error(as_summarized_experiment(
+    expect_snapshot(as_summarized_experiment(
         two_char_table, two_abundance, group_info_twoGroup, se_type='de_two',
-        paired_sample=FALSE))
-    expect_error(as_summarized_experiment(
+        paired_sample=FALSE), error=TRUE)
+    expect_snapshot(as_summarized_experiment(
         group_info_twoGroup, two_char_table, two_abundance, se_type='de_two',
-        paired_sample=FALSE))
+        paired_sample=FALSE), error=TRUE)
 })
 
 expect_correct_charList <- function(se, result_list) {
@@ -328,9 +314,9 @@ test_that("list_lipid_char can output correct lipid list.", {
 
 # Test for wrong input
 test_that("list_lipid_char can handle wrong input", {
-    expect_error(list_lipid_char(data.frame()))
-    expect_error(list_lipid_char(abundance_twoGroup))
-    expect_error(list_lipid_char(abundance_twoGroup$feature))
+    expect_snapshot(list_lipid_char(data.frame()), error=TRUE)
+    expect_snapshot(list_lipid_char(abundance_twoGroup), error=TRUE)
+    expect_snapshot(list_lipid_char(abundance_twoGroup$feature), error=TRUE)
 })
 
 
@@ -340,9 +326,9 @@ test_that("extract_summarized_experiment can output correct result list", {
     expect_correct_seList(profiling_se, result_list)
     result_list <- extract_summarized_experiment(two_se)
     expect_correct_seList(two_se, result_list)
-    expect_error(extract_summarized_experiment(data.frame()))
-    expect_error(extract_summarized_experiment(abundance_twoGroup))
-    expect_error(extract_summarized_experiment(abundance_twoGroup$feature))
+    expect_snapshot(extract_summarized_experiment(data.frame()), error=TRUE)
+    expect_snapshot(extract_summarized_experiment(abundance_twoGroup), error=TRUE)
+    expect_snapshot(extract_summarized_experiment(abundance_twoGroup$feature), error=TRUE)
     ## test for have metadata
     deSp_se <- deSp_twoGroup(
         two_se, ref_group='ctrl', test='t-test', significant='padj',
