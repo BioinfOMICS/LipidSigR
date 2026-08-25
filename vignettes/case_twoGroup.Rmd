@@ -260,10 +260,13 @@ parse_lipid <- rgoslin::parseLipidNames(lipidNames=ml_abundance$feature)
 # filter lipid recognized by rgoslin
 recognized_lipid <- parse_lipid$Original.Name[
     which(parse_lipid$Grammar != 'NOT_PARSEABLE')]
-abundance <- ml_abundance %>% 
-    dplyr::filter(feature %in% recognized_lipid)
-goslin_annotation <- parse_lipid %>% 
-    dplyr::filter(Original.Name %in% recognized_lipid)
+abundance <- ml_abundance %>%
+    dplyr::filter(feature %in% recognized_lipid) %>%
+    as.data.frame()
+goslin_annotation <- parse_lipid %>%
+    dplyr::filter(Original.Name %in% recognized_lipid)  %>%
+    as.data.frame()
+condition_table <- condition_table %>% as.data.frame()
 ```
 After running the above code, two data frames, `abundance`, and 
 `goslin_annotation`, will be generated and used in the next step.
@@ -749,11 +752,11 @@ The volcano plot illustrates a similar concept to the MA plot. These points visu
 You can further plot an abundance box plot for any lipid species of interest by 
 `LipidSigR::boxPlot_feature_twoGroup`. 
 
-For example, let's use `TAG 48:0;0`, a significant lipid species from the lollipop above.
+For example, let's use `TAG 50:1;0`, a significant lipid species from the lollipop above.
 ```{r boxPlot}
-# plot abundance box plot of 'TAG 48:0;0'
+# plot abundance box plot of 'TAG 50:1;0'
 boxPlot_result <- boxPlot_feature_twoGroup(
-    processed_se, feature='TAG 48:0;0', ref_group='ctrl', test='t-test',
+    processed_se, feature='TAG 50:1;0', ref_group='ctrl', test='t-test',
     transform='log10')
 # result summary
 summary(boxPlot_result)
@@ -1190,11 +1193,11 @@ summary(heatmap_one_total_chain_list)
 You can further plot an abundance box plot for any lipid species of interest by 
 `LipidSigR::boxPlot_feature_twoGroup`. 
 
-For example, let's use `15:0`, a significant lipid species from the heatmap above.
+For example, let's use `16:0`, a significant lipid species from the heatmap above.
 ```{r boxPlot_two_heatmap}
-# plot abundance box plot of "15:0"
+# plot abundance box plot of "16:0"
 boxPlot_result <- boxPlot_feature_twoGroup(
-    heatmap_one$each_chain$chain_db_se, feature='15:0', 
+    heatmap_one$each_chain$chain_db_se, feature='16:0', 
     ref_group='ctrl', test='t-test', transform='log10')
 
 # result summary
@@ -1349,8 +1352,7 @@ network <- visNetwork(
         dragEnd="function () {this.setOptions( { physics: false } );}") %>%
     visEdges(color=list(color="#DDDDDD",highlight="#C62F4B")) %>%
     visOptions(
-        highlightNearest=list(enabled=TRUE, degree=1, hover=FALSE),
-        selectedBy="group", nodesIdSelection=TRUE)
+        highlightNearest=list(enabled=TRUE, degree=1, hover=FALSE), nodesIdSelection=TRUE)
 # view network
 network
 ```
@@ -1501,7 +1503,7 @@ char_list <- list_lipid_char(processed_ml)
 ml_se <- ml_model(
     processed_ml, char=c("class","Total.DB"), transform='log10',
     ranking_method='Random_forest', ml_method='Random_forest', 
-    split_prop=0.3, nfold=10, alpha=NULL)
+    split_prop=0.7, nfold=10, alpha=NULL)
 ```
 
 After running the above code, a SummarizedExperiment object `ml_se` will be 
